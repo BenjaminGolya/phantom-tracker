@@ -23,6 +23,11 @@ export function DashboardClient({ habits: initialHabits }: DashboardClientProps)
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
 
+  // Keep local state in sync with fresh server data after navigation/refresh
+  useEffect(() => {
+    setHabits(initialHabits);
+  }, [initialHabits]);
+
   const today = format(new Date(), "yyyy-MM-dd");
 
   // Keyboard shortcut N = new habit

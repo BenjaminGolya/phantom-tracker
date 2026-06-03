@@ -25,6 +25,11 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
   const [view, setView] = useState<"cards" | "grid">("cards");
   const [range, setRange] = useState<ProgressRange>("month");
 
+  // Keep local state in sync with fresh server data after navigation/refresh
+  useEffect(() => {
+    setHabits(initialHabits);
+  }, [initialHabits]);
+
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
