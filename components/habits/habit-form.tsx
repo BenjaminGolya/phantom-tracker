@@ -302,7 +302,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
             {/* Icon */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">Icon</label>
-              <div className="grid grid-cols-10 gap-1.5">
+              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
                 {HABIT_ICONS.map(({ name, Icon, label }) => {
                   const selected = icon === name;
                   return (
@@ -317,7 +317,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
                         backgroundColor: selected ? color : `${color}12`,
                         boxShadow: selected ? `0 0 10px ${color}50` : undefined,
                       }}
-                      className="w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:border-primary/60"
+                      className="w-full aspect-square rounded-xl border flex items-center justify-center transition-all hover:border-primary/60"
                     >
                       <Icon size={18} />
                     </button>
