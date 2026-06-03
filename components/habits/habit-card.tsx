@@ -9,7 +9,7 @@ import {
 import { Flame, MoreHorizontal, Pencil, Trash2, Archive } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
-import { calcStreak, getHabitLevel, LEVELS } from "@/lib/utils";
+import { calcStreak, getHabitLevel } from "@/lib/utils";
 import { getHabitIcon } from "@/lib/habit-icons";
 
 export type ProgressRange = "week" | "month" | "year" | "all";
