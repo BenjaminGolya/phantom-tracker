@@ -1,0 +1,10 @@
+{
+  "name": "Phantom Tracker",
+  "short_name": "Phantom",
+  "description": "Track your habits in the dark.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": []
+}

@@ -1,0 +1,73 @@
+import nodemailer from "nodemailer";
+
+function isSmtpConfigured() {
+  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
+export async function sendVerificationEmail(to: string, code: string) {
+  // ── Dev fallback: log to console when SMTP isn't configured ──────────────
+  if (!isSmtpConfigured()) {
+    console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log(`  📬  VERIFICATION CODE for ${to}`);
+    console.log(`  ➜   ${code}`);
+    console.log("  (SMTP not configured — code logged to console)");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
+  const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
+
+  await transporter.sendMail({
+    from,
+    to,
+    subject: `${code} — Your Phantom Tracker verification code`,
+    text: `Your verification code is: ${code}\n\nIt expires in 15 minutes. Do not share it with anyone.`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <body style="margin:0;padding:0;background:#0a0a0a;font-family:system-ui,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 16px;">
+            <tr><td align="center">
+              <table width="420" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222222;border-radius:16px;overflow:hidden;">
+                <!-- Header -->
+                <tr>
+                  <td style="padding:32px 32px 24px;text-align:center;border-bottom:1px solid #1a1a1a;">
+                    <div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;background:#7f49c3;border-radius:12px;margin-bottom:16px;">
+                      <span style="font-size:22px;">👻</span>
+                    </div>
+                    <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:600;letter-spacing:-0.3px;">Phantom Tracker</h1>
+                    <p style="margin:8px 0 0;color:#a1a1aa;font-size:13px;">Verify your email address</p>
+                  </td>
+                </tr>
+                <!-- Code -->
+                <tr>
+                  <td style="padding:32px;">
+                    <p style="margin:0 0 20px;color:#a1a1aa;font-size:14px;line-height:1.6;">
+                      Enter this 6-digit code to complete your registration. It expires in <strong style="color:#ffffff;">15 minutes</strong>.
+                    </p>
+                    <div style="background:#1a1a1a;border:1px solid #222222;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+                      <span style="font-family:monospace;font-size:36px;font-weight:700;letter-spacing:12px;color:#7f49c3;">${code}</span>
+                    </div>
+                    <p style="margin:0;color:#71717a;font-size:12px;text-align:center;">
+                      If you didn't create an account, you can safely ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+      </html>
+    `,
+  });
+}

@@ -1,0 +1,351 @@
+"use client";
+
+import { useMemo } from "react";
+import { format, subDays } from "date-fns";
+import { motion } from "framer-motion";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
+} from "recharts";
+import { HabitWithLogs } from "@/types";
+import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
+import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy } from "lucide-react";
+import { getHabitIcon } from "@/lib/habit-icons";
+
+interface StatsClientProps {
+  habits: HabitWithLogs[];
+}
+
+// ─── Animated XP bar ─────────────────────────────────────────────────────────
+function XPProgressBar({ progress, color, delay = 0 }: { progress: number; color: string; delay?: number }) {
+  return (
+    <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
+      <motion.div
+        className="h-full rounded-full"
+        style={{ backgroundColor: color }}
+        initial={{ width: 0 }}
+        animate={{ width: `${progress}%` }}
+        transition={{ duration: 0.8, delay, ease: "easeOut" }}
+      />
+    </div>
+  );
+}
+
+// ─── Profile level hero card ──────────────────────────────────────────────────
+function ProfileLevelCard({ habits }: { habits: HabitWithLogs[] }) {
+  const info = useMemo(() => getProfileLevel(
+    habits.map((h) => ({ logs: h.logs, category: h.category }))
+  ), [habits]);
+
+  const next = PROFILE_LEVELS.find((l) => l.level === info.level + 1);
+
+  const xpSources = [
+    { label: "Base completions",  value: info.breakdown.base,         icon: <Zap size={12} />,    color: "#3b82f6" },
+    { label: "Streak bonuses",    value: info.breakdown.streakBonus,  icon: <Flame size={12} />,  color: "#f97316" },
+    { label: "Perfect days",      value: info.breakdown.perfectDays,  icon: <Star size={12} />,   color: "#eab308" },
+    { label: "Category diversity",value: info.breakdown.diversity,    icon: <Shield size={12} />, color: "#22c55e" },
+    { label: "Habit mastery",     value: info.breakdown.masteryBonus, icon: <Trophy size={12} />, color: "#a855f7" },
+  ];
+
+  const maxSource = Math.max(...xpSources.map((s) => s.value), 1);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative overflow-hidden bg-surface border border-border rounded-2xl p-5"
+      style={{ borderColor: `${info.color}30` }}
+    >
+      {/* Glow blob */}
+      <div
+        className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-10 pointer-events-none"
+        style={{ backgroundColor: info.color }}
+      />
+
+      {/* Top row */}
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <p className="text-xs text-muted mb-1 uppercase tracking-widest font-medium">Profile Level</p>
+          <div className="flex items-center gap-2">
+            <span className="text-5xl font-light leading-none" style={{ color: info.color }}>{info.emoji}</span>
+            <div>
+              <h2 className="text-2xl font-bold" style={{ color: info.color }}>{info.label}</h2>
+              <p className="text-xs text-muted">Level {info.level} of {PROFILE_LEVELS.length}</p>
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-3xl font-mono font-bold" style={{ color: info.color }}>{info.xp}</p>
+          <p className="text-xs text-muted">total XP</p>
+        </div>
+      </div>
+
+      {/* XP bar to next level */}
+      <div className="mb-4">
+        <div className="flex justify-between text-xs text-muted mb-1.5">
+          <span>{info.isMax ? "Max level reached ✦" : `${info.xp - info.xpRequired} / ${info.xpNext - info.xpRequired} XP to next`}</span>
+          {next && <span><span style={{ color: next.color }}>{next.emoji}</span> {next.label}</span>}
+        </div>
+        <XPProgressBar progress={info.progress} color={info.color} />
+        {/* Level milestones */}
+        <div className="flex justify-between mt-1">
+          {PROFILE_LEVELS.map((lvl) => (
+            <div
+              key={lvl.level}
+              title={`Lv.${lvl.level} ${lvl.label}`}
+              className="flex flex-col items-center gap-0.5"
+            >
+              <div
+                className="w-1.5 h-1.5 rounded-full transition-all"
+                style={{
+                  backgroundColor: info.level >= lvl.level ? lvl.color : "#2a2a2a",
+                  boxShadow: info.level === lvl.level ? `0 0 6px ${lvl.color}` : undefined,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* XP breakdown */}
+      <div className="border-t border-border pt-4">
+        <p className="text-xs text-muted uppercase tracking-wider mb-3 font-medium">XP Sources</p>
+        <div className="space-y-2.5">
+          {xpSources.map((src, i) => (
+            <div key={src.label}>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5" style={{ color: src.color }}>
+                  {src.icon}
+                  <span className="text-xs text-muted">{src.label}</span>
+                </div>
+                <span className="text-xs font-mono font-medium" style={{ color: src.color }}>
+                  +{src.value} XP
+                </span>
+              </div>
+              <XPProgressBar
+                progress={Math.round((src.value / maxSource) * 100)}
+                color={src.color}
+                delay={i * 0.1}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* XP rules hint */}
+      <div className="mt-4 border-t border-border pt-3 grid grid-cols-2 gap-x-4 gap-y-1">
+        {[
+          ["7d streak", "+1 XP/check"],
+          ["14d streak", "+2 XP/check"],
+          ["30d streak", "+3 XP/check"],
+          ["Perfect day", "+5 XP"],
+          ["New category", "+10 XP"],
+          ["Habit level up", "+20 XP"],
+        ].map(([rule, reward]) => (
+          <div key={rule} className="flex items-center justify-between">
+            <span className="text-[10px] text-muted">{rule}</span>
+            <span className="text-[10px] font-mono" style={{ color: info.color }}>{reward}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Per-habit level tracker ──────────────────────────────────────────────────
+function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
+  const sorted = [...habits].sort((a, b) => {
+    const la = getHabitLevel(a.logs);
+    const lb = getHabitLevel(b.logs);
+    return lb.xp - la.xp;
+  });
+
+  return (
+    <div>
+      <h2 className="text-sm font-medium mb-3">Habit Levels</h2>
+      <div className="space-y-2">
+        {sorted.map((habit, i) => {
+          const info = getHabitLevel(habit.logs) as ReturnType<typeof getHabitLevel> & {
+            nextTierEmoji?: string; nextTierLabel?: string; nextTierColor?: string; nextTierMinLevel?: number;
+          };
+          const HabitIcon = getHabitIcon(habit.icon);
+
+          return (
+            <motion.div
+              key={habit.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-surface border border-border rounded-xl p-3"
+            >
+              {/* Header row */}
+              <div className="flex items-center gap-3 mb-2.5">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: `${habit.color}20`, border: `1px solid ${habit.color}40`, color: habit.color }}
+                >
+                  <HabitIcon size={16} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium truncate">{habit.name}</p>
+                    {/* Tier badge + level number */}
+                    <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                      <div
+                        className="px-1.5 py-0.5 rounded-md text-xs font-mono font-bold border"
+                        style={{ color: info.color, borderColor: `${info.color}40`, background: `${info.color}12` }}
+                      >
+                        {info.emoji}
+                      </div>
+                      <span className="text-xs font-mono text-muted">Lv.{info.level}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="text-[11px] font-medium" style={{ color: info.color }}>{info.label}</span>
+                    {info.nextTierEmoji && (
+                      <span className="text-[11px] text-muted flex items-center gap-1">
+                        <span className="opacity-40">·</span>
+                        <span>next</span>
+                        <span>{info.nextTierEmoji}</span>
+                        <span>{info.nextTierLabel} at Lv.{info.nextTierMinLevel}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* XP progress bar with tier milestone dots */}
+              <div className="relative">
+                <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden mb-1">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: info.color }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${info.progress}%` }}
+                    transition={{ duration: 0.7, delay: i * 0.05, ease: "easeOut" }}
+                  />
+                </div>
+                {/* Tier milestone dots on the bar */}
+                <div className="flex justify-between mt-1.5">
+                  {LEVELS.map((tier) => {
+                    const reached = info.level >= tier.minLevel;
+                    const isCurrent = info.level >= tier.minLevel &&
+                      (LEVELS.find(t => t.minLevel > tier.minLevel)?.minLevel ?? Infinity) > info.level;
+                    return (
+                      <div key={tier.minLevel} className="flex flex-col items-center gap-0.5">
+                        <div
+                          className="w-1.5 h-1.5 rounded-full transition-all"
+                          style={{
+                            backgroundColor: reached ? tier.color : "#2a2a2a",
+                            boxShadow: isCurrent ? `0 0 6px ${tier.color}` : undefined,
+                          }}
+                        />
+                        <span
+                          className="text-[8px] font-bold font-mono"
+                          style={{ color: reached ? tier.color : "#3a3a3a" }}
+                        >
+                          {tier.emoji}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-1">
+                <span className="text-[10px] font-mono text-muted">
+                  {info.xp} / {info.xpNext} XP
+                </span>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main stats page ──────────────────────────────────────────────────────────
+export function StatsClient({ habits }: StatsClientProps) {
+  const weekData = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = format(subDays(new Date(), 6 - i), "yyyy-MM-dd");
+      const label = format(subDays(new Date(), 6 - i), "EEE");
+      const count = habits.reduce((acc, h) =>
+        acc + (h.logs.some((l) => l.date === date && l.completed) ? 1 : 0), 0);
+      return { date, label, count, total: habits.length };
+    });
+  }, [habits]);
+
+  const totalCompletions = habits.reduce((acc, h) => acc + h.logs.filter((l) => l.completed).length, 0);
+  const overallRate = habits.length
+    ? Math.round(habits.reduce((acc, h) => acc + calcCompletionRate(h.logs, 30), 0) / habits.length)
+    : 0;
+  const allStreaks = habits.map((h) => calcStreak(h.logs));
+  const topLongest = Math.max(0, ...allStreaks.map((s) => s.longest));
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6 pb-20 lg:pb-6">
+      <h1 className="text-lg font-semibold">Stats</h1>
+
+      {habits.length === 0 ? (
+        <div className="flex flex-col items-center py-20 text-center">
+          <div className="text-5xl mb-3">📊</div>
+          <p className="text-sm text-muted">No data yet — start tracking habits!</p>
+        </div>
+      ) : (
+        <>
+          {/* Profile level hero */}
+          <ProfileLevelCard habits={habits} />
+
+          {/* Overview cards */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "Total Completions", value: totalCompletions, icon: <BarChart2 size={16} className="text-primary" /> },
+              { label: "30-day Rate",        value: `${overallRate}%`, icon: <TrendingUp size={16} className="text-green-400" /> },
+              { label: "Best Streak Ever",   value: `${topLongest}d`, icon: <Flame size={16} className="text-orange-400" /> },
+              { label: "Habits Tracked",     value: habits.length,    icon: <Award size={16} className="text-primary" /> },
+            ].map(({ label, value, icon }, i) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-surface border border-border rounded-xl p-4"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-muted">{label}</span>
+                  {icon}
+                </div>
+                <div className="text-2xl font-mono font-bold">{value}</div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Weekly bar chart */}
+          <div className="bg-surface border border-border rounded-xl p-4">
+            <h2 className="text-sm font-medium mb-4">Last 7 days</h2>
+            <ResponsiveContainer width="100%" height={140}>
+              <BarChart data={weekData} barSize={28}>
+                <XAxis dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis hide domain={[0, Math.max(habits.length, 1)]} />
+                <Tooltip
+                  cursor={{ fill: "#1a1a1a" }}
+                  contentStyle={{ background: "#111", border: "1px solid #222", borderRadius: 8, fontSize: 12 }}
+                  formatter={(v) => [`${v}/${habits.length}`, "Completed"]}
+                />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {weekData.map((entry, i) => (
+                    <Cell key={i} fill={entry.count === entry.total && entry.total > 0 ? "#7f49c3" : "#2a2a2a"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Habit level tracker */}
+          <HabitLevelTracker habits={habits} />
+        </>
+      )}
+    </div>
+  );
+}
