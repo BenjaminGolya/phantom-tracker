@@ -9,6 +9,7 @@ import { HabitWithLogs, HabitFormData } from "@/types";
 import { HabitCard, ProgressRange } from "@/components/habits/habit-card";
 import { HabitGrid } from "@/components/habits/habit-grid";
 import { HabitForm } from "@/components/habits/habit-form";
+import { useMounted } from "@/lib/use-mounted";
 
 interface HabitsClientProps {
   habits: HabitWithLogs[];
@@ -16,6 +17,7 @@ interface HabitsClientProps {
 
 export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
   const router = useRouter();
+  const mounted = useMounted();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState<HabitWithLogs | null>(null);
@@ -112,6 +114,21 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
     const updated = await res.json();
     setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
     router.refresh();
+  }
+
+  // Habit cards render date-based calendars (new Date()), which would mismatch
+  // between server and client. Render a shell until mounted to avoid hydration errors.
+  if (!mounted) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 pb-20 lg:pb-6">
+        <div className="h-9" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-44 bg-surface border border-border rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

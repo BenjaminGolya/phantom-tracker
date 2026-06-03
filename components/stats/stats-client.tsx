@@ -10,6 +10,7 @@ import { HabitWithLogs } from "@/types";
 import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
 import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
+import { useMounted } from "@/lib/use-mounted";
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
@@ -266,6 +267,7 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
 
 // ─── Main stats page ──────────────────────────────────────────────────────────
 export function StatsClient({ habits }: StatsClientProps) {
+  const mounted = useMounted();
   const weekData = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const date = format(subDays(new Date(), 6 - i), "yyyy-MM-dd");
@@ -282,6 +284,21 @@ export function StatsClient({ habits }: StatsClientProps) {
     : 0;
   const allStreaks = habits.map((h) => calcStreak(h.logs));
   const topLongest = Math.max(0, ...allStreaks.map((s) => s.longest));
+
+  // Date-based charts/streaks differ server vs client — render a shell until mounted.
+  if (!mounted) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 pb-20 lg:pb-6">
+        <h1 className="text-lg font-semibold">Stats</h1>
+        <div className="h-48 bg-surface border border-border rounded-2xl animate-pulse" />
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 bg-surface border border-border rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20 lg:pb-6">

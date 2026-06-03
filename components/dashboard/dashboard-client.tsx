@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Flame, Target, Zap, CheckCircle2, Plus, Ghost } from "lucide-react";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, phantomScore } from "@/lib/utils";
+import { useMounted } from "@/lib/use-mounted";
 import { HabitForm } from "@/components/habits/habit-form";
 import { TodayChecklist } from "@/components/dashboard/today-checklist";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -18,6 +19,7 @@ interface DashboardClientProps {
 
 export function DashboardClient({ habits: initialHabits }: DashboardClientProps) {
   const router = useRouter();
+  const mounted = useMounted();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
 
@@ -92,6 +94,21 @@ export function DashboardClient({ habits: initialHabits }: DashboardClientProps)
     setHabits((prev) => [...prev, habit]);
     setShowForm(false);
     router.refresh();
+  }
+
+  // Avoid SSR/client hydration mismatch from date-based values: render a
+  // lightweight shell until mounted, then the real (client-local) content.
+  if (!mounted) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 pb-20 lg:pb-6">
+        <div className="h-9" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-[88px] bg-surface border border-border rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
