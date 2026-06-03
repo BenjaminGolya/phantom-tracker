@@ -82,14 +82,17 @@ function GoalCounter({
 }) {
   const goal = habit.goal!;
   const todayLog = habit.logs.find((l) => l.date === today);
-  const [val, setVal] = useState(todayLog?.value ?? 0);
+  // Fall back to the goal if the log is marked complete but has no numeric value
+  // (e.g. completed via the quick-toggle button or legacy data).
+  const logVal = todayLog?.value ?? (todayLog?.completed ? goal : 0);
+  const [val, setVal] = useState(logVal);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const done = val >= goal;
 
   // Sync if log changes externally
   useEffect(() => {
-    setVal(todayLog?.value ?? 0);
-  }, [todayLog?.value]);
+    setVal(logVal);
+  }, [logVal]);
 
   function commit(next: number) {
     const clamped = Math.max(0, next);
@@ -412,7 +415,16 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => onToggleDay?.(habit.id, today, !doneToday)}
+            onClick={() => {
+              const next = !doneToday;
+              // For goal habits, the quick-complete button fills the counter to
+              // the goal (or clears it), so `value` and `completed` stay in sync.
+              if (habit.goal) {
+                onToggleDay?.(habit.id, today, next, next ? habit.goal : 0);
+              } else {
+                onToggleDay?.(habit.id, today, next);
+              }
+            }}
             style={{
               background: doneToday ? habit.color : "transparent",
               borderColor: doneToday ? habit.color : "#333",

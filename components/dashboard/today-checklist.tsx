@@ -20,11 +20,14 @@ function GoalRow({ habit, today, onToggle }: {
 }) {
   const goal = habit.goal!;
   const todayLog = habit.logs.find((l) => l.date === today);
-  const [val, setVal] = useState(todayLog?.value ?? 0);
+  // Fall back to the goal if the log is complete but has no numeric value
+  // (e.g. completed via the quick-toggle button or legacy data).
+  const logVal = todayLog?.value ?? (todayLog?.completed ? goal : 0);
+  const [val, setVal] = useState(logVal);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const done = val >= goal;
 
-  useEffect(() => { setVal(todayLog?.value ?? 0); }, [todayLog?.value]);
+  useEffect(() => { setVal(logVal); }, [logVal]);
 
   function commit(next: number) {
     const clamped = Math.max(0, next);
