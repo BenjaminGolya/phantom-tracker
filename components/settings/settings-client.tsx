@@ -9,7 +9,7 @@ interface SettingsClientProps {
 }
 
 export function SettingsClient({ user }: SettingsClientProps) {
-  const [name, setName] = useState(user.name ?? "");
+  const [name, setName] = useState(user?.name ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -56,7 +56,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
           <div>
             <label className="text-xs text-muted block mb-1.5">Email</label>
             <input
-              value={user.email}
+              value={user?.email ?? ""}
               disabled
               className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-muted"
             />
