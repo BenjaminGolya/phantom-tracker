@@ -263,7 +263,13 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+        style={{
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+        }}
+      >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -275,7 +281,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
           initial={{ opacity: 0, scale: 0.96, y: 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96 }}
-          className="relative w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl z-10 max-h-[90vh] flex flex-col overflow-hidden"
+          className="relative w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl z-10 max-h-[85dvh] flex flex-col overflow-hidden"
         >
           {/* Fixed header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
