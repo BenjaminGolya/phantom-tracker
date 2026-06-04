@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushToUser } from "@/lib/push";
+import { logError } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,16 @@ async function handle(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  try {
+    return await runReminders();
+  } catch (err) {
+    // Critical background job — alert the admin if it breaks.
+    logError("cron/reminders", err, { alert: true });
+    return NextResponse.json({ error: "Reminder run failed" }, { status: 500 });
+  }
+}
+
+async function runReminders() {
   const now = new Date();
   const habits = await prisma.habit.findMany({
     where: { archived: false, reminderTime: { not: null } },

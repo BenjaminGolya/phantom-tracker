@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendNewUserNotification, sendWelcomeEmail } from "@/lib/email";
+import { logError } from "@/lib/log";
 
 export async function POST(req: NextRequest) {
   const { email, code } = await req.json();
@@ -44,13 +45,13 @@ export async function POST(req: NextRequest) {
   // connections) and each wrapped so a failure never blocks the signup.
   try {
     await sendWelcomeEmail(user.email, user.name);
-  } catch {
-    // ignore — verification still succeeds if the welcome email fails
+  } catch (err) {
+    logError("verify/welcome-email", err);
   }
   try {
     await sendNewUserNotification({ email: user.email, name: user.name });
-  } catch {
-    // ignore — verification still succeeds if the admin notification fails
+  } catch (err) {
+    logError("verify/admin-notify", err);
   }
 
   return NextResponse.json({ ok: true });

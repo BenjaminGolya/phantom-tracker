@@ -171,3 +171,28 @@ export async function sendNewUserNotification(newUser: { email: string; name?: s
     `,
   });
 }
+
+/** Email the admin about a production error. Best-effort; never throws. */
+export async function sendErrorAlert(context: string, detail: string) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL;
+  if (!to || !isSmtpConfigured()) return;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
+
+    await transporter.sendMail({
+      from,
+      to,
+      subject: `⚠️ Phantom Tracker error: ${context}`,
+      text: `An error occurred in production.\n\nContext: ${context}\nTime: ${new Date().toUTCString()}\n\n${detail}`,
+    });
+  } catch {
+    // never let alerting failures cascade
+  }
+}
