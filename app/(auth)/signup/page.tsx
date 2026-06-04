@@ -47,8 +47,8 @@ export default function SignupPage() {
         className="w-full max-w-sm"
       >
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center phantom-glow">
-            <Ghost size={24} className="text-white" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow">
+            <Ghost size={28} className="text-white" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight">Phantom Tracker</h1>
