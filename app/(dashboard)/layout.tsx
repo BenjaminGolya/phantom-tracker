@@ -15,10 +15,22 @@ export default async function DashboardLayout({
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  const habits = await prisma.habit.findMany({
-    where: { userId: session.user.id, archived: false },
-    include: { logs: true },
-  });
+  const [habits, dbUser] = await Promise.all([
+    prisma.habit.findMany({
+      where: { userId: session.user.id, archived: false },
+      include: { logs: true },
+    }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true, email: true, image: true },
+    }),
+  ]);
+
+  const user = {
+    name: dbUser?.name ?? session.user.name ?? null,
+    email: dbUser?.email ?? session.user.email ?? null,
+    image: dbUser?.image ?? null,
+  };
 
   const profileLevel = getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category }))
@@ -27,7 +39,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar
-        user={session.user}
+        user={user}
         profileLevel={{
           level: profileLevel.level,
           label: profileLevel.label,
@@ -38,7 +50,7 @@ export default async function DashboardLayout({
         }}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar user={session.user} />
+        <TopBar user={user} />
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">
           {children}
         </main>

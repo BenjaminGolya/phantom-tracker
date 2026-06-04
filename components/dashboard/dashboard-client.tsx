@@ -130,7 +130,6 @@ export function DashboardClient({ habits: initialHabits }: DashboardClientProps)
         >
           <Plus size={14} />
           New habit
-          <kbd className="hidden sm:inline text-xs opacity-60 ml-1 font-mono">N</kbd>
         </button>
       </div>
 

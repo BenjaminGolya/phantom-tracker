@@ -449,31 +449,37 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
               {current}
             </div>
           )}
+          {/* Always-visible edit button */}
+          <button
+            onClick={() => onEdit?.(habit)}
+            title="Edit habit"
+            className="p-1.5 rounded-md text-muted hover:text-primary hover:bg-surface-2 transition-colors"
+          >
+            <Pencil size={14} />
+          </button>
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 rounded-md text-muted hover:text-white hover:bg-surface-2 transition-colors opacity-0 group-hover:opacity-100"
+              title="More"
+              className="p-1.5 rounded-md text-muted hover:text-white hover:bg-surface-2 transition-colors"
             >
               <MoreHorizontal size={14} />
             </button>
             {menuOpen && (
-              <div
-                className="absolute right-0 top-7 z-50 w-40 bg-surface-2 border border-border rounded-xl shadow-xl py-1"
-                onMouseLeave={() => setMenuOpen(false)}
-              >
-                <button onClick={() => { onEdit?.(habit); setMenuOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
-                  <Pencil size={12} /> Edit
-                </button>
-                <button onClick={() => { onArchive?.(habit.id); setMenuOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
-                  <Archive size={12} /> Archive
-                </button>
-                <button onClick={() => { onDelete?.(habit.id); setMenuOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-surface transition-colors">
-                  <Trash2 size={12} /> Delete
-                </button>
-              </div>
+              <>
+                {/* Tap-outside backdrop (works on touch + mouse) */}
+                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 top-8 z-50 w-40 bg-surface-2 border border-border rounded-xl shadow-xl py-1">
+                  <button onClick={() => { onArchive?.(habit.id); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
+                    <Archive size={12} /> Archive
+                  </button>
+                  <button onClick={() => { onDelete?.(habit.id); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-surface transition-colors">
+                    <Trash2 size={12} /> Delete
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

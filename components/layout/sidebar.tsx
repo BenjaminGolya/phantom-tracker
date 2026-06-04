@@ -13,7 +13,7 @@ const nav = [
 ];
 
 interface SidebarProps {
-  user?: { name?: string | null; email?: string | null };
+  user?: { name?: string | null; email?: string | null; image?: string | null };
   profileLevel?: { level: number; label: string; emoji: string; color: string; progress: number; xp: number };
 }
 
@@ -93,9 +93,14 @@ export function Sidebar({ user, profileLevel }: SidebarProps) {
       {/* User */}
       <div className="px-3 py-3 border-t border-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-medium text-primary">
-            {(user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U"}
-          </div>
+          {user?.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.image} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-primary/30 shrink-0" />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-medium text-primary shrink-0">
+              {(user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U"}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="text-xs font-medium text-white truncate">{user?.name ?? "User"}</p>
             <p className="text-xs text-muted truncate">{user?.email}</p>

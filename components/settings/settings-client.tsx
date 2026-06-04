@@ -1,17 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, LogOut, Ghost } from "lucide-react";
+import { Loader2, Download, LogOut, Ghost, Camera, Trash2 } from "lucide-react";
 
 interface SettingsClientProps {
-  user: { id: string; name: string | null; email: string };
+  user: { id: string; name: string | null; email: string; image: string | null };
+}
+
+// Resize an image file to a square <=256px JPEG data URL to keep it small.
+function fileToAvatar(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const size = 256;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("no ctx"));
+        // center-crop to square
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width - min) / 2;
+        const sy = (img.height - min) / 2;
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export function SettingsClient({ user }: SettingsClientProps) {
+  const router = useRouter();
   const [name, setName] = useState(user?.name ?? "");
+  const [image, setImage] = useState<string | null>(user?.image ?? null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const initial = (user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U";
+
+  async function handlePickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const dataUrl = await fileToAvatar(file);
+      setImage(dataUrl);
+      await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      router.refresh(); // update topbar/sidebar avatar
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function handleRemoveImage() {
+    setImage(null);
+    await fetch("/api/user", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: null }),
+    });
+    router.refresh();
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +86,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
     });
     setSaving(false);
     setSaved(true);
+    router.refresh();
     setTimeout(() => setSaved(false), 2000);
   }
 
@@ -44,6 +108,48 @@ export function SettingsClient({ user }: SettingsClientProps) {
       {/* Profile */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-4">Profile</h2>
+
+        {/* Avatar */}
+        <div className="flex items-center gap-4 mb-5">
+          <div className="relative">
+            {image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={image} alt="avatar" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-xl font-semibold text-primary">
+                {initial}
+              </div>
+            )}
+            {uploading && (
+              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                <Loader2 size={18} className="animate-spin text-white" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePickImage} className="hidden" />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors disabled:opacity-50"
+            >
+              <Camera size={13} />
+              {image ? "Change photo" : "Upload photo"}
+            </button>
+            {image && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted hover:text-red-400 transition-colors"
+              >
+                <Trash2 size={13} />
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+
         <form onSubmit={handleSave} className="space-y-3">
           <div>
             <label className="text-xs text-muted block mb-1.5">Display name</label>
