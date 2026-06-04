@@ -275,9 +275,10 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
           initial={{ opacity: 0, scale: 0.96, y: 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96 }}
-          className="relative w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl p-5 z-10 max-h-[90vh] overflow-y-auto"
+          className="relative w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl z-10 max-h-[90vh] flex flex-col overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-5">
+          {/* Fixed header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
             <h2 className="font-semibold text-sm">
               {initial ? "Edit habit" : "New habit"}
             </h2>
@@ -286,7 +287,9 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+            {/* Scrollable fields */}
+            <div className="overflow-y-auto px-5 py-4 space-y-4 flex-1">
             {/* Name */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">Name</label>
@@ -391,31 +394,35 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
 
             {/* Goal */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Monthly goal <span className="opacity-50">(optional)</span></label>
+              <label className="text-xs text-muted mb-1.5 block">Daily goal <span className="opacity-50">(optional)</span></label>
               <div className="relative">
                 <input
                   type="number"
                   value={goal}
                   onChange={(e) => setGoal(e.target.value)}
-                  placeholder="e.g. 20 completions this month"
+                  placeholder="e.g. 50"
                   min={1}
-                  max={31}
                   className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary transition-colors"
                 />
                 {goal && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">/ month</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">/ day</span>
                 )}
               </div>
+              <p className="text-[11px] text-muted mt-1.5">A count to hit each day (e.g. 50 push-ups). Leave empty for a simple done/skip habit.</p>
+            </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || !name.trim()}
-              className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading && <Loader2 size={14} className="animate-spin" />}
-              {initial ? "Save changes" : "Create habit"}
-            </button>
+            {/* Fixed footer */}
+            <div className="px-5 py-4 border-t border-border shrink-0">
+              <button
+                type="submit"
+                disabled={loading || !name.trim()}
+                className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 size={14} className="animate-spin" />}
+                {initial ? "Save changes" : "Create habit"}
+              </button>
+            </div>
           </form>
         </motion.div>
       </div>
