@@ -88,13 +88,16 @@ export async function sendWelcomeEmail(to: string, name?: string | null) {
 
   const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
   const appUrl = process.env.NEXTAUTH_URL ?? "https://phantomtracker.io";
+  // Point at /login (pre-filled) rather than /dashboard, so opening this email on
+  // any device signs the user into THIS account — not whatever the device was on.
+  const openUrl = `${appUrl}/login?email=${encodeURIComponent(to)}`;
   const hi = name ? `Hey ${name}` : "Hey there";
 
   await transporter.sendMail({
     from,
     to,
     subject: "Welcome to Phantom Tracker 👻",
-    text: `${hi},\n\nYour account is verified — welcome to Phantom Tracker!\n\nStart by creating your first habit, check it off each day, and watch your streaks and levels grow.\n\nOpen the app: ${appUrl}/dashboard\n\nStay consistent.`,
+    text: `${hi},\n\nYour account is verified — welcome to Phantom Tracker!\n\nStart by creating your first habit, check it off each day, and watch your streaks and levels grow.\n\nOpen the app: ${openUrl}\n\nStay consistent.`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -117,7 +120,7 @@ export async function sendWelcomeEmail(to: string, name?: string | null) {
                       Create your first habit, check it off each day, and watch your streaks, levels, and Phantom score grow. Set reminders so you never miss a day.
                     </p>
                     <div style="text-align:center;margin-bottom:20px;">
-                      <a href="${appUrl}/dashboard" style="display:inline-block;background:#7f49c3;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Open Phantom Tracker</a>
+                      <a href="${openUrl}" style="display:inline-block;background:#7f49c3;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Open Phantom Tracker</a>
                     </div>
                     <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">Stay consistent. 👻</p>
                   </td>

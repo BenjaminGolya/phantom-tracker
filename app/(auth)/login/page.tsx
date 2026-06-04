@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Ghost } from "lucide-react";
@@ -10,12 +10,23 @@ import { motion } from "framer-motion";
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const { data: session, status } = useSession();
   const justVerified = params.get("verified") === "1";
-  const [email, setEmail] = useState("");
+  const emailParam = params.get("email") ?? "";
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // If this device is already signed in as the account the link is for, skip
+  // straight to the dashboard. Otherwise show the form so the user can sign in
+  // (e.g. opening a new account's email on a device logged into another one).
+  useEffect(() => {
+    if (status === "authenticated" && emailParam && session?.user?.email === emailParam) {
+      router.replace("/dashboard");
+    }
+  }, [status, session, emailParam, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
