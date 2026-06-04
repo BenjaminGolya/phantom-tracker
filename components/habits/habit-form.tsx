@@ -274,7 +274,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md"
           onClick={onClose}
         />
         <motion.div
