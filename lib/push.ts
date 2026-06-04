@@ -19,10 +19,19 @@ export interface PushPayload {
   tag?: string;
 }
 
+export interface PushResult {
+  total: number;
+  sent: number;
+  errors: { statusCode?: number; message?: string }[];
+}
+
 /** Send a push to every subscription belonging to a user. Cleans up dead subs. */
-export async function sendPushToUser(userId: string, payload: PushPayload) {
+export async function sendPushToUser(userId: string, payload: PushPayload): Promise<PushResult> {
   configure();
   const subs = await prisma.pushSubscription.findMany({ where: { userId } });
+
+  let sent = 0;
+  const errors: { statusCode?: number; message?: string }[] = [];
 
   await Promise.all(
     subs.map(async (sub) => {
@@ -31,17 +40,20 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
           JSON.stringify(payload)
         );
+        sent++;
       } catch (err: unknown) {
-        const code = (err as { statusCode?: number })?.statusCode;
+        const e = err as { statusCode?: number; body?: string; message?: string };
+        const code = e?.statusCode;
+        errors.push({ statusCode: code, message: String(e?.body || e?.message || "").slice(0, 180) });
         // 404/410 = the subscription is gone (browser/app uninstalled) → drop it
         if (code === 404 || code === 410) {
           await prisma.pushSubscription.delete({ where: { endpoint: sub.endpoint } }).catch(() => {});
         } else {
-          console.error("Push send failed:", code, err);
+          console.error("Push send failed:", code, e?.body || e?.message);
         }
       }
     })
   );
 
-  return subs.length;
+  return { total: subs.length, sent, errors };
 }

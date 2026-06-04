@@ -99,9 +99,15 @@ export function usePush() {
     }
   }, []);
 
-  const sendTest = useCallback(async (): Promise<boolean> => {
+  const sendTest = useCallback(async (): Promise<{
+    ok: boolean;
+    total?: number;
+    sent?: number;
+    errors?: { statusCode?: number; message?: string }[];
+    error?: string;
+  }> => {
     const res = await fetch("/api/push/test", { method: "POST" });
-    return res.ok;
+    return res.json().catch(() => ({ ok: false }));
   }, []);
 
   return { supported, permission, subscribed, busy, iosNeedsInstall, subscribe, unsubscribe, sendTest };

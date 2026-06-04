@@ -52,9 +52,16 @@ export function SettingsClient({ user }: SettingsClientProps) {
 
   async function handleTest() {
     setTestMsg("Sending…");
-    const ok = await push.sendTest();
-    setTestMsg(ok ? "Sent! Check your notifications." : "Failed — try re-enabling.");
-    setTimeout(() => setTestMsg(""), 4000);
+    const r = await push.sendTest();
+    if (r.ok && (r.sent ?? 0) > 0) {
+      setTestMsg("Sent ✓ — check your notifications.");
+    } else if (r.total === 0 || r.error) {
+      setTestMsg("No device subscribed — turn it off and on again.");
+    } else {
+      const code = r.errors?.[0]?.statusCode;
+      setTestMsg(`Delivery failed${code ? ` (code ${code})` : ""} — the push was rejected.`);
+    }
+    setTimeout(() => setTestMsg(""), 7000);
   }
 
   async function handlePickImage(e: React.ChangeEvent<HTMLInputElement>) {
