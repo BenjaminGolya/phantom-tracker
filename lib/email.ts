@@ -72,6 +72,65 @@ export async function sendVerificationEmail(to: string, code: string) {
   });
 }
 
+/** Welcome a newly-verified user. No-op when SMTP isn't configured. */
+export async function sendWelcomeEmail(to: string, name?: string | null) {
+  if (!isSmtpConfigured()) {
+    console.log(`\n  👋 (welcome email skipped — no SMTP) for ${to}\n`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+
+  const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
+  const appUrl = process.env.NEXTAUTH_URL ?? "https://phantomtracker.io";
+  const hi = name ? `Hey ${name}` : "Hey there";
+
+  await transporter.sendMail({
+    from,
+    to,
+    subject: "Welcome to Phantom Tracker 👻",
+    text: `${hi},\n\nYour account is verified — welcome to Phantom Tracker!\n\nStart by creating your first habit, check it off each day, and watch your streaks and levels grow.\n\nOpen the app: ${appUrl}/dashboard\n\nStay consistent.`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <body style="margin:0;padding:0;background:#0a0a0a;font-family:system-ui,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 16px;">
+            <tr><td align="center">
+              <table width="440" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222222;border-radius:16px;overflow:hidden;">
+                <tr>
+                  <td style="padding:32px 32px 8px;text-align:center;">
+                    <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#7f49c3;border-radius:14px;margin-bottom:16px;">
+                      <span style="font-size:24px;">👻</span>
+                    </div>
+                    <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">Welcome to Phantom Tracker</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 32px 28px;">
+                    <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi}, your account is verified — you're in. 🎉</p>
+                    <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                      Create your first habit, check it off each day, and watch your streaks, levels, and Phantom score grow. Set reminders so you never miss a day.
+                    </p>
+                    <div style="text-align:center;margin-bottom:20px;">
+                      <a href="${appUrl}/dashboard" style="display:inline-block;background:#7f49c3;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Open Phantom Tracker</a>
+                    </div>
+                    <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">Stay consistent. 👻</p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+      </html>
+    `,
+  });
+}
+
 /** Notify the admin inbox whenever a new user joins. No-op if not configured. */
 export async function sendNewUserNotification(newUser: { email: string; name?: string | null }) {
   const to = process.env.ADMIN_NOTIFY_EMAIL;
