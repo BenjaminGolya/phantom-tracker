@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Loader2, ChevronDown, Plus, Tag, Check } from "lucide-react";
+import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock } from "lucide-react";
 import { HABIT_ICONS } from "@/lib/habit-icons";
 import { HabitFormData, HabitWithLogs } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -218,6 +218,101 @@ function CategoryPicker({
   );
 }
 
+// ─── 24h time picker (dropdown only, no typing) ───────────────────────────────
+function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const hourCol = useRef<HTMLDivElement>(null);
+  const minCol = useRef<HTMLDivElement>(null);
+
+  const [hh, mm] = value ? value.split(":") : ["", ""];
+  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+  const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
+
+  useEffect(() => {
+    if (!open) return;
+    function onClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  // Scroll the selected values into view when opening
+  useEffect(() => {
+    if (!open) return;
+    hourCol.current?.querySelector<HTMLElement>("[data-selected=true]")?.scrollIntoView({ block: "center" });
+    minCol.current?.querySelector<HTMLElement>("[data-selected=true]")?.scrollIntoView({ block: "center" });
+  }, [open]);
+
+  function pickHour(h: string) { onChange(`${h}:${mm || "00"}`); }
+  function pickMin(m: string) { onChange(`${hh || "00"}:${m}`); }
+
+  return (
+    <div ref={ref} className="relative flex-1">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm transition-colors hover:border-primary/50 focus:outline-none focus:border-primary"
+        style={{ borderColor: open ? "#7f49c3" : undefined }}
+      >
+        <span className="flex items-center gap-2">
+          <Clock size={14} className="text-muted" />
+          {value ? <span className="text-white font-mono">{value}</span> : <span className="text-muted">Select time…</span>}
+        </span>
+        <ChevronDown size={14} className={`text-muted transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 4, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.98 }}
+            transition={{ duration: 0.12 }}
+            className="absolute left-0 right-0 bottom-full mb-1 z-50 flex bg-surface-2 border border-border rounded-xl shadow-2xl overflow-hidden"
+          >
+            <div ref={hourCol} className="flex-1 max-h-44 overflow-y-auto py-1 border-r border-border">
+              <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Hour</p>
+              {hours.map((h) => {
+                const sel = h === hh;
+                return (
+                  <button
+                    key={h}
+                    type="button"
+                    data-selected={sel}
+                    onClick={() => pickHour(h)}
+                    className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
+                  >
+                    {h}
+                  </button>
+                );
+              })}
+            </div>
+            <div ref={minCol} className="flex-1 max-h-44 overflow-y-auto py-1">
+              <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Min</p>
+              {minutes.map((m) => {
+                const sel = m === mm;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    data-selected={sel}
+                    onClick={() => pickMin(m)}
+                    className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Main form ────────────────────────────────────────────────────────────────
 interface HabitFormProps {
   initial?: HabitWithLogs;
@@ -423,17 +518,12 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
             <div>
               <label className="text-xs text-muted mb-1.5 block">Reminder <span className="opacity-50">(optional)</span></label>
               <div className="flex items-center gap-2">
-                <input
-                  type="time"
-                  value={reminderTime}
-                  onChange={(e) => setReminderTime(e.target.value)}
-                  className="flex-1 px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-colors [color-scheme:dark]"
-                />
+                <TimePicker value={reminderTime} onChange={setReminderTime} />
                 {reminderTime && (
                   <button
                     type="button"
                     onClick={() => setReminderTime("")}
-                    className="px-3 py-2.5 text-xs text-muted hover:text-red-400 transition-colors"
+                    className="px-3 py-2.5 text-xs text-muted hover:text-red-400 transition-colors shrink-0"
                   >
                     Clear
                   </button>
