@@ -40,14 +40,17 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Best-effort emails — never block the signup if they fail.
+  // Best-effort emails — sent sequentially (Hostinger SMTP rejects concurrent
+  // connections) and each wrapped so a failure never blocks the signup.
   try {
-    await Promise.allSettled([
-      sendWelcomeEmail(user.email, user.name),
-      sendNewUserNotification({ email: user.email, name: user.name }),
-    ]);
+    await sendWelcomeEmail(user.email, user.name);
   } catch (err) {
-    console.error("Post-verification emails failed:", err);
+    console.error("[verify] Welcome email failed:", err);
+  }
+  try {
+    await sendNewUserNotification({ email: user.email, name: user.name });
+  } catch (err) {
+    console.error("[verify] Admin notification failed:", err);
   }
 
   return NextResponse.json({ ok: true });
