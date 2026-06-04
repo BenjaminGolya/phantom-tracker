@@ -449,18 +449,10 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
               {current}
             </div>
           )}
-          {/* Always-visible edit button */}
-          <button
-            onClick={() => onEdit?.(habit)}
-            title="Edit habit"
-            className="p-1.5 rounded-md text-muted hover:text-primary hover:bg-surface-2 transition-colors"
-          >
-            <Pencil size={14} />
-          </button>
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              title="More"
+              title="Options"
               className="p-1.5 rounded-md text-muted hover:text-white hover:bg-surface-2 transition-colors"
             >
               <MoreHorizontal size={14} />
@@ -470,6 +462,10 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
                 {/* Tap-outside backdrop (works on touch + mouse) */}
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 top-8 z-50 w-40 bg-surface-2 border border-border rounded-xl shadow-xl py-1">
+                  <button onClick={() => { onEdit?.(habit); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
+                    <Pencil size={12} /> Edit
+                  </button>
                   <button onClick={() => { onArchive?.(habit.id); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
                     <Archive size={12} /> Archive
