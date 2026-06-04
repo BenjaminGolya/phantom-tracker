@@ -48,8 +48,6 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
         // 404/410 = the subscription is gone (browser/app uninstalled) → drop it
         if (code === 404 || code === 410) {
           await prisma.pushSubscription.delete({ where: { endpoint: sub.endpoint } }).catch(() => {});
-        } else {
-          console.error("Push send failed:", code, e?.body || e?.message);
         }
       }
     })

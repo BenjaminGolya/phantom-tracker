@@ -134,10 +134,7 @@ export async function sendWelcomeEmail(to: string, name?: string | null) {
 /** Notify the admin inbox whenever a new user joins. No-op if not configured. */
 export async function sendNewUserNotification(newUser: { email: string; name?: string | null }) {
   const to = process.env.ADMIN_NOTIFY_EMAIL;
-  if (!to) {
-    console.log("[admin-notify] ADMIN_NOTIFY_EMAIL not set — skipping");
-    return; // feature off unless an admin address is set
-  }
+  if (!to) return; // feature off unless an admin address is set
 
   if (!isSmtpConfigured()) {
     console.log(`\n  📥 New user joined: ${newUser.email}${newUser.name ? ` (${newUser.name})` : ""}\n`);
@@ -154,7 +151,7 @@ export async function sendNewUserNotification(newUser: { email: string; name?: s
   const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
   const when = new Date().toUTCString();
 
-  const info = await transporter.sendMail({
+  await transporter.sendMail({
     from,
     to,
     subject: `🎉 New Phantom Tracker user: ${newUser.email}`,
@@ -173,5 +170,4 @@ export async function sendNewUserNotification(newUser: { email: string; name?: s
       </div>
     `,
   });
-  console.log(`[admin-notify] sent to ${to} (messageId: ${info.messageId})`);
 }

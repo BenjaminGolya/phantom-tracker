@@ -49,9 +49,11 @@ export async function POST(req: NextRequest) {
 
   try {
     await sendVerificationEmail(email, code);
-  } catch (err) {
-    console.error("Email send failed:", err);
-    console.log(`▶ VERIFICATION CODE for ${email}: ${code}`);
+  } catch {
+    return NextResponse.json(
+      { error: "Could not send the verification email. Please try again." },
+      { status: 502 }
+    );
   }
 
   return NextResponse.json({ ok: true, email });

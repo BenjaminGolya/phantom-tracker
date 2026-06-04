@@ -44,13 +44,13 @@ export async function POST(req: NextRequest) {
   // connections) and each wrapped so a failure never blocks the signup.
   try {
     await sendWelcomeEmail(user.email, user.name);
-  } catch (err) {
-    console.error("[verify] Welcome email failed:", err);
+  } catch {
+    // ignore — verification still succeeds if the welcome email fails
   }
   try {
     await sendNewUserNotification({ email: user.email, name: user.name });
-  } catch (err) {
-    console.error("[verify] Admin notification failed:", err);
+  } catch {
+    // ignore — verification still succeeds if the admin notification fails
   }
 
   return NextResponse.json({ ok: true });
