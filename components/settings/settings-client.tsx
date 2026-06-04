@@ -197,16 +197,17 @@ export function SettingsClient({ user }: SettingsClientProps) {
           Get a push notification when a habit&apos;s reminder time arrives.
         </p>
 
-        {!push.supported ? (
-          <p className="text-xs text-muted">Notifications aren&apos;t supported on this browser.</p>
-        ) : push.iosNeedsInstall ? (
+        {push.iosNeedsInstall ? (
           <div className="flex items-start gap-2.5 px-3 py-3 bg-surface-2 border border-border rounded-lg">
             <Smartphone size={16} className="text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-muted">
-              On iPhone, add Phantom Tracker to your <span className="text-white">Home Screen</span> first
-              (Share → Add to Home Screen), then open it from there to enable notifications.
+              On iPhone, add Phantom Tracker to your <span className="text-white">Home Screen</span> first:
+              tap <span className="text-white">Share → Add to Home Screen</span>, then open it from the
+              new icon and come back here to turn on notifications.
             </p>
           </div>
+        ) : !push.supported ? (
+          <p className="text-xs text-muted">Notifications aren&apos;t supported on this browser.</p>
         ) : push.permission === "denied" ? (
           <p className="text-xs text-red-400">
             Notifications are blocked in your browser settings. Re-enable them for this site, then refresh.
