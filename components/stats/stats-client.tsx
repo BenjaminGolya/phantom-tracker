@@ -1,12 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
+import dynamic from "next/dynamic";
 import { format, subDays } from "date-fns";
 import { motion } from "framer-motion";
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-} from "recharts";
 import { HabitWithLogs } from "@/types";
+
+// Lazy-load the chart (Recharts is heavy) so it loads in its own chunk after
+// the page renders, instead of blocking the whole stats page.
+const WeeklyChart = dynamic(() => import("./weekly-chart"), {
+  ssr: false,
+  loading: () => <div className="h-[140px] rounded-lg bg-surface-2 animate-pulse" />,
+});
 import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
 import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
@@ -341,22 +346,7 @@ export function StatsClient({ habits }: StatsClientProps) {
           {/* Weekly bar chart */}
           <div className="bg-surface border border-border rounded-xl p-4">
             <h2 className="text-sm font-medium mb-4">Last 7 days</h2>
-            <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={weekData} barSize={28}>
-                <XAxis dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis hide domain={[0, Math.max(habits.length, 1)]} />
-                <Tooltip
-                  cursor={{ fill: "#1a1a1a" }}
-                  contentStyle={{ background: "#111", border: "1px solid #222", borderRadius: 8, fontSize: 12 }}
-                  formatter={(v) => [`${v}/${habits.length}`, "Completed"]}
-                />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {weekData.map((entry, i) => (
-                    <Cell key={i} fill={entry.count === entry.total && entry.total > 0 ? "#7f49c3" : "#2a2a2a"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <WeeklyChart data={weekData} total={habits.length} />
           </div>
 
           {/* Habit level tracker */}
