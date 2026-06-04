@@ -237,6 +237,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
   );
   const [goal, setGoal] = useState(initial?.goal?.toString() ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
+  const [reminderTime, setReminderTime] = useState(initial?.reminderTime ?? "");
   const [loading, setLoading] = useState(false);
 
   function toggleDay(d: string) {
@@ -257,6 +258,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
       frequency: freq,
       goal: goal ? parseInt(goal) : undefined,
       category: category || undefined,
+      reminderTime: reminderTime || null,
     });
     setLoading(false);
   }
@@ -415,6 +417,29 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
                 )}
               </div>
               <p className="text-[11px] text-muted mt-1.5">A count to hit each day (e.g. 50 push-ups). Leave empty for a simple done/skip habit.</p>
+            </div>
+
+            {/* Reminder */}
+            <div>
+              <label className="text-xs text-muted mb-1.5 block">Reminder <span className="opacity-50">(optional)</span></label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="flex-1 px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white focus:outline-none focus:border-primary transition-colors [color-scheme:dark]"
+                />
+                {reminderTime && (
+                  <button
+                    type="button"
+                    onClick={() => setReminderTime("")}
+                    className="px-3 py-2.5 text-xs text-muted hover:text-red-400 transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-muted mt-1.5">Get a push notification at this time if you haven&apos;t completed it yet. Enable notifications in Settings.</p>
             </div>
             </div>
 

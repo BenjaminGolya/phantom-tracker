@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, LogOut, Ghost, Camera, Trash2 } from "lucide-react";
+import { Loader2, Download, LogOut, Ghost, Camera, Trash2, Bell, BellRing, Smartphone } from "lucide-react";
+import { usePush } from "@/lib/use-push";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
@@ -39,13 +40,22 @@ function fileToAvatar(file: File): Promise<string> {
 
 export function SettingsClient({ user }: SettingsClientProps) {
   const router = useRouter();
+  const push = usePush();
   const [name, setName] = useState(user?.name ?? "");
   const [image, setImage] = useState<string | null>(user?.image ?? null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [testMsg, setTestMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const initial = (user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U";
+
+  async function handleTest() {
+    setTestMsg("Sending…");
+    const ok = await push.sendTest();
+    setTestMsg(ok ? "Sent! Check your notifications." : "Failed — try re-enabling.");
+    setTimeout(() => setTestMsg(""), 4000);
+  }
 
   async function handlePickImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -176,6 +186,63 @@ export function SettingsClient({ user }: SettingsClientProps) {
             {saved ? "Saved ✓" : "Save changes"}
           </button>
         </form>
+      </div>
+
+      {/* Notifications */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <Bell size={15} className="text-primary" /> Reminders
+        </h2>
+        <p className="text-xs text-muted mb-4">
+          Get a push notification when a habit&apos;s reminder time arrives.
+        </p>
+
+        {!push.supported ? (
+          <p className="text-xs text-muted">Notifications aren&apos;t supported on this browser.</p>
+        ) : push.iosNeedsInstall ? (
+          <div className="flex items-start gap-2.5 px-3 py-3 bg-surface-2 border border-border rounded-lg">
+            <Smartphone size={16} className="text-primary shrink-0 mt-0.5" />
+            <p className="text-xs text-muted">
+              On iPhone, add Phantom Tracker to your <span className="text-white">Home Screen</span> first
+              (Share → Add to Home Screen), then open it from there to enable notifications.
+            </p>
+          </div>
+        ) : push.permission === "denied" ? (
+          <p className="text-xs text-red-400">
+            Notifications are blocked in your browser settings. Re-enable them for this site, then refresh.
+          </p>
+        ) : push.subscribed ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-green-400">
+              <BellRing size={15} /> Notifications enabled on this device
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={handleTest}
+                className="px-3 py-1.5 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors"
+              >
+                Send test
+              </button>
+              <button
+                onClick={push.unsubscribe}
+                disabled={push.busy}
+                className="px-3 py-1.5 text-sm text-muted hover:text-red-400 transition-colors disabled:opacity-50"
+              >
+                Disable
+              </button>
+              {testMsg && <span className="text-xs text-muted">{testMsg}</span>}
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={push.subscribe}
+            disabled={push.busy}
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50"
+          >
+            {push.busy ? <Loader2 size={14} className="animate-spin" /> : <Bell size={14} />}
+            Enable notifications
+          </button>
+        )}
       </div>
 
       {/* Data */}

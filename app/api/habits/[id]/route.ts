@@ -17,6 +17,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       frequency: data.frequency,
       goal: data.goal ?? null,
       category: data.category ?? null,
+      reminderTime: data.reminderTime ?? null,
       archived: data.archived ?? false,
     },
     include: { logs: true },

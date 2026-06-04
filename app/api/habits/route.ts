@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       frequency: data.frequency ?? "daily",
       goal: data.goal ?? null,
       category: data.category ?? null,
+      reminderTime: data.reminderTime ?? null,
     },
     include: { logs: true },
   });

@@ -6,6 +6,7 @@ export interface HabitWithLogs {
   frequency: string;
   goal: number | null;
   category: string | null;
+  reminderTime: string | null;
   archived: boolean;
   createdAt: Date;
   logs: HabitLog[];
@@ -26,4 +27,5 @@ export interface HabitFormData {
   frequency: string;
   goal?: number;
   category?: string;
+  reminderTime?: string | null;
 }
