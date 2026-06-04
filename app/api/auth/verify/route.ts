@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendNewUserNotification } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const { email, code } = await req.json();
@@ -38,6 +39,13 @@ export async function POST(req: NextRequest) {
       verificationExpires: null,
     },
   });
+
+  // Notify the admin inbox about the new user (best-effort — never block signup)
+  try {
+    await sendNewUserNotification({ email: user.email, name: user.name });
+  } catch (err) {
+    console.error("Admin new-user notification failed:", err);
+  }
 
   return NextResponse.json({ ok: true });
 }

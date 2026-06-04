@@ -71,3 +71,44 @@ export async function sendVerificationEmail(to: string, code: string) {
     `,
   });
 }
+
+/** Notify the admin inbox whenever a new user joins. No-op if not configured. */
+export async function sendNewUserNotification(newUser: { email: string; name?: string | null }) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL;
+  if (!to) return; // feature off unless an admin address is set
+
+  if (!isSmtpConfigured()) {
+    console.log(`\n  📥 New user joined: ${newUser.email}${newUser.name ? ` (${newUser.name})` : ""}\n`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+
+  const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
+  const when = new Date().toUTCString();
+
+  await transporter.sendMail({
+    from,
+    to,
+    subject: `🎉 New Phantom Tracker user: ${newUser.email}`,
+    text: `A new user just verified their account.\n\nEmail: ${newUser.email}\nName: ${newUser.name || "—"}\nWhen: ${when}`,
+    html: `
+      <div style="font-family:system-ui,sans-serif;background:#0a0a0a;padding:32px;color:#fff;">
+        <div style="max-width:420px;margin:0 auto;background:#111;border:1px solid #222;border-radius:14px;padding:24px;">
+          <h2 style="margin:0 0 4px;font-size:16px;">🎉 New user joined</h2>
+          <p style="margin:0 0 16px;color:#a1a1aa;font-size:13px;">Someone just verified their Phantom Tracker account.</p>
+          <table style="font-size:14px;width:100%;border-collapse:collapse;">
+            <tr><td style="padding:6px 0;color:#a1a1aa;">Email</td><td style="padding:6px 0;text-align:right;color:#fff;">${newUser.email}</td></tr>
+            <tr><td style="padding:6px 0;color:#a1a1aa;">Name</td><td style="padding:6px 0;text-align:right;color:#fff;">${newUser.name || "—"}</td></tr>
+            <tr><td style="padding:6px 0;color:#a1a1aa;">When</td><td style="padding:6px 0;text-align:right;color:#fff;">${when}</td></tr>
+          </table>
+        </div>
+      </div>
+    `,
+  });
+}
