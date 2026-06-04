@@ -102,7 +102,7 @@ export function SettingsClient({ user }: SettingsClientProps) {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-6 pb-20 lg:pb-6">
+    <div className="max-w-lg mx-auto space-y-6 pb-28 lg:pb-6">
       <h1 className="text-lg font-semibold">Settings</h1>
 
       {/* Profile */}

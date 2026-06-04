@@ -125,7 +125,7 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
   // between server and client. Render a shell until mounted to avoid hydration errors.
   if (!mounted) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 pb-20 lg:pb-6">
+      <div className="max-w-4xl mx-auto space-y-6 pb-28 lg:pb-6">
         <div className="h-9" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -137,7 +137,7 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20 lg:pb-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-28 lg:pb-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h1 className="text-lg font-semibold">Habits</h1>

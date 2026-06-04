@@ -288,7 +288,7 @@ export function StatsClient({ habits }: StatsClientProps) {
   // Date-based charts/streaks differ server vs client — render a shell until mounted.
   if (!mounted) {
     return (
-      <div className="max-w-3xl mx-auto space-y-6 pb-20 lg:pb-6">
+      <div className="max-w-3xl mx-auto space-y-6 pb-28 lg:pb-6">
         <h1 className="text-lg font-semibold">Stats</h1>
         <div className="h-48 bg-surface border border-border rounded-2xl animate-pulse" />
         <div className="grid grid-cols-2 gap-3">
@@ -301,7 +301,7 @@ export function StatsClient({ habits }: StatsClientProps) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-20 lg:pb-6">
+    <div className="max-w-3xl mx-auto space-y-6 pb-28 lg:pb-6">
       <h1 className="text-lg font-semibold">Stats</h1>
 
       {habits.length === 0 ? (
