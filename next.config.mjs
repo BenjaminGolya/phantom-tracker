@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // Don't reuse a stale client-side Router Cache entry for dynamic pages.
-    // Ensures navigating between /habits and /dashboard always refetches fresh
-    // server data, so a completion on one page shows up immediately on the other.
+    // Cache navigations client-side so switching tabs is instant, instead of
+    // refetching from the server every time. Freshness after a change is still
+    // guaranteed because every mutation calls router.refresh(), which clears the
+    // whole Router Cache — so completing a habit on one page still shows up on
+    // the others immediately.
     staleTimes: {
-      dynamic: 0,
+      dynamic: 30,
       static: 180,
     },
   },
