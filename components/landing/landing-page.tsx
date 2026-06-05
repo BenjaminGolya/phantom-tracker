@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
@@ -106,6 +107,9 @@ const FEATURES = [
 ];
 
 export function LandingPage() {
+  const { status } = useSession();
+  const authed = status === "authenticated";
+
   return (
     <div className="min-h-screen bg-background text-white overflow-x-hidden">
       {/* Background glow */}
@@ -121,12 +125,20 @@ export function LandingPage() {
             <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/login" className="text-sm text-muted hover:text-white transition-colors px-3 py-1.5">
-              Sign in
-            </Link>
-            <Link href="/signup" className="text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow">
-              Get started
-            </Link>
+            {authed ? (
+              <Link href="/dashboard" className="flex items-center gap-1 text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow">
+                Open app <ChevronRight size={14} />
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm text-muted hover:text-white transition-colors px-3 py-1.5">
+                  Sign in
+                </Link>
+                <Link href="/signup" className="text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow">
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -146,8 +158,8 @@ export function LandingPage() {
             every single day. Free, on every device.
           </p>
           <div className="flex items-center justify-center gap-3 mt-8">
-            <Link href="/signup" className="flex items-center gap-1.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-all hover:shadow-glow">
-              Get started — it&apos;s free <ChevronRight size={15} />
+            <Link href={authed ? "/dashboard" : "/signup"} className="flex items-center gap-1.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-all hover:shadow-glow">
+              {authed ? "Open your dashboard" : "Get started — it's free"} <ChevronRight size={15} />
             </Link>
             <Link href="#install" className="text-sm font-medium text-muted hover:text-white border border-border hover:border-primary/40 px-5 py-2.5 rounded-xl transition-colors">
               How it works
@@ -267,8 +279,8 @@ export function LandingPage() {
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Start building better habits today</h2>
             <p className="text-muted mt-3 max-w-md mx-auto">It&apos;s free, takes a minute to set up, and works on every device.</p>
-            <Link href="/signup" className="inline-flex items-center gap-1.5 mt-7 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-6 py-3 rounded-xl transition-all hover:shadow-glow">
-              Create your free account <ChevronRight size={15} />
+            <Link href={authed ? "/dashboard" : "/signup"} className="inline-flex items-center gap-1.5 mt-7 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-6 py-3 rounded-xl transition-all hover:shadow-glow">
+              {authed ? "Open Phantom Tracker" : "Create your free account"} <ChevronRight size={15} />
             </Link>
           </div>
         </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, Ghost, Settings } from "lucide-react";
+import { LogOut, Ghost, Settings, Info } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
@@ -82,6 +82,14 @@ export function TopBar({ user }: TopBarProps) {
             >
               <Settings size={14} />
               Settings
+            </Link>
+            <Link
+              href="/welcome"
+              onClick={() => setOpen(false)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
+            >
+              <Info size={14} />
+              About &amp; install
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
