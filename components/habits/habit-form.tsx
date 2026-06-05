@@ -518,7 +518,13 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
             <div>
               <label className="text-xs text-muted mb-1.5 block">Reminder <span className="opacity-50">(optional)</span></label>
               <div className="flex items-center gap-2">
-                <TimePicker value={reminderTime} onChange={setReminderTime} />
+                <TimePicker
+                  value={reminderTime}
+                  onChange={(v) => {
+                    console.log("[reminder] selected time:", v, "| your timezone:", Intl.DateTimeFormat().resolvedOptions().timeZone);
+                    setReminderTime(v);
+                  }}
+                />
                 {reminderTime && (
                   <button
                     type="button"
