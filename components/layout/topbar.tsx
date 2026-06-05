@@ -42,7 +42,7 @@ export function TopBar({ user }: TopBarProps) {
       <div className="relative" ref={ref}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-2 transition-colors"
+          className="flex items-center gap-2 p-1.5 sm:pr-3 rounded-full hover:bg-surface-2 transition-colors"
         >
           {user?.image ? (
             // eslint-disable-next-line @next/next/no-img-element
