@@ -44,15 +44,20 @@ function ProfileLevelCard({ habits }: { habits: HabitWithLogs[] }) {
 
   const next = PROFILE_LEVELS.find((l) => l.level === info.level + 1);
 
-  const xpSources = [
-    { label: "Base completions",  value: info.breakdown.base,         icon: <Zap size={12} />,    color: "#3b82f6" },
-    { label: "Streak bonuses",    value: info.breakdown.streakBonus,  icon: <Flame size={12} />,  color: "#f97316" },
-    { label: "Perfect days",      value: info.breakdown.perfectDays,  icon: <Star size={12} />,   color: "#eab308" },
-    { label: "Category diversity",value: info.breakdown.diversity,    icon: <Shield size={12} />, color: "#22c55e" },
-    { label: "Habit mastery",     value: info.breakdown.masteryBonus, icon: <Trophy size={12} />, color: "#a855f7" },
-  ];
+  // Categories counted toward diversity (capped at 5). Derived from XP (10 each).
+  const cats = Math.round(info.breakdown.diversity / 10);
 
-  const maxSource = Math.max(...xpSources.map((s) => s.value), 1);
+  const xpSources = [
+    { label: "Base completions",  value: info.breakdown.base,         icon: <Zap size={12} />,    color: "#3b82f6", hint: "1 XP for every habit you check off" },
+    { label: "Streak bonuses",    value: info.breakdown.streakBonus,  icon: <Flame size={12} />,  color: "#f97316", hint: "+1 / +2 / +3 per check at 7 / 14 / 30-day streaks" },
+    { label: "Perfect days",      value: info.breakdown.perfectDays,  icon: <Star size={12} />,   color: "#eab308", hint: "+5 for each day you complete every habit" },
+    {
+      label: "Category diversity", value: info.breakdown.diversity, icon: <Shield size={12} />, color: "#22c55e",
+      hint: cats >= 5 ? "Maxed — all 5 category slots used 🎉" : `${cats}/5 categories · add ${5 - cats} more for +${(5 - cats) * 10} XP`,
+      cap: 5, used: cats,
+    },
+    { label: "Habit mastery",     value: info.breakdown.masteryBonus, icon: <Trophy size={12} />, color: "#a855f7", hint: "+20 each time a habit reaches a new tier (E, D, C…)" },
+  ];
 
   return (
     <motion.div
@@ -112,46 +117,44 @@ function ProfileLevelCard({ habits }: { habits: HabitWithLogs[] }) {
         </div>
       </div>
 
-      {/* XP breakdown */}
+      {/* XP breakdown — how you earn it + how to earn more */}
       <div className="border-t border-border pt-4">
-        <p className="text-xs text-muted uppercase tracking-wider mb-3 font-medium">XP Sources</p>
-        <div className="space-y-2.5">
-          {xpSources.map((src, i) => (
-            <div key={src.label}>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1.5" style={{ color: src.color }}>
-                  {src.icon}
-                  <span className="text-xs text-muted">{src.label}</span>
+        <p className="text-xs text-muted uppercase tracking-wider mb-3 font-medium">How you earn XP</p>
+        <div className="space-y-3">
+          {xpSources.map((src) => {
+            const capped = "cap" in src;
+            return (
+              <div key={src.label}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5" style={{ color: src.color }}>
+                    {src.icon}
+                    <span className="text-xs text-white">{src.label}</span>
+                  </div>
+                  <span
+                    className="text-xs font-mono font-medium"
+                    style={{ color: src.value > 0 ? src.color : "#52525b" }}
+                  >
+                    +{src.value} XP
+                  </span>
                 </div>
-                <span className="text-xs font-mono font-medium" style={{ color: src.color }}>
-                  +{src.value} XP
-                </span>
+                <div className="flex items-end justify-between gap-3 mt-1 ml-[22px]">
+                  <p className="text-[10px] text-muted leading-snug">{src.hint}</p>
+                  {capped && (
+                    <div className="flex gap-1 shrink-0 mb-0.5">
+                      {Array.from({ length: (src as { cap: number }).cap }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-3.5 h-1.5 rounded-full transition-all"
+                          style={{ background: i < (src as { used: number }).used ? src.color : "#2a2a2a" }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <XPProgressBar
-                progress={Math.round((src.value / maxSource) * 100)}
-                color={src.color}
-                delay={i * 0.1}
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
-      </div>
-
-      {/* XP rules hint */}
-      <div className="mt-4 border-t border-border pt-3 grid grid-cols-2 gap-x-4 gap-y-1">
-        {[
-          ["7d streak", "+1 XP/check"],
-          ["14d streak", "+2 XP/check"],
-          ["30d streak", "+3 XP/check"],
-          ["Perfect day", "+5 XP"],
-          ["New category", "+10 XP"],
-          ["Habit level up", "+20 XP"],
-        ].map(([rule, reward]) => (
-          <div key={rule} className="flex items-center justify-between">
-            <span className="text-[10px] text-muted">{rule}</span>
-            <span className="text-[10px] font-mono" style={{ color: info.color }}>{reward}</span>
-          </div>
-        ))}
       </div>
     </motion.div>
   );
