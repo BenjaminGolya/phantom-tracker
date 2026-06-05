@@ -8,10 +8,17 @@ function generateCode(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { email, password, name } = await req.json();
+  const { email, password, name, acceptedTerms, newsletterOptIn } = await req.json();
 
   if (!email || !password) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  if (!acceptedTerms) {
+    return NextResponse.json(
+      { error: "You must accept the Terms of Service and Privacy Policy." },
+      { status: 400 }
+    );
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -31,6 +38,9 @@ export async function POST(req: NextRequest) {
       data: {
         password: hashed,
         name: name ?? existing.name,
+        acceptedTerms: true,
+        acceptedTermsAt: new Date(),
+        newsletterOptIn: !!newsletterOptIn,
         verificationCode: code,
         verificationExpires: expires,
       },
@@ -41,6 +51,9 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         name,
+        acceptedTerms: true,
+        acceptedTermsAt: new Date(),
+        newsletterOptIn: !!newsletterOptIn,
         verificationCode: code,
         verificationExpires: expires,
       },

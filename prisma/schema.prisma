@@ -13,6 +13,9 @@ model User {
   password            String
   image               String?
   timezone            String?
+  acceptedTerms       Boolean            @default(false)
+  acceptedTermsAt     DateTime?
+  newsletterOptIn     Boolean            @default(false)
   emailVerified       DateTime?
   verificationCode    String?
   verificationExpires DateTime?
