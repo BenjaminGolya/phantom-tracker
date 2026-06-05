@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Ghost, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown } from "lucide-react";
 import { usePush } from "@/lib/use-push";
+import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
@@ -97,7 +98,6 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [importMsg, setImportMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const importRef = useRef<HTMLInputElement>(null);
-  const initial = (user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U";
 
   async function handleTest() {
     setTestMsg("Sending…");
@@ -272,9 +272,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
               // eslint-disable-next-line @next/next/no-img-element
               <img src={image} alt="avatar" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-xl font-semibold text-primary">
-                {initial}
-              </div>
+              <GhostAvatar size={64} className="border-2 border-primary/30" />
             )}
             {uploading && (
               <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
@@ -484,7 +482,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* About */}
       <div className="text-center pt-4">
-        <p className="text-xs text-muted flex items-center justify-center gap-1.5"><Ghost size={11} className="text-primary" /> Phantom Tracker — v1.0.0</p>
+        <p className="text-xs text-muted flex items-center justify-center gap-1.5"><GhostMark size={11} className="text-primary" /> Phantom Tracker — v1.0.0</p>
         <p className="text-xs text-muted mt-1">Dark mode only. Built for consistency.</p>
       </div>
     </div>

@@ -7,6 +7,7 @@ import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Share, Smartphone, ChevronRight, CalendarDays, Sparkles, MoreHorizontal,
 } from "lucide-react";
+import { GhostMark } from "@/components/brand/ghost-mark";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -120,7 +121,7 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow">
-              <Ghost size={15} className="text-white" />
+              <GhostMark size={16} className="text-white" />
             </div>
             <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
           </div>
@@ -275,7 +276,7 @@ export function LandingPage() {
           <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-primary/15 blur-3xl" />
           <div className="relative">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow mx-auto mb-5">
-              <Ghost size={28} className="text-white" />
+              <GhostMark size={28} className="text-white" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Start building better habits today</h2>
             <p className="text-muted mt-3 max-w-md mx-auto">It&apos;s free, takes a minute to set up, and works on every device.</p>
@@ -290,7 +291,7 @@ export function LandingPage() {
       <footer className="border-t border-border/60">
         <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-muted">
-            <Ghost size={14} className="text-primary" />
+            <GhostMark size={14} className="text-primary" />
             <span className="text-xs">Phantom Tracker — built for consistency.</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted">

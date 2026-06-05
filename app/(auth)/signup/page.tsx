@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, Ghost, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { GhostMark } from "@/components/brand/ghost-mark";
 
 type PolicyKey = "terms" | "privacy" | "newsletter";
 
@@ -101,7 +102,7 @@ export default function SignupPage() {
       >
         <div className="flex flex-col items-center mb-8 gap-3">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow">
-            <Ghost size={28} className="text-white" />
+            <GhostMark size={28} className="text-white" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight">Phantom Tracker</h1>

@@ -1,9 +1,10 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, Ghost, Settings, Info, Home } from "lucide-react";
+import { LogOut, Settings, Info, Home } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
 
 interface TopBarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
@@ -12,7 +13,6 @@ interface TopBarProps {
 export function TopBar({ user }: TopBarProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const initial = (user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U";
 
   // Close the dropdown when clicking/tapping outside of it
   useEffect(() => {
@@ -32,7 +32,7 @@ export function TopBar({ user }: TopBarProps) {
     <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-surface shrink-0">
       <div className="lg:hidden flex items-center gap-2">
         <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center phantom-glow">
-          <Ghost size={15} className="text-white" />
+          <GhostMark size={16} className="text-white" />
         </div>
         <span className="font-semibold text-sm">Phantom Tracker</span>
       </div>
@@ -59,9 +59,7 @@ export function TopBar({ user }: TopBarProps) {
               className="w-7 h-7 rounded-full object-cover border border-primary/30"
             />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-medium text-primary">
-              {initial}
-            </div>
+            <GhostAvatar size={28} className="border border-primary/30" />
           )}
           <span className="text-sm text-muted hidden sm:block">{user?.name ?? user?.email}</span>
         </button>
@@ -73,9 +71,7 @@ export function TopBar({ user }: TopBarProps) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={user.image} alt="avatar" className="w-9 h-9 rounded-full object-cover border border-primary/30 shrink-0" />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-sm font-medium text-primary shrink-0">
-                  {initial}
-                </div>
+                <GhostAvatar size={36} className="border border-primary/30 shrink-0" />
               )}
               <div className="min-w-0">
                 <p className="text-xs font-medium text-white truncate">{user?.name ?? "User"}</p>

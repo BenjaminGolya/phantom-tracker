@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Target, BarChart2, Settings, Ghost, Sparkles } from "lucide-react";
+import { LayoutDashboard, Target, BarChart2, Settings, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,7 +27,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-border">
         <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center phantom-glow shrink-0">
-          <Ghost size={15} className="text-white" />
+          <GhostMark size={16} className="text-white" />
         </div>
         <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
         {pro && (
@@ -119,9 +120,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={user.image} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-primary/30 shrink-0" />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-medium text-primary shrink-0">
-              {(user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U"}
-            </div>
+            <GhostAvatar size={28} className="border border-primary/30 shrink-0" />
           )}
           <div className="min-w-0">
             <p className="text-xs font-medium text-white truncate">{user?.name ?? "User"}</p>
