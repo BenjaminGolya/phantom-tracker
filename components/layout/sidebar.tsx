@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Target, BarChart2, Settings, Ghost } from "lucide-react";
+import { LayoutDashboard, Target, BarChart2, Settings, Ghost, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -14,10 +14,11 @@ const nav = [
 
 interface SidebarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
+  pro?: boolean;
   profileLevel?: { level: number; label: string; emoji: string; color: string; progress: number; xp: number };
 }
 
-export function Sidebar({ user, profileLevel }: SidebarProps) {
+export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -28,6 +29,11 @@ export function Sidebar({ user, profileLevel }: SidebarProps) {
           <Ghost size={15} className="text-white" />
         </div>
         <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
+        {pro && (
+          <span className="ml-auto text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
+            PRO
+          </span>
+        )}
       </div>
 
       {/* Nav */}
@@ -60,6 +66,22 @@ export function Sidebar({ user, profileLevel }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Upgrade CTA (free users only) */}
+      {!pro && (
+        <Link
+          href="/pricing"
+          className="mx-3 mb-2 px-3 py-2.5 rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/15 transition-all flex items-center gap-2 group"
+        >
+          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 text-primary shrink-0">
+            <Sparkles size={15} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-primary">Upgrade to Pro</p>
+            <p className="text-[10px] text-muted">Unlimited habits & more</p>
+          </div>
+        </Link>
+      )}
 
       {/* Profile level card */}
       {profileLevel && (

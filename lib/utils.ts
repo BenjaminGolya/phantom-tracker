@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, parseISO, startOfYear, eachDayOfInterval, endOfYear } from "date-fns";
+import { PLAN_LIMITS } from "./plan";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -139,18 +140,23 @@ export function getHabitLevel(logs: { completed: boolean }[]): LevelInfo {
 //   • Diversity     — +10 XP per unique category tracked (up to 5)
 //   • Habit mastery — +20 XP each time a habit reaches a new level
 
+// `pro: true` tiers are exclusive — only Pro users can ever reach/display them.
 export const PROFILE_LEVELS = [
-  { level: 1,  label: "Wanderer",    emoji: "🌫️", color: "#6b7280", xpRequired: 0    },
-  { level: 2,  label: "Initiate",    emoji: "🕯️", color: "#64748b", xpRequired: 50   },
-  { level: 3,  label: "Seeker",      emoji: "🔍", color: "#3b82f6", xpRequired: 150  },
-  { level: 4,  label: "Builder",     emoji: "🏗️", color: "#06b6d4", xpRequired: 350  },
-  { level: 5,  label: "Warrior",     emoji: "⚔️", color: "#22c55e", xpRequired: 700  },
-  { level: 6,  label: "Champion",    emoji: "🏆", color: "#a855f7", xpRequired: 1200 },
-  { level: 7,  label: "Master",      emoji: "🔥", color: "#f97316", xpRequired: 2000 },
-  { level: 8,  label: "Grandmaster", emoji: "👑", color: "#eab308", xpRequired: 3500 },
-  { level: 9,  label: "Legend",      emoji: "💎", color: "#7f49c3", xpRequired: 6000 },
-  { level: 10, label: "Phantom",     emoji: "👻", color: "#7f49c3", xpRequired: 10000},
-];
+  { level: 1,  label: "Wanderer",    emoji: "🌫️", color: "#6b7280", xpRequired: 0     },
+  { level: 2,  label: "Initiate",    emoji: "🕯️", color: "#64748b", xpRequired: 50    },
+  { level: 3,  label: "Seeker",      emoji: "🔍", color: "#3b82f6", xpRequired: 150   },
+  { level: 4,  label: "Builder",     emoji: "🏗️", color: "#06b6d4", xpRequired: 350   },
+  { level: 5,  label: "Warrior",     emoji: "⚔️", color: "#22c55e", xpRequired: 700   },
+  { level: 6,  label: "Champion",    emoji: "🏆", color: "#a855f7", xpRequired: 1200  },
+  { level: 7,  label: "Master",      emoji: "🔥", color: "#f97316", xpRequired: 2000  },
+  { level: 8,  label: "Grandmaster", emoji: "👑", color: "#eab308", xpRequired: 3500  },
+  { level: 9,  label: "Legend",      emoji: "💎", color: "#7f49c3", xpRequired: 6000  },
+  { level: 10, label: "Phantom",     emoji: "👻", color: "#7f49c3", xpRequired: 10000 },
+  // ── Pro-exclusive tiers ──────────────────────────────────────────────────
+  { level: 11, label: "Ascendant",   emoji: "🌌", color: "#8b5cf6", xpRequired: 16000, pro: true },
+  { level: 12, label: "Ethereal",    emoji: "✴️", color: "#d946ef", xpRequired: 26000, pro: true },
+  { level: 13, label: "Eternal",     emoji: "♾️", color: "#f43f5e", xpRequired: 42000, pro: true },
+] as { level: number; label: string; emoji: string; color: string; xpRequired: number; pro?: boolean }[];
 
 export type XPBreakdown = {
   base: number;
@@ -161,7 +167,14 @@ export type XPBreakdown = {
   total: number;
 };
 
-export type ProfileLevelInfo = LevelInfo & { breakdown: XPBreakdown };
+export type ProfileLevelInfo = LevelInfo & {
+  breakdown: XPBreakdown;
+  /** True when a free user has hit the free level cap and more XP is locked behind Pro. */
+  capped: boolean;
+  /** Raw XP before the Pro multiplier (for transparency in the UI). */
+  baseXp: number;
+  isPro: boolean;
+};
 
 export function calcProfileXP(
   habits: { logs: { date: string; completed: boolean }[]; category: string | null }[]
@@ -223,25 +236,42 @@ export function calcProfileXP(
 }
 
 export function getProfileLevel(
-  habits: { logs: { date: string; completed: boolean }[]; category: string | null }[]
+  habits: { logs: { date: string; completed: boolean }[]; category: string | null }[],
+  opts: { isPro?: boolean } = {}
 ): ProfileLevelInfo {
+  const pro = !!opts.isPro;
   const breakdown = calcProfileXP(habits);
-  const xp = breakdown.total;
-  let current = PROFILE_LEVELS[0];
-  for (const lvl of PROFILE_LEVELS) {
+  const baseXp = breakdown.total;
+  // Pro perk: XP boost. Multiplied total flows into level progression + breakdown total.
+  const xp = pro ? Math.round(baseXp * PLAN_LIMITS.proXpMultiplier) : baseXp;
+  breakdown.total = xp;
+
+  // Free users can only climb the non-Pro ladder up to the free cap level.
+  const ladder = PROFILE_LEVELS.filter((l) => {
+    if (l.pro && !pro) return false;
+    if (!pro && l.level > PLAN_LIMITS.freeProfileLevelCap) return false;
+    return true;
+  });
+
+  let current = ladder[0];
+  for (const lvl of ladder) {
     if (xp >= lvl.xpRequired) current = lvl;
     else break;
   }
-  const idx = PROFILE_LEVELS.findIndex((l) => l.level === current.level);
-  const isMax = idx === PROFILE_LEVELS.length - 1;
-  const next = isMax ? null : PROFILE_LEVELS[idx + 1];
+  const idx = ladder.findIndex((l) => l.level === current.level);
+  const atLadderTop = idx === ladder.length - 1;
+  const next = atLadderTop ? null : ladder[idx + 1];
+  // capped = free user who has the XP to go further but is blocked by the cap.
+  const capped = !pro && atLadderTop && current.level === PLAN_LIMITS.freeProfileLevelCap;
+  const isMax = pro && atLadderTop;
+
   const xpIntoLevel = xp - current.xpRequired;
   const xpSpan = next ? next.xpRequired - current.xpRequired : 1;
-  const progress = isMax ? 100 : Math.min(100, Math.round((xpIntoLevel / xpSpan) * 100));
+  const progress = atLadderTop ? 100 : Math.min(100, Math.round((xpIntoLevel / xpSpan) * 100));
   return {
     level: current.level, label: current.label, emoji: current.emoji, color: current.color,
     xp, xpRequired: current.xpRequired, xpNext: next ? next.xpRequired : current.xpRequired,
-    progress, isMax, breakdown,
+    progress, isMax, breakdown, capped, baseXp, isPro: pro,
   };
 }
 

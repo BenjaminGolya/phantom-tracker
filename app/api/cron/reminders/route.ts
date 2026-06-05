@@ -40,7 +40,7 @@ async function runReminders() {
   const habits = await prisma.habit.findMany({
     where: { archived: false, reminderTime: { not: null } },
     include: {
-      user: { select: { id: true, timezone: true } },
+      user: { select: { id: true, timezone: true, plan: true } },
       logs: true,
     },
   });
@@ -49,6 +49,9 @@ async function runReminders() {
   for (const habit of habits) {
     const tz = habit.user.timezone;
     if (!tz || !habit.reminderTime) continue;
+
+    // Reminders are a Pro feature — skip free users.
+    if (habit.user.plan !== "pro") continue;
 
     let local;
     try {

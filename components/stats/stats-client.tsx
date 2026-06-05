@@ -12,13 +12,16 @@ const WeeklyChart = dynamic(() => import("./weekly-chart"), {
   ssr: false,
   loading: () => <div className="h-[140px] rounded-lg bg-surface-2 animate-pulse" />,
 });
+import Link from "next/link";
 import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
-import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy } from "lucide-react";
+import { PLAN_LIMITS } from "@/lib/plan";
+import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
+  pro?: boolean;
 }
 
 // ─── Animated XP bar ─────────────────────────────────────────────────────────
@@ -37,12 +40,17 @@ function XPProgressBar({ progress, color, delay = 0 }: { progress: number; color
 }
 
 // ─── Profile level hero card ──────────────────────────────────────────────────
-function ProfileLevelCard({ habits }: { habits: HabitWithLogs[] }) {
+function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boolean }) {
   const info = useMemo(() => getProfileLevel(
-    habits.map((h) => ({ logs: h.logs, category: h.category }))
-  ), [habits]);
+    habits.map((h) => ({ logs: h.logs, category: h.category })),
+    { isPro: pro }
+  ), [habits, pro]);
 
-  const next = PROFILE_LEVELS.find((l) => l.level === info.level + 1);
+  // Tiers a free user can display are capped; Pro unlocks the full ladder.
+  const visibleLevels = pro
+    ? PROFILE_LEVELS
+    : PROFILE_LEVELS.filter((l) => !l.pro && l.level <= PLAN_LIMITS.freeProfileLevelCap);
+  const next = visibleLevels.find((l) => l.level === info.level + 1);
 
   // Categories counted toward diversity (capped at 5). Derived from XP (10 each).
   const cats = Math.round(info.breakdown.diversity / 10);
@@ -80,15 +88,33 @@ function ProfileLevelCard({ habits }: { habits: HabitWithLogs[] }) {
             <span className="text-5xl font-light leading-none" style={{ color: info.color }}>{info.emoji}</span>
             <div>
               <h2 className="text-2xl font-bold" style={{ color: info.color }}>{info.label}</h2>
-              <p className="text-xs text-muted">Level {info.level} of {PROFILE_LEVELS.length}</p>
+              <p className="text-xs text-muted">Level {info.level} of {visibleLevels.length}</p>
             </div>
           </div>
         </div>
         <div className="text-right">
           <p className="text-3xl font-mono font-bold" style={{ color: info.color }}>{info.xp}</p>
           <p className="text-xs text-muted">total XP</p>
+          {pro && (
+            <p className="text-[10px] text-primary font-medium flex items-center gap-1 justify-end mt-0.5">
+              <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× Pro boost
+            </p>
+          )}
         </div>
       </div>
+
+      {/* Free cap notice */}
+      {info.capped && (
+        <Link
+          href="/pricing"
+          className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary/15 transition-colors"
+        >
+          <Lock size={13} className="text-primary shrink-0" />
+          <span className="text-[11px] text-muted">
+            You&apos;ve maxed the Free ladder. <span className="text-primary font-medium">Go Pro</span> for {PLAN_LIMITS.proXpMultiplier}× XP and exclusive tiers (🌌 ✴️ ♾️).
+          </span>
+        </Link>
+      )}
 
       {/* XP bar to next level */}
       <div className="mb-4">
@@ -99,10 +125,10 @@ function ProfileLevelCard({ habits }: { habits: HabitWithLogs[] }) {
         <XPProgressBar progress={info.progress} color={info.color} />
         {/* Level milestones */}
         <div className="flex justify-between mt-1">
-          {PROFILE_LEVELS.map((lvl) => (
+          {visibleLevels.map((lvl) => (
             <div
               key={lvl.level}
-              title={`Lv.${lvl.level} ${lvl.label}`}
+              title={`Lv.${lvl.level} ${lvl.label}${lvl.pro ? " (Pro)" : ""}`}
               className="flex flex-col items-center gap-0.5"
             >
               <div
@@ -273,8 +299,61 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
   );
 }
 
+// ─── Advanced stats (Pro-gated) ───────────────────────────────────────────────
+function AdvancedStats({
+  pro,
+  metrics,
+}: {
+  pro: boolean;
+  metrics: { label: string; value: string | number; icon: React.ReactNode; hint: string }[];
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-medium flex items-center gap-1.5">
+          Advanced Stats
+          <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
+            <Sparkles size={9} /> PRO
+          </span>
+        </h2>
+      </div>
+
+      <div className="relative">
+        <div className={`grid grid-cols-2 gap-3 ${pro ? "" : "blur-sm select-none pointer-events-none"}`} aria-hidden={!pro}>
+          {metrics.map(({ label, value, icon, hint }) => (
+            <div key={label} className="bg-surface border border-border rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted">{label}</span>
+                {icon}
+              </div>
+              <div className="text-2xl font-mono font-bold">{value}</div>
+              <p className="text-[10px] text-muted mt-1">{hint}</p>
+            </div>
+          ))}
+        </div>
+
+        {!pro && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center mb-2">
+              <Lock size={18} className="text-primary" />
+            </div>
+            <p className="text-sm font-medium mb-0.5">Unlock advanced stats</p>
+            <p className="text-xs text-muted mb-3">Perfect days, consistency, streak insights & more.</p>
+            <Link
+              href="/pricing"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-dim text-white text-xs font-medium rounded-lg transition-all hover:shadow-glow"
+            >
+              <Sparkles size={13} /> Upgrade to Pro
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main stats page ──────────────────────────────────────────────────────────
-export function StatsClient({ habits }: StatsClientProps) {
+export function StatsClient({ habits, pro = false }: StatsClientProps) {
   const mounted = useMounted();
   const weekData = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -292,6 +371,18 @@ export function StatsClient({ habits }: StatsClientProps) {
     : 0;
   const allStreaks = habits.map((h) => calcStreak(h.logs));
   const topLongest = Math.max(0, ...allStreaks.map((s) => s.longest));
+
+  // ── Advanced (Pro) metrics ──
+  const profileInfo = getProfileLevel(
+    habits.map((h) => ({ logs: h.logs, category: h.category })),
+    { isPro: pro }
+  );
+  const perfectDays = Math.round(profileInfo.breakdown.perfectDays / 5);
+  const activeStreakSum = allStreaks.reduce((a, s) => a + s.current, 0);
+  const consistency7 = habits.length
+    ? Math.round(habits.reduce((acc, h) => acc + calcCompletionRate(h.logs, 7), 0) / habits.length)
+    : 0;
+  const categoriesUsed = Math.round(profileInfo.breakdown.diversity / 10);
 
   // Date-based charts/streaks differ server vs client — render a shell until mounted.
   if (!mounted) {
@@ -320,7 +411,7 @@ export function StatsClient({ habits }: StatsClientProps) {
       ) : (
         <>
           {/* Profile level hero */}
-          <ProfileLevelCard habits={habits} />
+          <ProfileLevelCard habits={habits} pro={pro} />
 
           {/* Overview cards */}
           <div className="grid grid-cols-2 gap-3">
@@ -351,6 +442,17 @@ export function StatsClient({ habits }: StatsClientProps) {
             <h2 className="text-sm font-medium mb-4">Last 7 days</h2>
             <WeeklyChart data={weekData} total={habits.length} />
           </div>
+
+          {/* Advanced stats — Pro */}
+          <AdvancedStats
+            pro={pro}
+            metrics={[
+              { label: "Perfect Days", value: perfectDays, icon: <Star size={16} className="text-yellow-400" />, hint: "Days you completed every habit" },
+              { label: "7-day Consistency", value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: "Completion rate this week" },
+              { label: "Active Streaks", value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: "Sum of all current streaks" },
+              { label: "Categories Used", value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: "Diversity of your habits" },
+            ]}
+          />
 
           {/* Habit level tracker */}
           <HabitLevelTracker habits={habits} />

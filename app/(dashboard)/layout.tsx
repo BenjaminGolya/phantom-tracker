@@ -6,6 +6,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { TopBar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/prisma";
 import { getProfileLevel } from "@/lib/utils";
+import { isPro } from "@/lib/plan";
 
 export default async function DashboardLayout({
   children,
@@ -22,9 +23,11 @@ export default async function DashboardLayout({
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, image: true },
+      select: { name: true, email: true, image: true, plan: true },
     }),
   ]);
+
+  const pro = isPro(dbUser);
 
   const user = {
     name: dbUser?.name ?? session.user.name ?? null,
@@ -33,13 +36,15 @@ export default async function DashboardLayout({
   };
 
   const profileLevel = getProfileLevel(
-    habits.map((h) => ({ logs: h.logs, category: h.category }))
+    habits.map((h) => ({ logs: h.logs, category: h.category })),
+    { isPro: pro }
   );
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar
         user={user}
+        pro={pro}
         profileLevel={{
           level: profileLevel.level,
           label: profileLevel.label,

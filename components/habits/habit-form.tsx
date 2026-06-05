@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock } from "lucide-react";
+import Link from "next/link";
+import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock, Lock } from "lucide-react";
 import { HABIT_ICONS } from "@/lib/habit-icons";
 import { HabitFormData, HabitWithLogs } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -339,11 +340,12 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
 // ─── Main form ────────────────────────────────────────────────────────────────
 interface HabitFormProps {
   initial?: HabitWithLogs;
+  pro?: boolean;
   onSubmit: (data: HabitFormData) => Promise<void>;
   onClose: () => void;
 }
 
-export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
+export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitFormProps) {
   const [name, setName] = useState(initial?.name ?? "");
   const [icon, setIcon] = useState(initial?.icon ?? "Target");
   const [color, setColor] = useState(initial?.color ?? "#7f49c3");
@@ -537,11 +539,33 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
               <p className="text-[11px] text-muted mt-1.5">A count to hit each day (e.g. 50 push-ups). Leave empty for a simple done/skip habit.</p>
             </div>
 
-            {/* Reminder */}
+            {/* Reminder — Pro only */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Reminder <span className="opacity-50">(optional)</span></label>
-              <TimePicker value={reminderTime} onChange={setReminderTime} />
-              <p className="text-[11px] text-muted mt-1.5">Get a push notification at this time if you haven&apos;t completed it yet. Enable notifications in Settings.</p>
+              <label className="text-xs text-muted mb-1.5 flex items-center gap-1.5">
+                Reminder <span className="opacity-50">(optional)</span>
+                {!pro && (
+                  <span className="ml-1 inline-flex items-center gap-1 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
+                    <Lock size={9} /> PRO
+                  </span>
+                )}
+              </label>
+              {pro ? (
+                <>
+                  <TimePicker value={reminderTime} onChange={setReminderTime} />
+                  <p className="text-[11px] text-muted mt-1.5">Get a push notification at this time if you haven&apos;t completed it yet. Enable notifications in Settings.</p>
+                </>
+              ) : (
+                <Link
+                  href="/pricing"
+                  onClick={onClose}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-primary/30 bg-primary/8 hover:bg-primary/15 transition-colors"
+                >
+                  <Clock size={14} className="text-primary shrink-0" />
+                  <span className="text-xs text-muted">
+                    <span className="text-primary font-medium">Upgrade to Pro</span> to get timed push reminders.
+                  </span>
+                </Link>
+              )}
             </div>
             </div>
 

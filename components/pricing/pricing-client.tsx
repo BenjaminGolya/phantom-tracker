@@ -1,0 +1,149 @@
+"use client";
+
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { Check, Sparkles, Loader2, Ghost, X } from "lucide-react";
+import { PLAN_LIMITS, PRICE_LABEL } from "@/lib/plan";
+
+const FREE_FEATURES: { label: string; included: boolean }[] = [
+  { label: `Up to ${PLAN_LIMITS.freeHabitLimit} habits`, included: true },
+  { label: "Daily tracking & streaks", included: true },
+  { label: "Contribution calendars", included: true },
+  { label: `Profile levels (up to Lv.${PLAN_LIMITS.freeProfileLevelCap})`, included: true },
+  { label: "Timed push reminders", included: false },
+  { label: "Advanced stats", included: false },
+  { label: `${PLAN_LIMITS.proXpMultiplier}× XP boost`, included: false },
+  { label: "Exclusive elite tiers", included: false },
+];
+
+const PRO_FEATURES: string[] = [
+  "Unlimited habits",
+  "Timed push reminders",
+  "Advanced stats & insights",
+  `${PLAN_LIMITS.proXpMultiplier}× XP boost on everything`,
+  "Exclusive tiers 🌌 ✴️ ♾️ (uncapped levels)",
+  "Daily tracking, streaks & calendars",
+  "Priority support",
+];
+
+export function PricingClient({ pro }: { pro: boolean }) {
+  const params = useSearchParams();
+  const canceled = params.get("canceled") === "1";
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function upgrade() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(
+        data?.message ??
+          (data?.error === "billing_unavailable"
+            ? "Billing isn't set up yet — check back soon."
+            : "Couldn't start checkout. Please try again.")
+      );
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6 pb-28 lg:pb-6">
+      <div className="text-center pt-2">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 mb-3">
+          <Ghost size={24} className="text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold">Go Pro</h1>
+        <p className="text-sm text-muted mt-1">
+          Unlock unlimited habits, reminders, advanced stats and a faster path to the top.
+        </p>
+      </div>
+
+      {canceled && (
+        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-border bg-surface text-xs text-muted">
+          <X size={13} /> Checkout canceled — no charge was made.
+        </div>
+      )}
+      {error && (
+        <div className="px-3.5 py-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-300">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Free */}
+        <div className="bg-surface border border-border rounded-2xl p-5">
+          <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">Free</p>
+          <p className="text-3xl font-bold mb-4">$0<span className="text-sm text-muted font-normal"> / mo</span></p>
+          <ul className="space-y-2.5">
+            {FREE_FEATURES.map((f) => (
+              <li key={f.label} className="flex items-center gap-2 text-sm">
+                {f.included ? (
+                  <Check size={15} className="text-green-400 shrink-0" />
+                ) : (
+                  <X size={15} className="text-muted/50 shrink-0" />
+                )}
+                <span className={f.included ? "text-white" : "text-muted line-through"}>{f.label}</span>
+              </li>
+            ))}
+          </ul>
+          {!pro && (
+            <div className="mt-5 text-center text-xs text-muted py-2 border border-border rounded-lg">
+              Your current plan
+            </div>
+          )}
+        </div>
+
+        {/* Pro */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative bg-surface border-2 border-primary/50 rounded-2xl p-5 shadow-[0_0_40px_#7f49c320]"
+        >
+          <span className="absolute -top-2.5 right-4 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md bg-primary text-white">
+            BEST VALUE
+          </span>
+          <p className="text-xs uppercase tracking-widest text-primary font-medium mb-1 flex items-center gap-1">
+            <Sparkles size={12} /> Pro
+          </p>
+          <p className="text-3xl font-bold mb-4">
+            $2<span className="text-sm text-muted font-normal"> / mo</span>
+          </p>
+          <ul className="space-y-2.5">
+            {PRO_FEATURES.map((f) => (
+              <li key={f} className="flex items-center gap-2 text-sm">
+                <Check size={15} className="text-primary shrink-0" />
+                <span className="text-white">{f}</span>
+              </li>
+            ))}
+          </ul>
+
+          {pro ? (
+            <div className="mt-5 text-center text-xs text-primary py-2.5 border border-primary/40 bg-primary/10 rounded-lg font-medium">
+              ✦ You&apos;re on Pro — thank you!
+            </div>
+          ) : (
+            <button
+              onClick={upgrade}
+              disabled={loading}
+              className="mt-5 w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-semibold rounded-lg transition-all hover:shadow-glow disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+              Upgrade — {PRICE_LABEL}
+            </button>
+          )}
+          <p className="text-[10px] text-muted text-center mt-2">Cancel anytime · secure checkout via Stripe</p>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

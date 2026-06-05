@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, LogOut, Ghost, Camera, Trash2, Bell, BellRing, Smartphone } from "lucide-react";
+import { Loader2, Download, LogOut, Ghost, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
+  pro?: boolean;
+  proSince?: string | null;
 }
 
 // Resize an image file to a square <=256px JPEG data URL to keep it small.
@@ -38,9 +41,32 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, proSince = null }: SettingsClientProps) {
   const router = useRouter();
   const push = usePush();
+  const [justUpgraded, setJustUpgraded] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  // Show a thank-you banner after returning from Stripe checkout (?upgraded=1).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgraded") === "1") {
+      setJustUpgraded(true);
+      router.refresh();
+      window.history.replaceState({}, "", "/settings");
+    }
+  }, [router]);
+
+  async function openPortal() {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.url) window.location.href = data.url;
+    } finally {
+      setPortalLoading(false);
+    }
+  }
   const [name, setName] = useState(user?.name ?? "");
   const [image, setImage] = useState<string | null>(user?.image ?? null);
   const [saving, setSaving] = useState(false);
@@ -122,6 +148,54 @@ export function SettingsClient({ user }: SettingsClientProps) {
     <div className="max-w-lg mx-auto space-y-6 pb-28 lg:pb-6">
       <h1 className="text-lg font-semibold">Settings</h1>
 
+      {justUpgraded && (
+        <div className="flex items-center gap-2 px-3.5 py-3 rounded-xl border border-primary/40 bg-primary/10 text-sm text-primary">
+          <Sparkles size={15} /> Welcome to Pro — your perks are now active. Thank you! ✦
+        </div>
+      )}
+
+      {/* Billing / Plan */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <Crown size={15} className="text-primary" /> Plan
+        </h2>
+        {pro ? (
+          <>
+            <div className="flex items-center justify-between gap-3 mt-3">
+              <div>
+                <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                  Pro <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 border border-primary/40">ACTIVE</span>
+                </p>
+                <p className="text-xs text-muted mt-0.5">
+                  {proSince ? `Member since ${new Date(proSince).toLocaleDateString()}` : "Thanks for supporting Phantom Tracker."}
+                </p>
+              </div>
+              <button
+                onClick={openPortal}
+                disabled={portalLoading}
+                className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+              >
+                {portalLoading && <Loader2 size={13} className="animate-spin" />}
+                Manage
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-between gap-3 mt-3">
+            <div>
+              <p className="text-sm font-medium">Free</p>
+              <p className="text-xs text-muted mt-0.5">Upgrade for unlimited habits, reminders & more.</p>
+            </div>
+            <Link
+              href="/pricing"
+              className="px-3.5 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow flex items-center gap-1.5 shrink-0"
+            >
+              <Sparkles size={13} /> Go Pro
+            </Link>
+          </div>
+        )}
+      </div>
+
       {/* Profile */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-4">Profile</h2>
@@ -199,12 +273,27 @@ export function SettingsClient({ user }: SettingsClientProps) {
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
           <Bell size={15} className="text-primary" /> Reminders
+          {!pro && (
+            <span className="ml-1 inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
+              <Lock size={9} /> PRO
+            </span>
+          )}
         </h2>
         <p className="text-xs text-muted mb-4">
           Get a push notification when a habit&apos;s reminder time arrives.
         </p>
 
-        {push.iosNeedsInstall ? (
+        {!pro ? (
+          <Link
+            href="/pricing"
+            className="flex items-center gap-2.5 px-3 py-3 rounded-lg border border-primary/30 bg-primary/8 hover:bg-primary/15 transition-colors"
+          >
+            <Sparkles size={16} className="text-primary shrink-0" />
+            <p className="text-xs text-muted">
+              <span className="text-primary font-medium">Upgrade to Pro</span> to enable timed push reminders for your habits.
+            </p>
+          </Link>
+        ) : push.iosNeedsInstall ? (
           <div className="flex items-start gap-2.5 px-3 py-3 bg-surface-2 border border-border rounded-lg">
             <Smartphone size={16} className="text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-muted">

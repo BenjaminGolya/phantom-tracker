@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Ghost } from "lucide-react";
+import { Plus, Search, Ghost, Sparkles } from "lucide-react";
+import { PLAN_LIMITS } from "@/lib/plan";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { AnimatePresence } from "framer-motion";
 import { HabitWithLogs, HabitFormData } from "@/types";
@@ -13,9 +15,10 @@ import { useMounted } from "@/lib/use-mounted";
 
 interface HabitsClientProps {
   habits: HabitWithLogs[];
+  pro?: boolean;
 }
 
-export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
+export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClientProps) {
   const router = useRouter();
   const mounted = useMounted();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
@@ -54,6 +57,17 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
 
   const archived = habits.filter((h) => h.archived);
 
+  const activeCount = habits.filter((h) => !h.archived).length;
+  const atLimit = !pro && activeCount >= PLAN_LIMITS.freeHabitLimit;
+
+  function handleNew() {
+    if (atLimit) {
+      router.push("/pricing");
+      return;
+    }
+    setShowForm(true);
+  }
+
   async function handleToggle(habitId: string, date: string, completed: boolean, value?: number) {
     const res = await fetch(`/api/habits/${habitId}/log`, {
       method: "POST",
@@ -79,7 +93,13 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    if (!res.ok) return;
+    if (!res.ok) {
+      if (res.status === 403) {
+        setShowForm(false);
+        router.push("/pricing");
+      }
+      return;
+    }
     const habit = await res.json();
     setHabits((prev) => [...prev, habit]);
     setShowForm(false);
@@ -173,7 +193,7 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
             ))}
           </div>
           <button
-            onClick={() => setShowForm(true)}
+            onClick={handleNew}
             className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow"
           >
             <Plus size={14} />
@@ -193,6 +213,22 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
           className="w-full pl-8 pr-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
         />
       </div>
+
+      {/* Free-plan usage / upgrade banner */}
+      {!pro && (
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg border border-primary/25 bg-primary/8">
+          <p className="text-xs text-muted">
+            <span className="font-mono font-semibold text-white">{activeCount}/{PLAN_LIMITS.freeHabitLimit}</span> habits used on the Free plan
+            {atLimit && <span className="text-primary"> — limit reached</span>}
+          </p>
+          <Link
+            href="/pricing"
+            className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline shrink-0"
+          >
+            <Sparkles size={12} /> Go Pro
+          </Link>
+        </div>
+      )}
 
       {/* Active habits */}
       {filtered.length === 0 ? (
@@ -257,6 +293,7 @@ export function HabitsClient({ habits: initialHabits }: HabitsClientProps) {
       {(showForm || editingHabit) && (
         <HabitForm
           initial={editingHabit ?? undefined}
+          pro={pro}
           onSubmit={editingHabit ? handleEdit : handleCreate}
           onClose={() => { setShowForm(false); setEditingHabit(null); }}
         />

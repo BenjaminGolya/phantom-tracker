@@ -19,6 +19,10 @@ model User {
   emailVerified       DateTime?
   verificationCode    String?
   verificationExpires DateTime?
+  plan                 String            @default("free")
+  stripeCustomerId     String?           @unique
+  stripeSubscriptionId String?
+  proSince             DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   habits              Habit[]

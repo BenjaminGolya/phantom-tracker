@@ -12,11 +12,19 @@ export default async function SettingsPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, image: true },
+    select: { id: true, name: true, email: true, image: true, plan: true, proSince: true },
   });
 
   // Stale session (the user no longer exists in the database) → force re-login.
   if (!user) redirect("/login");
 
-  return <SettingsClient user={user} />;
+  const pro = user.plan === "pro";
+
+  return (
+    <SettingsClient
+      user={{ id: user.id, name: user.name, email: user.email, image: user.image }}
+      pro={pro}
+      proSince={user.proSince ? user.proSince.toISOString() : null}
+    />
+  );
 }
