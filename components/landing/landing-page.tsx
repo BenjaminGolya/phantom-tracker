@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useState, useRef, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Share, Smartphone, ChevronRight, CalendarDays, Sparkles, MoreHorizontal,
+  LayoutDashboard, Settings, LogOut,
 } from "lucide-react";
-import { GhostMark } from "@/components/brand/ghost-mark";
+import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -107,6 +109,85 @@ const FEATURES = [
   { icon: <BarChart2 size={18} />, title: "Stats & insights", desc: "See your weekly completion, best streaks, and exactly where your XP comes from." },
 ];
 
+// Account control shown in the landing nav when the visitor is logged in.
+function NavAccount() {
+  const { data } = useSession();
+  const user = data?.user;
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handle(e: MouseEvent | TouchEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    document.addEventListener("touchstart", handle);
+    return () => {
+      document.removeEventListener("mousedown", handle);
+      document.removeEventListener("touchstart", handle);
+    };
+  }, [open]);
+
+  return (
+    <div className="flex items-center gap-2">
+      <Link
+        href="/dashboard"
+        className="flex items-center gap-1 text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow"
+      >
+        Open app <ChevronRight size={14} />
+      </Link>
+
+      <div className="relative" ref={ref}>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center rounded-full hover:ring-2 hover:ring-primary/40 transition-all"
+          aria-label="Account menu"
+        >
+          {user?.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.image} alt="avatar" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
+          ) : (
+            <GhostAvatar size={32} className="border border-primary/30" />
+          )}
+        </button>
+
+        {open && (
+          <div className="absolute right-0 top-11 w-52 bg-surface-2 border border-border rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-border">
+              <p className="text-xs font-medium text-white truncate">{user?.name ?? "User"}</p>
+              <p className="text-xs text-muted truncate">{user?.email}</p>
+            </div>
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
+            >
+              <LayoutDashboard size={14} />
+              Dashboard
+            </Link>
+            <Link
+              href="/settings"
+              onClick={() => setOpen(false)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
+            >
+              <Settings size={14} />
+              Settings
+            </Link>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-surface transition-colors"
+            >
+              <LogOut size={14} />
+              Sign out
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage() {
   const { status } = useSession();
   const authed = status === "authenticated";
@@ -127,9 +208,7 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-2">
             {authed ? (
-              <Link href="/dashboard" className="flex items-center gap-1 text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow">
-                Open app <ChevronRight size={14} />
-              </Link>
+              <NavAccount />
             ) : (
               <>
                 <Link href="/login" className="text-sm text-muted hover:text-white transition-colors px-3 py-1.5">
