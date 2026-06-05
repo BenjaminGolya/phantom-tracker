@@ -4,9 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
+import { DELETION_GRACE_DAYS } from "@/lib/account";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
@@ -57,6 +58,28 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [justUpgraded, setJustUpgraded] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalErr, setPortalErr] = useState("");
+  const [confirm, setConfirm] = useState<null | "disable" | "delete">(null);
+  const [acting, setActing] = useState(false);
+  const [actErr, setActErr] = useState("");
+
+  async function handleAccountAction() {
+    if (!confirm) return;
+    setActing(true);
+    setActErr("");
+    try {
+      const res = await fetch(`/api/account/${confirm}`, { method: "POST" });
+      if (res.ok) {
+        // Both actions log the user out; reactivation happens on next sign-in.
+        await signOut({ callbackUrl: "/login" });
+        return;
+      }
+      setActErr("Something went wrong. Please try again.");
+    } catch {
+      setActErr("Network error. Please try again.");
+    } finally {
+      setActing(false);
+    }
+  }
 
   // Show a thank-you banner after returning from Stripe checkout (?upgraded=1).
   useEffect(() => {
@@ -471,14 +494,85 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Danger zone */}
       <div className="bg-surface border border-red-900/30 rounded-xl p-5">
         <h2 className="text-sm font-medium text-red-400 mb-4">Account</h2>
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-900/30 transition-colors"
-        >
-          <LogOut size={13} />
-          Sign out
-        </button>
+        <div className="space-y-3">
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-900/30 transition-colors"
+          >
+            <LogOut size={13} />
+            Sign out
+          </button>
+
+          <div className="border-t border-red-900/20 pt-3 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium">Disable account</p>
+                <p className="text-xs text-muted">Pause your account. Data is kept; sign back in to reactivate.</p>
+              </div>
+              <button
+                onClick={() => setConfirm("disable")}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg border border-amber-700/30 transition-colors shrink-0"
+              >
+                <PauseCircle size={14} /> Disable
+              </button>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium">Delete account</p>
+                <p className="text-xs text-muted">Kept {DELETION_GRACE_DAYS} days to undo, then permanently erased.</p>
+              </div>
+              <button
+                onClick={() => setConfirm("delete")}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-900/30 transition-colors shrink-0"
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Disable / Delete confirmation modal */}
+      {confirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md" onClick={() => !acting && setConfirm(null)} />
+          <div className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10">
+            <div className="flex items-center gap-2 mb-2">
+              {confirm === "delete"
+                ? <Trash2 size={16} className="text-red-400" />
+                : <PauseCircle size={16} className="text-amber-300" />}
+              <h3 className="text-sm font-semibold">
+                {confirm === "delete" ? "Delete your account?" : "Disable your account?"}
+              </h3>
+            </div>
+            <p className="text-xs text-muted mb-4 leading-relaxed">
+              {confirm === "delete"
+                ? `Your account will be scheduled for deletion. We'll keep your data for ${DELETION_GRACE_DAYS} days — sign in any time before then to reactivate and keep everything. After ${DELETION_GRACE_DAYS} days it's permanently erased. We'll email you a confirmation.`
+                : "Your account will be disabled and reminders paused. Your data stays safe and you can reactivate any time by signing back in. We'll email you a confirmation."}
+            </p>
+            {actErr && <p className="text-xs text-red-400 mb-3">{actErr}</p>}
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setConfirm(null)}
+                disabled={acting}
+                className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAccountAction}
+                disabled={acting}
+                className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-60 ${
+                  confirm === "delete" ? "bg-red-600 hover:bg-red-500" : "bg-amber-600 hover:bg-amber-500"
+                }`}
+              >
+                {acting && <Loader2 size={13} className="animate-spin" />}
+                {confirm === "delete" ? "Delete account" : "Disable account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* About */}
       <div className="text-center pt-4">

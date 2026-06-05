@@ -23,9 +23,14 @@ export default async function DashboardLayout({
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, image: true, plan: true },
+      select: { name: true, email: true, image: true, plan: true, disabledAt: true, deletionRequestedAt: true },
     }),
   ]);
+
+  // Disabled or pending-deletion accounts can't use the app until reactivated.
+  if (dbUser?.disabledAt || dbUser?.deletionRequestedAt) {
+    redirect("/account/reactivate");
+  }
 
   const pro = isPro(dbUser);
 

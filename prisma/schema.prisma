@@ -24,6 +24,8 @@ model User {
   stripeSubscriptionId String?
   proSince             DateTime?
   trialEndsAt          DateTime?
+  disabledAt           DateTime?
+  deletionRequestedAt  DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   habits              Habit[]
