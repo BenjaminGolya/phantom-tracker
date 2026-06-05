@@ -8,7 +8,17 @@ import { logError } from "@/lib/log";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-async function setPlanByCustomer(customerId: string, plan: "free" | "pro", subscriptionId?: string | null) {
+// Stripe gives trial_end as a unix timestamp (seconds) or null.
+function trialEndDate(trialEnd?: number | null): Date | null {
+  return trialEnd ? new Date(trialEnd * 1000) : null;
+}
+
+async function setPlanByCustomer(
+  customerId: string,
+  plan: "free" | "pro",
+  subscriptionId?: string | null,
+  trialEndsAt?: Date | null
+) {
   const user = await prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
   if (!user) return;
   await prisma.user.update({
@@ -17,11 +27,19 @@ async function setPlanByCustomer(customerId: string, plan: "free" | "pro", subsc
       plan,
       stripeSubscriptionId: subscriptionId ?? (plan === "free" ? null : user.stripeSubscriptionId),
       proSince: plan === "pro" ? (user.proSince ?? new Date()) : user.proSince,
+      // Clear the trial countdown once they're no longer trialing (or downgraded).
+      trialEndsAt: plan === "free" ? null : trialEndsAt ?? null,
     },
   });
 }
 
-async function setPlanByUserId(userId: string, plan: "free" | "pro", customerId?: string, subscriptionId?: string | null) {
+async function setPlanByUserId(
+  userId: string,
+  plan: "free" | "pro",
+  customerId?: string,
+  subscriptionId?: string | null,
+  trialEndsAt?: Date | null
+) {
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -29,6 +47,7 @@ async function setPlanByUserId(userId: string, plan: "free" | "pro", customerId?
       ...(customerId ? { stripeCustomerId: customerId } : {}),
       stripeSubscriptionId: subscriptionId ?? undefined,
       ...(plan === "pro" ? { proSince: new Date() } : {}),
+      trialEndsAt: plan === "free" ? null : trialEndsAt ?? null,
     },
   });
 }
@@ -58,15 +77,24 @@ export async function POST(req: NextRequest) {
         const userId = s.metadata?.userId;
         const customerId = typeof s.customer === "string" ? s.customer : s.customer?.id;
         const subId = typeof s.subscription === "string" ? s.subscription : s.subscription?.id ?? null;
-        if (userId) await setPlanByUserId(userId, "pro", customerId, subId);
-        else if (customerId) await setPlanByCustomer(customerId, "pro", subId);
+        // Pull the subscription to learn whether it's on a trial and when it ends.
+        let trialEndsAt: Date | null = null;
+        if (subId) {
+          try {
+            const sub = await getStripe().subscriptions.retrieve(subId);
+            trialEndsAt = sub.status === "trialing" ? trialEndDate(sub.trial_end) : null;
+          } catch { /* non-fatal: countdown just won't show */ }
+        }
+        if (userId) await setPlanByUserId(userId, "pro", customerId, subId, trialEndsAt);
+        else if (customerId) await setPlanByCustomer(customerId, "pro", subId, trialEndsAt);
         break;
       }
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
         const active = sub.status === "active" || sub.status === "trialing";
-        await setPlanByCustomer(customerId, active ? "pro" : "free", active ? sub.id : null);
+        const trialEndsAt = sub.status === "trialing" ? trialEndDate(sub.trial_end) : null;
+        await setPlanByCustomer(customerId, active ? "pro" : "free", active ? sub.id : null, trialEndsAt);
         break;
       }
       case "customer.subscription.deleted": {

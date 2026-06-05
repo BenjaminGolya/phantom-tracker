@@ -11,6 +11,13 @@ interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
   pro?: boolean;
   proSince?: string | null;
+  trialEndsAt?: string | null;
+}
+
+// Whole days remaining until a date (rounded up). Returns 0 if already past.
+function daysUntil(iso: string): number {
+  const ms = new Date(iso).getTime() - Date.now();
+  return ms <= 0 ? 0 : Math.ceil(ms / 86_400_000);
 }
 
 // Resize an image file to a square <=256px JPEG data URL to keep it small.
@@ -41,7 +48,8 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, proSince = null }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null }: SettingsClientProps) {
+  const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
   const router = useRouter();
   const push = usePush();
   const [justUpgraded, setJustUpgraded] = useState(false);
@@ -164,10 +172,17 @@ export function SettingsClient({ user, pro = false, proSince = null }: SettingsC
             <div className="flex items-center justify-between gap-3 mt-3">
               <div>
                 <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
-                  Pro <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 border border-primary/40">ACTIVE</span>
+                  Pro
+                  <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 border border-primary/40">
+                    {trialDaysLeft !== null ? "TRIAL" : "ACTIVE"}
+                  </span>
                 </p>
                 <p className="text-xs text-muted mt-0.5">
-                  {proSince ? `Member since ${new Date(proSince).toLocaleDateString()}` : "Thanks for supporting Phantom Tracker."}
+                  {trialDaysLeft !== null
+                    ? `Free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} · then billing starts`
+                    : proSince
+                      ? `Member since ${new Date(proSince).toLocaleDateString()}`
+                      : "Thanks for supporting Phantom Tracker."}
                 </p>
               </div>
               <button
