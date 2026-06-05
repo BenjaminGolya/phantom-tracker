@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Share, Smartphone, ChevronRight, CalendarDays, Sparkles, MoreHorizontal,
-  LayoutDashboard, Settings, LogOut,
+  Settings, LogOut,
 } from "lucide-react";
 import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
 
@@ -153,19 +153,11 @@ function NavAccount() {
         </button>
 
         {open && (
-          <div className="absolute right-0 top-11 w-52 bg-surface-2 border border-border rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+          <div className="absolute right-0 top-11 w-56 bg-surface-2 border border-border rounded-xl shadow-xl z-50 py-1 overflow-hidden">
             <div className="px-3 py-2.5 border-b border-border">
-              <p className="text-xs font-medium text-white truncate">{user?.name ?? "User"}</p>
+              {user?.name && <p className="text-xs font-medium text-white truncate">{user.name}</p>}
               <p className="text-xs text-muted truncate">{user?.email}</p>
             </div>
-            <Link
-              href="/dashboard"
-              onClick={() => setOpen(false)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
-            >
-              <LayoutDashboard size={14} />
-              Dashboard
-            </Link>
             <Link
               href="/settings"
               onClick={() => setOpen(false)}
