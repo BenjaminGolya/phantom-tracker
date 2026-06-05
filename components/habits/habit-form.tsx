@@ -249,19 +249,30 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
   function pickMin(m: string) { onChange(`${hh || "00"}:${m}`); }
 
   return (
-    <div ref={ref} className="relative flex-1">
-      <button
-        type="button"
+    <div ref={ref} className="relative w-full">
+      <div
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm transition-colors hover:border-primary/50 focus:outline-none focus:border-primary"
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm cursor-pointer transition-colors hover:border-primary/50"
         style={{ borderColor: open ? "#7f49c3" : undefined }}
       >
         <span className="flex items-center gap-2">
           <Clock size={14} className="text-muted" />
           {value ? <span className="text-white font-mono">{value}</span> : <span className="text-muted">Select time…</span>}
         </span>
-        <ChevronDown size={14} className={`text-muted transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
+        <span className="flex items-center gap-1.5">
+          {value && (
+            <button
+              type="button"
+              aria-label="Clear reminder"
+              onClick={(e) => { e.stopPropagation(); onChange(""); setOpen(false); }}
+              className="text-muted hover:text-red-400 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
+          <ChevronDown size={14} className={`text-muted transition-transform ${open ? "rotate-180" : ""}`} />
+        </span>
+      </div>
 
       <AnimatePresence>
         {open && (
@@ -270,41 +281,53 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 bottom-full mb-1 z-50 flex bg-surface-2 border border-border rounded-xl shadow-2xl overflow-hidden"
+            className="absolute left-0 right-0 bottom-full mb-1 z-50 bg-surface-2 border border-border rounded-xl shadow-2xl overflow-hidden"
           >
-            <div ref={hourCol} className="flex-1 max-h-44 overflow-y-auto py-1 border-r border-border">
-              <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Hour</p>
-              {hours.map((h) => {
-                const sel = h === hh;
-                return (
-                  <button
-                    key={h}
-                    type="button"
-                    data-selected={sel}
-                    onClick={() => pickHour(h)}
-                    className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
-                  >
-                    {h}
-                  </button>
-                );
-              })}
+            <div className="flex">
+              <div ref={hourCol} className="flex-1 max-h-44 overflow-y-auto py-1 border-r border-border">
+                <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Hour</p>
+                {hours.map((h) => {
+                  const sel = h === hh;
+                  return (
+                    <button
+                      key={h}
+                      type="button"
+                      data-selected={sel}
+                      onClick={() => pickHour(h)}
+                      className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
+                    >
+                      {h}
+                    </button>
+                  );
+                })}
+              </div>
+              <div ref={minCol} className="flex-1 max-h-44 overflow-y-auto py-1">
+                <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Min</p>
+                {minutes.map((m) => {
+                  const sel = m === mm;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      data-selected={sel}
+                      onClick={() => pickMin(m)}
+                      className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
+                    >
+                      {m}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div ref={minCol} className="flex-1 max-h-44 overflow-y-auto py-1">
-              <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Min</p>
-              {minutes.map((m) => {
-                const sel = m === mm;
-                return (
-                  <button
-                    key={m}
-                    type="button"
-                    data-selected={sel}
-                    onClick={() => pickMin(m)}
-                    className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
-                  >
-                    {m}
-                  </button>
-                );
-              })}
+            {/* Confirm — closes the dropdown */}
+            <div className="border-t border-border p-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="w-full py-1.5 bg-primary hover:bg-primary-dim text-white text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Check size={13} /> Done{value ? ` · ${value}` : ""}
+              </button>
             </div>
           </motion.div>
         )}
@@ -517,18 +540,7 @@ export function HabitForm({ initial, onSubmit, onClose }: HabitFormProps) {
             {/* Reminder */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">Reminder <span className="opacity-50">(optional)</span></label>
-              <div className="flex items-center gap-2">
-                <TimePicker value={reminderTime} onChange={setReminderTime} />
-                {reminderTime && (
-                  <button
-                    type="button"
-                    onClick={() => setReminderTime("")}
-                    className="px-3 py-2.5 text-xs text-muted hover:text-red-400 transition-colors shrink-0"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
+              <TimePicker value={reminderTime} onChange={setReminderTime} />
               <p className="text-[11px] text-muted mt-1.5">Get a push notification at this time if you haven&apos;t completed it yet. Enable notifications in Settings.</p>
             </div>
             </div>
