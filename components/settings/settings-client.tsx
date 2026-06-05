@@ -12,6 +12,7 @@ interface SettingsClientProps {
   pro?: boolean;
   proSince?: string | null;
   trialEndsAt?: string | null;
+  hasBilling?: boolean;
 }
 
 // Whole days remaining until a date (rounded up). Returns 0 if already past.
@@ -48,12 +49,13 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
   const router = useRouter();
   const push = usePush();
   const [justUpgraded, setJustUpgraded] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [portalErr, setPortalErr] = useState("");
 
   // Show a thank-you banner after returning from Stripe checkout (?upgraded=1).
   useEffect(() => {
@@ -67,10 +69,21 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
   async function openPortal() {
     setPortalLoading(true);
+    setPortalErr("");
     try {
       const res = await fetch("/api/stripe/portal", { method: "POST" });
       const data = await res.json();
-      if (res.ok && data.url) window.location.href = data.url;
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setPortalErr(
+        data?.error === "no_customer"
+          ? "No billing account is linked — there's nothing to manage."
+          : "Billing portal is unavailable right now. Please try again later."
+      );
+    } catch {
+      setPortalErr("Network error. Please try again.");
     } finally {
       setPortalLoading(false);
     }
@@ -215,15 +228,22 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                       : "Thanks for supporting Phantom Tracker."}
                 </p>
               </div>
-              <button
-                onClick={openPortal}
-                disabled={portalLoading}
-                className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
-              >
-                {portalLoading && <Loader2 size={13} className="animate-spin" />}
-                Manage
-              </button>
+              {hasBilling ? (
+                <button
+                  onClick={openPortal}
+                  disabled={portalLoading}
+                  className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+                >
+                  {portalLoading && <Loader2 size={13} className="animate-spin" />}
+                  Manage
+                </button>
+              ) : (
+                <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
+                  Complimentary Pro — no billing to manage
+                </span>
+              )}
             </div>
+            {portalErr && <p className="text-xs text-red-400 mt-2">{portalErr}</p>}
           </>
         ) : (
           <div className="flex items-center justify-between gap-3 mt-3">
