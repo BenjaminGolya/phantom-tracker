@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe, stripeConfigured, priceForInterval, type BillingInterval } from "@/lib/stripe";
+import { TRIAL_DAYS } from "@/lib/plan";
 import { logError } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true, email: true, plan: true, stripeCustomerId: true },
+      select: { id: true, email: true, plan: true, stripeCustomerId: true, proSince: true },
     });
     if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (user.plan === "pro") {
@@ -59,6 +60,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Offer the free trial only to users who've never subscribed before.
+    const eligibleForTrial = !user.proSince;
+
     const checkout = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
@@ -67,7 +71,10 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl()}/pricing?canceled=1`,
       allow_promotion_codes: true,
       // So the webhook can map the subscription back to our user.
-      subscription_data: { metadata: { userId: user.id } },
+      subscription_data: {
+        metadata: { userId: user.id },
+        ...(eligibleForTrial ? { trial_period_days: TRIAL_DAYS } : {}),
+      },
       metadata: { userId: user.id },
     });
 

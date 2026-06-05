@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, Sparkles, Loader2, Ghost, X } from "lucide-react";
-import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT } from "@/lib/plan";
+import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
 
 type Interval = "monthly" | "yearly";
 
@@ -29,7 +29,7 @@ const PRO_FEATURES: string[] = [
   "Priority support",
 ];
 
-export function PricingClient({ pro }: { pro: boolean }) {
+export function PricingClient({ pro, trialEligible = false }: { pro: boolean; trialEligible?: boolean }) {
   const params = useSearchParams();
   const canceled = params.get("canceled") === "1";
   const [loading, setLoading] = useState(false);
@@ -73,6 +73,11 @@ export function PricingClient({ pro }: { pro: boolean }) {
         <p className="text-sm text-muted mt-1">
           Unlock unlimited habits, reminders, advanced stats and a faster path to the top.
         </p>
+        {!pro && trialEligible && (
+          <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30 text-xs font-medium text-primary">
+            <Sparkles size={12} /> Start with a {TRIAL_DAYS}-day free trial — cancel anytime
+          </div>
+        )}
       </div>
 
       {canceled && (
@@ -186,10 +191,16 @@ export function PricingClient({ pro }: { pro: boolean }) {
               className="mt-5 w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-semibold rounded-lg transition-all hover:shadow-glow disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-              Upgrade — {interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL}
+              {trialEligible
+                ? `Start ${TRIAL_DAYS}-day free trial`
+                : `Upgrade — ${interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL}`}
             </button>
           )}
-          <p className="text-[10px] text-muted text-center mt-2">Cancel anytime · secure checkout via Stripe</p>
+          <p className="text-[10px] text-muted text-center mt-2">
+            {trialEligible
+              ? `Free for ${TRIAL_DAYS} days, then ${interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL} · cancel anytime`
+              : "Cancel anytime · secure checkout via Stripe"}
+          </p>
         </motion.div>
       </div>
     </div>
