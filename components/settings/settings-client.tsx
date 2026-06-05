@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, LogOut, Ghost, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Ghost, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 
 interface SettingsClientProps {
@@ -81,7 +81,9 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [testMsg, setTestMsg] = useState("");
+  const [importMsg, setImportMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const importRef = useRef<HTMLInputElement>(null);
   const initial = (user?.name ?? user?.email ?? "U")?.[0]?.toUpperCase() ?? "U";
 
   async function handleTest() {
@@ -141,15 +143,43 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
     setTimeout(() => setSaved(false), 2000);
   }
 
-  async function handleExport() {
-    const res = await fetch("/api/export");
+  async function handleExport(format: "csv" | "json" = "csv") {
+    const res = await fetch(`/api/export${format === "json" ? "?format=json" : ""}`);
+    if (!res.ok) return;
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "phantom-tracker-export.csv";
+    a.download = format === "json" ? "phantom-tracker-backup.json" : "phantom-tracker-export.csv";
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (importRef.current) importRef.current.value = "";
+    if (!file) return;
+    setImportMsg("Importing…");
+    try {
+      const text = await file.text();
+      JSON.parse(text); // fail fast on bad files
+      const res = await fetch("/api/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: text,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setImportMsg(`Imported ${data.habitsCreated} habit(s) and ${data.logsImported} log(s).`);
+        router.refresh();
+      } else {
+        setImportMsg(data?.message ?? "Import failed — make sure it's a Phantom Tracker backup file.");
+      }
+    } catch {
+      setImportMsg("Couldn't read that file — it must be a valid .json backup.");
+    } finally {
+      setTimeout(() => setImportMsg(""), 8000);
+    }
   }
 
   return (
@@ -357,24 +387,67 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         )}
       </div>
 
-      {/* Data */}
+      {/* Data — Pro */}
       <div className="bg-surface border border-border rounded-xl p-5">
-        <h2 className="text-sm font-medium mb-4">Data</h2>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Export data</p>
-              <p className="text-xs text-muted">Download all your habits as CSV</p>
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          Data
+          {!pro && (
+            <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
+              <Lock size={9} /> PRO
+            </span>
+          )}
+        </h2>
+        <p className="text-xs text-muted mb-4">Export a backup of your habits, or import one into this account.</p>
+
+        {!pro ? (
+          <Link
+            href="/pricing"
+            className="flex items-center gap-2.5 px-3 py-3 rounded-lg border border-primary/30 bg-primary/8 hover:bg-primary/15 transition-colors"
+          >
+            <Sparkles size={16} className="text-primary shrink-0" />
+            <p className="text-xs text-muted">
+              <span className="text-primary font-medium">Upgrade to Pro</span> to export and import your data.
+            </p>
+          </Link>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium">Export</p>
+                <p className="text-xs text-muted">CSV for spreadsheets, or a full JSON backup</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => handleExport("csv")}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors"
+                >
+                  <Download size={13} /> CSV
+                </button>
+                <button
+                  onClick={() => handleExport("json")}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors"
+                >
+                  <Download size={13} /> JSON
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors"
-            >
-              <Download size={13} />
-              Export
-            </button>
+
+            <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+              <div>
+                <p className="text-sm font-medium">Import</p>
+                <p className="text-xs text-muted">Restore from a .json backup (merges, never deletes)</p>
+              </div>
+              <input ref={importRef} type="file" accept="application/json,.json" onChange={handleImport} className="hidden" />
+              <button
+                onClick={() => importRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"
+              >
+                <Upload size={13} /> Import
+              </button>
+            </div>
+            {importMsg && <p className="text-xs text-muted">{importMsg}</p>}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Danger zone */}
