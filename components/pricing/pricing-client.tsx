@@ -122,7 +122,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
         {/* Free */}
         <div className="bg-surface border border-border rounded-2xl p-5">
           <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">Free</p>
-          <p className="text-3xl font-bold mb-4">$0<span className="text-sm text-muted font-normal"> / mo</span></p>
+          <p className="text-3xl font-bold mb-4">€0<span className="text-sm text-muted font-normal"> / mo</span></p>
           <ul className="space-y-2.5">
             {FREE_FEATURES.map((f) => (
               <li key={f.label} className="flex items-center gap-2 text-sm">
@@ -158,14 +158,14 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
             {interval === "yearly" ? (
               <>
                 <p className="text-3xl font-bold">
-                  $15<span className="text-sm text-muted font-normal"> / yr</span>
+                  €15<span className="text-sm text-muted font-normal"> / yr</span>
                 </p>
-                <p className="text-[11px] text-primary mt-0.5">≈ $1.25/mo · billed yearly · save {YEARLY_SAVINGS_PCT}%</p>
+                <p className="text-[11px] text-primary mt-0.5">≈ €1.25/mo · billed yearly · save {YEARLY_SAVINGS_PCT}%</p>
               </>
             ) : (
               <>
                 <p className="text-3xl font-bold">
-                  $2<span className="text-sm text-muted font-normal"> / mo</span>
+                  €2<span className="text-sm text-muted font-normal"> / mo</span>
                 </p>
                 <p className="text-[11px] text-muted mt-0.5">billed monthly</p>
               </>
