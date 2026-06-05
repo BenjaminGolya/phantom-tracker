@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, Ghost, Settings, Info } from "lucide-react";
+import { LogOut, Ghost, Settings, Info, Home } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
@@ -37,7 +37,14 @@ export function TopBar({ user }: TopBarProps) {
         <span className="font-semibold text-sm">Phantom Tracker</span>
       </div>
 
-      <div className="hidden lg:block" />
+      {/* Back to the public landing page */}
+      <Link
+        href="/"
+        className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-muted hover:text-white hover:bg-surface-2 transition-colors"
+      >
+        <Home size={15} />
+        Home
+      </Link>
 
       <div className="relative" ref={ref}>
         <button
@@ -75,6 +82,14 @@ export function TopBar({ user }: TopBarProps) {
                 <p className="text-xs text-muted truncate">{user?.email}</p>
               </div>
             </div>
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
+            >
+              <Home size={14} />
+              Back to home
+            </Link>
             <Link
               href="/settings"
               onClick={() => setOpen(false)}
