@@ -11,18 +11,49 @@ interface WeeklyChartProps {
 
 export default function WeeklyChart({ data, total }: WeeklyChartProps) {
   return (
-    <ResponsiveContainer width="100%" height={140}>
-      <BarChart data={data} barSize={28}>
-        <XAxis dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} />
+    <ResponsiveContainer width="100%" height={160}>
+      <BarChart data={data} barSize={26} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+        <XAxis dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} dy={4} />
         <YAxis hide domain={[0, Math.max(total, 1)]} />
         <Tooltip
-          cursor={{ fill: "#1a1a1a" }}
-          contentStyle={{ background: "#111", border: "1px solid #222", borderRadius: 8, fontSize: 12 }}
-          formatter={(v) => [`${v}/${total}`, "Completed"]}
+          cursor={{ fill: "rgba(127,73,195,0.10)" }}
+          content={({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            const count = Number(payload[0].value);
+            const done = count >= total && total > 0;
+            return (
+              <div
+                style={{
+                  background: "#1c1c1e",
+                  border: "1px solid #34343a",
+                  borderRadius: 10,
+                  padding: "8px 12px",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+                }}
+              >
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#ffffff", marginBottom: 3 }}>{label}</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 2,
+                      background: done ? "#7f49c3" : "#3f3f46",
+                      display: "inline-block",
+                    }}
+                  />
+                  <span style={{ fontFamily: "monospace", fontWeight: 600, color: done ? "#b28fff" : "#fff" }}>
+                    {count}/{total}
+                  </span>
+                  <span>completed{done ? " · perfect day 🎉" : ""}</span>
+                </div>
+              </div>
+            );
+          }}
         />
-        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+        <Bar dataKey="count" radius={[5, 5, 0, 0]}>
           {data.map((entry, i) => (
-            <Cell key={i} fill={entry.count === entry.total && entry.total > 0 ? "#7f49c3" : "#2a2a2a"} />
+            <Cell key={i} fill={entry.count === entry.total && entry.total > 0 ? "#7f49c3" : "#33333a"} />
           ))}
         </Bar>
       </BarChart>
