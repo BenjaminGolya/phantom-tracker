@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, Sparkles, Loader2, Ghost, X } from "lucide-react";
-import { PLAN_LIMITS, PRICE_LABEL } from "@/lib/plan";
+import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT } from "@/lib/plan";
+
+type Interval = "monthly" | "yearly";
 
 const FREE_FEATURES: { label: string; included: boolean }[] = [
   { label: `Up to ${PLAN_LIMITS.freeHabitLimit} habits`, included: true },
@@ -32,12 +34,17 @@ export function PricingClient({ pro }: { pro: boolean }) {
   const canceled = params.get("canceled") === "1";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [interval, setInterval] = useState<Interval>("yearly");
 
   async function upgrade() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval }),
+      });
       const data = await res.json();
       if (res.ok && data.url) {
         window.location.href = data.url;
@@ -79,6 +86,33 @@ export function PricingClient({ pro }: { pro: boolean }) {
         </div>
       )}
 
+      {/* Billing interval toggle */}
+      {!pro && (
+        <div className="flex items-center justify-center">
+          <div className="inline-flex items-center bg-surface border border-border rounded-xl p-1">
+            <button
+              onClick={() => setInterval("monthly")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                interval === "monthly" ? "bg-surface-2 text-white" : "text-muted hover:text-white"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setInterval("yearly")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                interval === "yearly" ? "bg-primary/20 text-primary" : "text-muted hover:text-white"
+              }`}
+            >
+              Yearly
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                SAVE {YEARLY_SAVINGS_PCT}%
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Free */}
         <div className="bg-surface border border-border rounded-2xl p-5">
@@ -115,9 +149,23 @@ export function PricingClient({ pro }: { pro: boolean }) {
           <p className="text-xs uppercase tracking-widest text-primary font-medium mb-1 flex items-center gap-1">
             <Sparkles size={12} /> Pro
           </p>
-          <p className="text-3xl font-bold mb-4">
-            $2<span className="text-sm text-muted font-normal"> / mo</span>
-          </p>
+          <div className="mb-4">
+            {interval === "yearly" ? (
+              <>
+                <p className="text-3xl font-bold">
+                  $15<span className="text-sm text-muted font-normal"> / yr</span>
+                </p>
+                <p className="text-[11px] text-primary mt-0.5">≈ $1.25/mo · billed yearly · save {YEARLY_SAVINGS_PCT}%</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-bold">
+                  $2<span className="text-sm text-muted font-normal"> / mo</span>
+                </p>
+                <p className="text-[11px] text-muted mt-0.5">billed monthly</p>
+              </>
+            )}
+          </div>
           <ul className="space-y-2.5">
             {PRO_FEATURES.map((f) => (
               <li key={f} className="flex items-center gap-2 text-sm">
@@ -138,7 +186,7 @@ export function PricingClient({ pro }: { pro: boolean }) {
               className="mt-5 w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-semibold rounded-lg transition-all hover:shadow-glow disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-              Upgrade — {PRICE_LABEL}
+              Upgrade — {interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL}
             </button>
           )}
           <p className="text-[10px] text-muted text-center mt-2">Cancel anytime · secure checkout via Stripe</p>

@@ -16,5 +16,13 @@ export function getStripe(): Stripe {
 
 export const stripeConfigured = () => !!process.env.STRIPE_SECRET_KEY;
 
-/** The recurring price for the Pro plan ($2/mo). Created in the Stripe dashboard. */
-export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID ?? "";
+/** Recurring prices for the Pro plan. Created in the Stripe dashboard. */
+export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID ?? ""; // $2 / month
+export const PRO_PRICE_ID_YEARLY = process.env.STRIPE_PRO_PRICE_ID_YEARLY ?? ""; // $15 / year
+
+export type BillingInterval = "monthly" | "yearly";
+
+/** Resolve the configured price id for a billing interval. */
+export function priceForInterval(interval: BillingInterval): string {
+  return interval === "yearly" ? PRO_PRICE_ID_YEARLY : PRO_PRICE_ID;
+}

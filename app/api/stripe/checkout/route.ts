@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getStripe, stripeConfigured, PRO_PRICE_ID } from "@/lib/stripe";
+import { getStripe, stripeConfigured, priceForInterval, type BillingInterval } from "@/lib/stripe";
 import { logError } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -11,13 +11,23 @@ function baseUrl() {
   return process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 }
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!stripeConfigured() || !PRO_PRICE_ID) {
+  // Billing interval: monthly ($2/mo) by default, or yearly ($15/yr).
+  let interval: BillingInterval = "monthly";
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body?.interval === "yearly") interval = "yearly";
+  } catch {
+    /* no body → default monthly */
+  }
+  const priceId = priceForInterval(interval);
+
+  if (!stripeConfigured() || !priceId) {
     return NextResponse.json(
       { error: "billing_unavailable", message: "Billing is not configured yet." },
       { status: 503 }
@@ -52,7 +62,7 @@ export async function POST() {
     const checkout = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
-      line_items: [{ price: PRO_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${baseUrl()}/settings?upgraded=1`,
       cancel_url: `${baseUrl()}/pricing?canceled=1`,
       allow_promotion_codes: true,

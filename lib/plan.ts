@@ -32,3 +32,6 @@ export const PRO_FEATURES = {
 } as const;
 
 export const PRICE_LABEL = "$2/mo";
+export const PRICE_LABEL_YEARLY = "$15/yr";
+/** Effective monthly cost when paying yearly ($15 / 12 ≈ $1.25), for "save X%" copy. */
+export const YEARLY_SAVINGS_PCT = Math.round((1 - 15 / (2 * 12)) * 100); // ~38%
