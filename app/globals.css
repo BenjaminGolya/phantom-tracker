@@ -53,3 +53,21 @@
     backdrop-filter: blur(12px);
   }
 }
+
+/* ── Jumping phantom loader ──────────────────────────────────────────────── */
+@keyframes phantom-bounce {
+  0%, 100% { transform: translateY(0) scaleX(1.03); }
+  30%      { transform: translateY(-24%) scaleX(0.97); }
+  50%      { transform: translateY(-34%) scaleX(0.94); }
+  70%      { transform: translateY(-24%) scaleX(0.97); }
+}
+@keyframes phantom-shadow {
+  0%, 100% { transform: scaleX(1);    opacity: 0.35; }
+  50%      { transform: scaleX(0.5);  opacity: 0.12; }
+}
+.phantom-bounce { animation: phantom-bounce 1s ease-in-out infinite; will-change: transform; }
+.phantom-shadow { animation: phantom-shadow 1s ease-in-out infinite; will-change: transform, opacity; }
+
+@media (prefers-reduced-motion: reduce) {
+  .phantom-bounce, .phantom-shadow { animation: none; }
+}

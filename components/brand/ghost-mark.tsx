@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-// Phantom Tracker brand mark — uses the official logo artwork (public/ghost-logo.png).
+// Phantom Tracker brand mark — uses the official logo artwork (public/ghost-logo-128.png).
 
 export function GhostLogo({
   size = 28,
@@ -12,7 +12,7 @@ export function GhostLogo({
 }) {
   return (
     <img
-      src="/ghost-logo.png"
+      src="/ghost-logo-128.png"
       alt="Phantom Tracker"
       width={size}
       height={size}
