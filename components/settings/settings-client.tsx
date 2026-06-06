@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
@@ -67,6 +67,37 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [newEmail, setNewEmail] = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailMsg, setEmailMsg] = useState("");
+  const [fbType, setFbType] = useState<"bug" | "question" | "feedback">("bug");
+  const [fbMessage, setFbMessage] = useState("");
+  const [fbSending, setFbSending] = useState(false);
+  const [fbResult, setFbResult] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function submitFeedback() {
+    if (fbMessage.trim().length < 5) {
+      setFbResult({ ok: false, text: "Please add a bit more detail." });
+      return;
+    }
+    setFbSending(true);
+    setFbResult(null);
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: fbType, message: fbMessage.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFbResult({ ok: true, text: "Thanks! Your message has been sent. ✓" });
+        setFbMessage("");
+      } else {
+        setFbResult({ ok: false, text: data?.message ?? "Couldn't send — please try again." });
+      }
+    } catch {
+      setFbResult({ ok: false, text: "Network error. Please try again." });
+    } finally {
+      setFbSending(false);
+    }
+  }
 
   async function submitEmailChange() {
     if (!newEmail.trim()) return;
@@ -570,6 +601,65 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             {importMsg && <p className="text-xs text-muted">{importMsg}</p>}
           </div>
         )}
+      </div>
+
+      {/* Help & feedback */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <LifeBuoy size={15} className="text-primary" /> Help &amp; feedback
+        </h2>
+        <p className="text-xs text-muted mb-4">Found a bug or have a question? Send it our way — we read every message.</p>
+
+        <div className="flex gap-2 mb-3">
+          {([
+            { v: "bug", label: "Bug" },
+            { v: "question", label: "Question" },
+            { v: "feedback", label: "Feedback" },
+          ] as const).map((t) => (
+            <button
+              key={t.v}
+              type="button"
+              onClick={() => setFbType(t.v)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                fbType === t.v ? "bg-primary text-white" : "bg-surface-2 text-muted hover:text-white border border-border"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          value={fbMessage}
+          onChange={(e) => setFbMessage(e.target.value)}
+          rows={4}
+          maxLength={5000}
+          placeholder={
+            fbType === "bug"
+              ? "What happened? What did you expect? Steps to reproduce help a lot."
+              : fbType === "question"
+                ? "What would you like to know?"
+                : "Share your thoughts…"
+          }
+          className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+        />
+
+        <div className="flex items-center justify-between gap-3 mt-2">
+          {fbResult ? (
+            <p className={`text-xs ${fbResult.ok ? "text-green-400" : "text-red-400"}`}>{fbResult.text}</p>
+          ) : (
+            <span className="text-[11px] text-muted">Replies come to your account email.</span>
+          )}
+          <button
+            type="button"
+            onClick={submitFeedback}
+            disabled={fbSending || fbMessage.trim().length < 5}
+            className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 shrink-0"
+          >
+            {fbSending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+            Send
+          </button>
+        </div>
       </div>
 
       {/* Danger zone */}

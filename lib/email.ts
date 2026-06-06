@@ -294,6 +294,45 @@ export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string
   });
 }
 
+/** Send a user's bug report / question / feedback to the admin inbox. */
+export async function sendFeedbackEmail(opts: {
+  fromEmail: string;
+  fromName?: string | null;
+  type: string;
+  message: string;
+  appVersion?: string;
+}): Promise<{ ok: boolean; reason?: string }> {
+  const to = process.env.ADMIN_NOTIFY_EMAIL;
+  if (!to) return { ok: false, reason: "no_admin" };
+
+  const when = new Date().toUTCString();
+  const label = opts.type === "bug" ? "🐛 Bug report" : opts.type === "question" ? "❓ Question" : "💬 Feedback";
+
+  if (!isSmtpConfigured()) {
+    console.log(`\n  📨 ${label} from ${opts.fromEmail}:\n  ${opts.message}\n  (SMTP not configured — logged only)\n`);
+    return { ok: true };
+  }
+
+  await makeTransport().sendMail({
+    from: emailFrom(),
+    to,
+    replyTo: opts.fromEmail, // reply goes straight to the user
+    subject: `${label} — Phantom Tracker (${opts.fromEmail})`,
+    text:
+      `${label}\n\nFrom: ${opts.fromName || "—"} <${opts.fromEmail}>\n` +
+      `Version: ${opts.appVersion ?? "—"}\nWhen: ${when}\n\nMessage:\n${opts.message}`,
+    html: shell(label, `
+      <table style="font-size:13px;width:100%;border-collapse:collapse;margin-bottom:14px;">
+        <tr><td style="padding:4px 0;color:#a1a1aa;">From</td><td style="padding:4px 0;text-align:right;color:#fff;">${opts.fromName ? `${opts.fromName} · ` : ""}${opts.fromEmail}</td></tr>
+        <tr><td style="padding:4px 0;color:#a1a1aa;">Version</td><td style="padding:4px 0;text-align:right;color:#fff;">${opts.appVersion ?? "—"}</td></tr>
+        <tr><td style="padding:4px 0;color:#a1a1aa;">When</td><td style="padding:4px 0;text-align:right;color:#fff;">${when}</td></tr>
+      </table>
+      <div style="background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:14px;color:#e4e4e7;font-size:14px;line-height:1.6;white-space:pre-wrap;">${opts.message.replace(/</g, "&lt;")}</div>
+      <p style="color:#71717a;font-size:11px;margin:14px 0 0;">Reply to this email to respond to the user directly.</p>`),
+  });
+  return { ok: true };
+}
+
 /** Email the admin about a production error. Best-effort; never throws. */
 export async function sendErrorAlert(context: string, detail: string) {
   const to = process.env.ADMIN_NOTIFY_EMAIL;
