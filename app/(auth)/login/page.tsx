@@ -13,6 +13,8 @@ function LoginForm() {
   const params = useSearchParams();
   const { data: session, status } = useSession();
   const justVerified = params.get("verified") === "1";
+  const emailChanged = params.get("emailChanged") === "1";
+  const emailChangeIssue = params.get("emailChange"); // invalid | expired | taken | error
   const emailParam = params.get("email") ?? "";
   const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
@@ -68,6 +70,22 @@ function LoginForm() {
         {justVerified && (
           <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm text-center">
             ✓ Email verified — you can now sign in
+          </div>
+        )}
+
+        {emailChanged && (
+          <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm text-center">
+            ✓ Email updated — sign in with your new address
+          </div>
+        )}
+
+        {emailChangeIssue && (
+          <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
+            {emailChangeIssue === "expired"
+              ? "That email-change link has expired. Please request a new one."
+              : emailChangeIssue === "taken"
+                ? "That email is now in use by another account."
+                : "That email-change link is invalid or already used."}
           </div>
         )}
 

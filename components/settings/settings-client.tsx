@@ -15,6 +15,7 @@ interface SettingsClientProps {
   proSince?: string | null;
   trialEndsAt?: string | null;
   hasBilling?: boolean;
+  pendingEmail?: string | null;
 }
 
 // Whole days remaining until a date (rounded up). Returns 0 if already past.
@@ -51,7 +52,7 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
   const router = useRouter();
   const push = usePush();
@@ -61,6 +62,36 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [confirm, setConfirm] = useState<null | "disable" | "delete">(null);
   const [acting, setActing] = useState(false);
   const [actErr, setActErr] = useState("");
+  const [changingEmail, setChangingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailMsg, setEmailMsg] = useState("");
+
+  async function submitEmailChange() {
+    if (!newEmail.trim()) return;
+    setEmailSaving(true);
+    setEmailMsg("");
+    try {
+      const res = await fetch("/api/user/email/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newEmail: newEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEmailMsg(`✓ Confirmation sent to ${data.pendingEmail}. Open it and tap "Confirm new email" to finish.`);
+        setChangingEmail(false);
+        setNewEmail("");
+        router.refresh();
+      } else {
+        setEmailMsg(data?.message ?? "Couldn't start the email change. Please try again.");
+      }
+    } catch {
+      setEmailMsg("Network error. Please try again.");
+    } finally {
+      setEmailSaving(false);
+    }
+  }
 
   async function handleAccountAction() {
     if (!confirm) return;
@@ -338,11 +369,60 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           </div>
           <div>
             <label className="text-xs text-muted block mb-1.5">Email</label>
-            <input
-              value={user?.email ?? ""}
-              disabled
-              className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-muted"
-            />
+            {!changingEmail ? (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    value={user?.email ?? ""}
+                    disabled
+                    className="flex-1 min-w-0 px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-muted"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { setChangingEmail(true); setEmailMsg(""); }}
+                    className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"
+                  >
+                    Change
+                  </button>
+                </div>
+                {pendingEmail && (
+                  <p className="text-[11px] text-amber-300 mt-1.5">
+                    Pending: <span className="font-medium">{pendingEmail}</span> — check that inbox to confirm.
+                  </p>
+                )}
+              </>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="new@email.com"
+                  autoFocus
+                  className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={submitEmailChange}
+                    disabled={emailSaving || !newEmail.trim()}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50"
+                  >
+                    {emailSaving && <Loader2 size={13} className="animate-spin" />}
+                    Send confirmation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setChangingEmail(false); setNewEmail(""); }}
+                    className="px-3 py-2 text-sm text-muted hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <p className="text-[11px] text-muted">We&apos;ll email a confirmation link to the new address. Your email changes only after you click it.</p>
+              </div>
+            )}
+            {emailMsg && <p className="text-[11px] text-muted mt-1.5">{emailMsg}</p>}
           </div>
           <button
             type="submit"

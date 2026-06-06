@@ -12,7 +12,7 @@ export default async function SettingsPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, image: true, plan: true, proSince: true, trialEndsAt: true, stripeCustomerId: true },
+    select: { id: true, name: true, email: true, image: true, plan: true, proSince: true, trialEndsAt: true, stripeCustomerId: true, pendingEmail: true },
   });
 
   // Stale session (the user no longer exists in the database) → force re-login.
@@ -27,6 +27,7 @@ export default async function SettingsPage() {
       proSince={user.proSince ? user.proSince.toISOString() : null}
       trialEndsAt={user.trialEndsAt ? user.trialEndsAt.toISOString() : null}
       hasBilling={!!user.stripeCustomerId}
+      pendingEmail={user.pendingEmail}
     />
   );
 }

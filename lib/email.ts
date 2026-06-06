@@ -259,6 +259,41 @@ export async function sendAccountReactivatedEmail(to: string, name?: string | nu
   });
 }
 
+/** Send a confirm-your-new-email link to the pending address. */
+export async function sendEmailChangeConfirmation(toNewEmail: string, token: string, name?: string | null) {
+  const hi = name ? `Hi ${name}` : "Hi there";
+  const url = `${appUrl()}/api/user/email/confirm?token=${encodeURIComponent(token)}`;
+  if (!isSmtpConfigured()) {
+    console.log(`\n  ✉️  (email-change confirm skipped — no SMTP) for ${toNewEmail}\n  ➜  ${url}\n`);
+    return;
+  }
+  await makeTransport().sendMail({
+    from: emailFrom(), to: toNewEmail,
+    subject: "Confirm your new Phantom Tracker email",
+    text: `${hi},\n\nYou requested to change your Phantom Tracker email to this address. Confirm it to finish:\n\n${url}\n\nThis link expires in 1 hour. If you didn't request this, you can ignore this email.`,
+    html: shell("Confirm your new email", `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">You asked to change your Phantom Tracker email to <strong style="color:#fff;">${toNewEmail}</strong>. Tap the button to confirm — the link expires in <strong style="color:#fff;">1 hour</strong>.</p>
+      <div style="text-align:center;margin-bottom:16px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Confirm new email</a></div>
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">If you didn't request this, you can safely ignore this email.</p>`),
+  });
+}
+
+/** Notify the OLD email that a change was requested (security heads-up). */
+export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string, name?: string | null) {
+  const hi = name ? `Hi ${name}` : "Hi there";
+  if (!isSmtpConfigured()) { console.log(`\n  ✉️  (email-change notice skipped — no SMTP) for ${toOldEmail}\n`); return; }
+  await makeTransport().sendMail({
+    from: emailFrom(), to: toOldEmail,
+    subject: "A Phantom Tracker email change was requested",
+    text: `${hi},\n\nSomeone requested to change your Phantom Tracker account email to ${newEmail}. The change only takes effect after it's confirmed from the new address.\n\nIf this wasn't you, change your password immediately.`,
+    html: shell("Email change requested", `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">A request was made to change your account email to <strong style="color:#fff;">${newEmail}</strong>. It only takes effect once confirmed from that new address.</p>
+      <p style="color:#71717a;font-size:12px;margin:0;">If this wasn't you, please change your password right away.</p>`),
+  });
+}
+
 /** Email the admin about a production error. Best-effort; never throws. */
 export async function sendErrorAlert(context: string, detail: string) {
   const to = process.env.ADMIN_NOTIFY_EMAIL;
