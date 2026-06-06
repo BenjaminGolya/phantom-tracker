@@ -366,8 +366,17 @@ export function LandingPage() {
             <span className="text-xs">Phantom Tracker — built for consistency.</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted">
-            <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
-            <Link href="/signup" className="hover:text-white transition-colors">Get started</Link>
+            {authed ? (
+              <>
+                <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
+                <Link href="/settings" className="hover:text-white transition-colors">Settings</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
+                <Link href="/signup" className="hover:text-white transition-colors">Get started</Link>
+              </>
+            )}
           </div>
         </div>
       </footer>

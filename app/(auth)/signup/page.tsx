@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
@@ -59,6 +60,13 @@ const POLICIES: Record<PolicyKey, { title: string; body: React.ReactNode }> = {
 
 export default function SignupPage() {
   const router = useRouter();
+  const { status } = useSession();
+
+  // Already signed in → no need to register again.
+  useEffect(() => {
+    if (status === "authenticated") router.replace("/dashboard");
+  }, [status, router]);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

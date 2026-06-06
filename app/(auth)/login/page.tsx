@@ -20,13 +20,13 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // If this device is already signed in as the account the link is for, skip
-  // straight to the dashboard. Otherwise show the form so the user can sign in
-  // (e.g. opening a new account's email on a device logged into another one).
+  // Already signed in → go to the dashboard. The one exception: an email link
+  // for a DIFFERENT account (?email=) opened on a device logged into another
+  // account — there we keep the form so they can switch accounts.
   useEffect(() => {
-    if (status === "authenticated" && emailParam && session?.user?.email === emailParam) {
-      router.replace("/dashboard");
-    }
+    if (status !== "authenticated") return;
+    const differentAccountLink = emailParam && session?.user?.email !== emailParam;
+    if (!differentAccountLink) router.replace("/dashboard");
   }, [status, session, emailParam, router]);
 
   async function handleSubmit(e: React.FormEvent) {
