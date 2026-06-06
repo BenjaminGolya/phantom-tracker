@@ -15,9 +15,10 @@ import confetti from "canvas-confetti";
 
 interface DashboardClientProps {
   habits: HabitWithLogs[];
+  pro?: boolean;
 }
 
-export function DashboardClient({ habits: initialHabits }: DashboardClientProps) {
+export function DashboardClient({ habits: initialHabits, pro = false }: DashboardClientProps) {
   const router = useRouter();
   const mounted = useMounted();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
@@ -169,6 +170,7 @@ export function DashboardClient({ habits: initialHabits }: DashboardClientProps)
 
       {showForm && (
         <HabitForm
+          pro={pro}
           onSubmit={handleCreateHabit}
           onClose={() => setShowForm(false)}
         />
