@@ -19,6 +19,20 @@ export const metadata: Metadata = {
   description: "Track your habits in the dark.",
   manifest: "/manifest.json",
   themeColor: "#0a0a0a",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  // Controls the name shown under the icon when added to an iOS Home Screen.
+  appleWebApp: {
+    capable: true,
+    title: "Phantom Tracker",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
