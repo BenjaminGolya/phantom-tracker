@@ -8,6 +8,7 @@ import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smar
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
+import { APP_VERSION, LATEST, CHANGELOG } from "@/lib/version";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
@@ -654,10 +655,45 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         </div>
       )}
 
-      {/* About */}
-      <div className="text-center pt-4">
-        <p className="text-xs text-muted flex items-center justify-center gap-1.5"><GhostLogo size={14} /> Phantom Tracker — v1.0.0</p>
-        <p className="text-xs text-muted mt-1">Dark mode only. Built for consistency.</p>
+      {/* About / version */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium flex items-center gap-2">
+            <GhostLogo size={16} /> Phantom Tracker
+          </h2>
+          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
+            v{APP_VERSION}
+          </span>
+        </div>
+
+        <div className="mb-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted mb-1">Latest update</p>
+          <p className="text-xs text-white leading-relaxed">{LATEST.summary}</p>
+          <p className="text-[10px] text-muted mt-0.5">{LATEST.date}</p>
+        </div>
+
+        <details className="group">
+          <summary className="text-xs text-primary cursor-pointer list-none flex items-center gap-1 select-none">
+            <span className="group-open:hidden">Show changelog</span>
+            <span className="hidden group-open:inline">Hide changelog</span>
+          </summary>
+          <ul className="mt-2 space-y-2 border-t border-border pt-2">
+            {CHANGELOG.map((c) => (
+              <li key={c.version} className="text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-primary">v{c.version}</span>
+                  <span className="text-[10px] text-muted">{c.date}</span>
+                </div>
+                <p className="text-muted leading-relaxed">{c.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </div>
+
+      {/* Footer note */}
+      <div className="text-center pt-2">
+        <p className="text-xs text-muted">Dark mode only. Built for consistency.</p>
       </div>
     </div>
   );
