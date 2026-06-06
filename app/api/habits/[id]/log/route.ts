@@ -9,9 +9,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const { date, completed, value } = await req.json();
 
-  // Backfill window: you can only log/edit the last 7 days (no future, no
-  // ancient history). A 1-day buffer on each side absorbs timezone skew
-  // between the client's local date and the server clock.
+  // Backfill window: only today and yesterday can be logged/edited. A 1-day
+  // buffer on each side absorbs timezone skew between the client's local date
+  // and the server clock (so "yesterday" is never wrongly rejected).
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ error: "bad_date" }, { status: 400 });
   }
@@ -21,9 +21,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (target > todayUtc + dayMs) {
     return NextResponse.json({ error: "future_date", message: "You can't log a future day." }, { status: 400 });
   }
-  if (target < todayUtc - 7 * dayMs) {
+  if (target < todayUtc - 2 * dayMs) {
     return NextResponse.json(
-      { error: "too_old", message: "You can only log or edit the last 7 days." },
+      { error: "too_old", message: "You can only log today or yesterday." },
       { status: 400 }
     );
   }

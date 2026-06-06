@@ -43,9 +43,9 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
     weeks.push(week);
   }
 
-  // Backfill window: only the last 7 days are editable.
+  // Backfill window: only today and yesterday are editable.
   const editFloor = startOfDay(new Date());
-  editFloor.setDate(editFloor.getDate() - 7);
+  editFloor.setDate(editFloor.getDate() - 1);
 
   function isEditable(day: string) {
     const d = startOfDay(parseISO(day));
