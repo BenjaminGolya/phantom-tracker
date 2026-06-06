@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   eachDayOfInterval, startOfYear, isSameMonth, isToday, isFuture,
-  startOfISOWeek, endOfISOWeek, startOfDay,
+  startOfISOWeek, endOfISOWeek, startOfDay, subDays,
 } from "date-fns";
-import { Flame, MoreHorizontal, Pencil, Trash2, Archive } from "lucide-react";
+import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel } from "@/lib/utils";
@@ -384,6 +384,17 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   const today = format(new Date(), "yyyy-MM-dd");
   const doneToday = completedSet.has(today);
 
+  // "Forgot yesterday?" nudge — show only when yesterday was a scheduled day,
+  // isn't logged yet, and falls on/after the habit's creation date.
+  const yDate = subDays(new Date(), 1);
+  const yesterday = format(yDate, "yyyy-MM-dd");
+  const yDow = format(yDate, "EEE").toLowerCase(); // mon, tue, ...
+  const scheduledYesterday =
+    habit.frequency === "daily" || habit.frequency.split(",").map((d) => d.trim()).includes(yDow);
+  const yAfterStart = startOfDay(yDate) >= startOfDay(habit.createdAt ? new Date(habit.createdAt) : yDate);
+  const showLogYesterday =
+    !!onToggleDay && !habit.archived && scheduledYesterday && yAfterStart && !completedSet.has(yesterday);
+
   // Detect level-up when logs change
   useEffect(() => {
     const newInfo = getHabitLevel(habit.logs);
@@ -487,6 +498,16 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
       {/* Daily goal counter */}
       {habit.goal && onToggleDay && (
         <GoalCounter habit={habit} today={today} onLog={onToggleDay} />
+      )}
+
+      {/* Forgot-yesterday nudge */}
+      {showLogYesterday && (
+        <button
+          onClick={() => onToggleDay?.(habit.id, yesterday, true, habit.goal ? habit.goal : undefined)}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border hover:border-primary/50 text-xs text-muted hover:text-primary transition-colors"
+        >
+          <RotateCcw size={12} /> Forgot yesterday? Mark it done
+        </button>
       )}
 
       {/* Calendar */}

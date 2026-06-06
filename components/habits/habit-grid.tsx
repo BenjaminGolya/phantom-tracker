@@ -43,10 +43,17 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
     weeks.push(week);
   }
 
+  // Backfill window: only the last 7 days are editable.
+  const editFloor = startOfDay(new Date());
+  editFloor.setDate(editFloor.getDate() - 7);
+
+  function isEditable(day: string) {
+    const d = startOfDay(parseISO(day));
+    return !isAfter(d, today) && !isAfter(editFloor, d);
+  }
+
   function handleClick(day: string) {
-    if (!day || !onToggle) return;
-    const d = parseISO(day);
-    if (isAfter(startOfDay(d), today)) return; // future date
+    if (!day || !onToggle || !isEditable(day)) return;
     const completed = !completedSet.has(day);
     onToggle(habit.id, day, completed);
   }
@@ -104,7 +111,7 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
                     outlineOffset: "1px",
                   }}
                   className={`rounded-[2px] transition-all ${
-                    !isFuture ? "cursor-pointer hover:ring-1 hover:ring-white/30" : "cursor-default"
+                    isEditable(day) ? "cursor-pointer hover:ring-1 hover:ring-white/30" : "cursor-default"
                   }`}
                 />
               );
