@@ -301,6 +301,7 @@ export async function sendFeedbackEmail(opts: {
   type: string;
   message: string;
   appVersion?: string;
+  attachments?: { filename: string; content: string; contentType: string }[]; // content = base64
 }): Promise<{ ok: boolean; reason?: string }> {
   const to = process.env.ADMIN_NOTIFY_EMAIL;
   if (!to) return { ok: false, reason: "no_admin" };
@@ -329,7 +330,14 @@ export async function sendFeedbackEmail(opts: {
           <tr><td style="padding:4px 0;color:#a1a1aa;">When</td><td style="padding:4px 0;text-align:right;color:#fff;">${when}</td></tr>
         </table>
         <div style="background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:14px;color:#e4e4e7;font-size:14px;line-height:1.6;white-space:pre-wrap;">${opts.message.replace(/</g, "&lt;")}</div>
+        ${opts.attachments?.length ? `<p style="color:#a1a1aa;font-size:12px;margin:14px 0 0;">📎 ${opts.attachments.length} screenshot(s) attached.</p>` : ""}
         <p style="color:#71717a;font-size:11px;margin:14px 0 0;">Reply to this email to respond to the user directly.</p>`),
+      attachments: opts.attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        encoding: "base64",
+        contentType: a.contentType,
+      })),
     });
     return { ok: true };
   } catch (e) {

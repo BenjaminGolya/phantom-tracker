@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
@@ -71,6 +71,41 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [fbMessage, setFbMessage] = useState("");
   const [fbSending, setFbSending] = useState(false);
   const [fbResult, setFbResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [fbFiles, setFbFiles] = useState<{ name: string; dataUrl: string; contentType: string }[]>([]);
+  const fbFileRef = useRef<HTMLInputElement>(null);
+
+  const FB_MAX_FILES = 3;
+  const FB_MAX_MB = 5;
+  const FB_ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+
+  function pickScreenshots(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (fbFileRef.current) fbFileRef.current.value = "";
+    setFbResult(null);
+    for (const file of files) {
+      if (fbFiles.length >= FB_MAX_FILES) {
+        setFbResult({ ok: false, text: `Up to ${FB_MAX_FILES} screenshots.` });
+        break;
+      }
+      if (!FB_ALLOWED.includes(file.type)) {
+        setFbResult({ ok: false, text: "Only PNG, JPG, WebP or GIF images." });
+        continue;
+      }
+      if (file.size > FB_MAX_MB * 1024 * 1024) {
+        setFbResult({ ok: false, text: `Each image must be under ${FB_MAX_MB} MB.` });
+        continue;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFbFiles((prev) =>
+          prev.length >= FB_MAX_FILES
+            ? prev
+            : [...prev, { name: file.name, dataUrl: reader.result as string, contentType: file.type }]
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 
   async function submitFeedback() {
     if (fbMessage.trim().length < 5) {
@@ -80,15 +115,21 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
     setFbSending(true);
     setFbResult(null);
     try {
+      const attachments = fbFiles.map((f) => ({
+        filename: f.name,
+        contentType: f.contentType,
+        content: f.dataUrl.split(",")[1] ?? "", // strip "data:...;base64,"
+      }));
       const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: fbType, message: fbMessage.trim() }),
+        body: JSON.stringify({ type: fbType, message: fbMessage.trim(), attachments }),
       });
       const data = await res.json();
       if (res.ok) {
         setFbResult({ ok: true, text: "Thanks! Your message has been sent. ✓" });
         setFbMessage("");
+        setFbFiles([]);
       } else {
         setFbResult({ ok: false, text: data?.message ?? "Couldn't send — please try again." });
       }
@@ -643,6 +684,45 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           }
           className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
         />
+
+        {/* Screenshot attachments */}
+        <div className="mt-2">
+          <input
+            ref={fbFileRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            multiple
+            onChange={pickScreenshots}
+            className="hidden"
+          />
+          <div className="flex items-center gap-2 flex-wrap">
+            {fbFiles.map((f, i) => (
+              <div key={i} className="relative group/att">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={f.dataUrl} alt={f.name} className="w-12 h-12 rounded-lg object-cover border border-border" />
+                <button
+                  type="button"
+                  onClick={() => setFbFiles((prev) => prev.filter((_, j) => j !== i))}
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-600 text-white flex items-center justify-center"
+                  aria-label="Remove screenshot"
+                >
+                  <Trash2 size={9} />
+                </button>
+              </div>
+            ))}
+            {fbFiles.length < FB_MAX_FILES && (
+              <button
+                type="button"
+                onClick={() => fbFileRef.current?.click()}
+                className="w-12 h-12 rounded-lg border border-dashed border-border hover:border-primary/50 text-muted hover:text-primary flex items-center justify-center transition-colors"
+                title="Attach screenshot"
+              >
+                <ImagePlus size={16} />
+              </button>
+            )}
+          </div>
+          <p className="text-[10px] text-muted mt-1">Optional · up to {FB_MAX_FILES} images, {FB_MAX_MB} MB each.</p>
+        </div>
 
         <div className="flex items-center justify-between gap-3 mt-2">
           {fbResult ? (

@@ -9,6 +9,9 @@ import { logError } from "@/lib/log";
 export const dynamic = "force-dynamic";
 
 const TYPES = ["bug", "question", "feedback"];
+const MAX_FILES = 3;
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB per screenshot
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -25,6 +28,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "too_long", message: "Please keep it under 5000 characters." }, { status: 400 });
   }
 
+  // Validate optional screenshot attachments.
+  const rawFiles = Array.isArray(body?.attachments) ? body.attachments : [];
+  if (rawFiles.length > MAX_FILES) {
+    return NextResponse.json({ error: "too_many", message: `Up to ${MAX_FILES} screenshots.` }, { status: 400 });
+  }
+  const attachments: { filename: string; content: string; contentType: string }[] = [];
+  for (const f of rawFiles) {
+    const contentType = String(f?.contentType ?? "");
+    const content = String(f?.content ?? ""); // base64 (no data: prefix)
+    if (!ALLOWED_TYPES.includes(contentType)) {
+      return NextResponse.json({ error: "bad_type", message: "Screenshots must be PNG, JPG, WebP or GIF." }, { status: 400 });
+    }
+    // base64 length → byte size
+    const bytes = Math.floor((content.length * 3) / 4);
+    if (bytes > MAX_FILE_BYTES) {
+      return NextResponse.json({ error: "too_large", message: "Each screenshot must be under 5 MB." }, { status: 400 });
+    }
+    attachments.push({
+      filename: String(f?.filename ?? "screenshot").slice(0, 100),
+      content,
+      contentType,
+    });
+  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -38,6 +65,7 @@ export async function POST(req: NextRequest) {
       type,
       message,
       appVersion: APP_VERSION,
+      attachments,
     });
 
     if (!res.ok) {
