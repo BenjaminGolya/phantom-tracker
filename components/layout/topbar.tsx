@@ -4,7 +4,7 @@ import { signOut } from "next-auth/react";
 import { LogOut, Settings, Info, Home } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
+import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
 interface TopBarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
@@ -31,9 +31,7 @@ export function TopBar({ user }: TopBarProps) {
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-surface shrink-0">
       <div className="lg:hidden flex items-center gap-2">
-        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center phantom-glow">
-          <GhostMark size={16} className="text-white" />
-        </div>
+        <GhostLogo size={28} className="phantom-glow" />
         <span className="font-semibold text-sm">Phantom Tracker</span>
       </div>
 

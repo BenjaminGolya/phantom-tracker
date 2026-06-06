@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle } from "lucide-react";
 import { usePush } from "@/lib/use-push";
-import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
+import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
 
 interface SettingsClientProps {
@@ -656,7 +656,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* About */}
       <div className="text-center pt-4">
-        <p className="text-xs text-muted flex items-center justify-center gap-1.5"><GhostMark size={11} className="text-primary" /> Phantom Tracker — v1.0.0</p>
+        <p className="text-xs text-muted flex items-center justify-center gap-1.5"><GhostLogo size={14} /> Phantom Tracker — v1.0.0</p>
         <p className="text-xs text-muted mt-1">Dark mode only. Built for consistency.</p>
       </div>
     </div>

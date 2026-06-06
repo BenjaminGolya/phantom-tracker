@@ -9,7 +9,7 @@ import {
   Share, Smartphone, ChevronRight, CalendarDays, Sparkles, MoreHorizontal,
   Settings, LogOut,
 } from "lucide-react";
-import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
+import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -193,9 +193,7 @@ export function LandingPage() {
       <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow">
-              <GhostMark size={16} className="text-white" />
-            </div>
+            <GhostLogo size={28} className="phantom-glow" />
             <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
           </div>
           <div className="flex items-center gap-2">
@@ -346,9 +344,7 @@ export function LandingPage() {
         >
           <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-primary/15 blur-3xl" />
           <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow mx-auto mb-5">
-              <GhostMark size={28} className="text-white" />
-            </div>
+            <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow mx-auto mb-5" />
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Start building better habits today</h2>
             <p className="text-muted mt-3 max-w-md mx-auto">It&apos;s free, takes a minute to set up, and works on every device.</p>
             <Link href={authed ? "/dashboard" : "/signup"} className="inline-flex items-center gap-1.5 mt-7 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-6 py-3 rounded-xl transition-all hover:shadow-glow">
@@ -362,7 +358,7 @@ export function LandingPage() {
       <footer className="border-t border-border/60">
         <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-muted">
-            <GhostMark size={14} className="text-primary" />
+            <GhostLogo size={16} />
             <span className="text-xs">Phantom Tracker — built for consistency.</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted">

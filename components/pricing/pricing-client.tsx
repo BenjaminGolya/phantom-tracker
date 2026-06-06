@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, Sparkles, Loader2, X } from "lucide-react";
-import { GhostMark } from "@/components/brand/ghost-mark";
+import { GhostLogo } from "@/components/brand/ghost-mark";
 import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
 
 type Interval = "monthly" | "yearly";
@@ -67,9 +67,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-28 lg:pb-6">
       <div className="text-center pt-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 mb-3">
-          <GhostMark size={24} className="text-primary" />
-        </div>
+        <GhostLogo size={48} rounded="rounded-2xl" className="mb-3 mx-auto" />
         <h1 className="text-2xl font-bold">Go Pro</h1>
         <p className="text-sm text-muted mt-1">
           Unlock unlimited habits, reminders, advanced stats and a faster path to the top.

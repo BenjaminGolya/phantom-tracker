@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Target, BarChart2, Settings, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GhostMark, GhostAvatar } from "@/components/brand/ghost-mark";
+import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,9 +26,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
     <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-surface shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-border">
-        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center phantom-glow shrink-0">
-          <GhostMark size={16} className="text-white" />
-        </div>
+        <GhostLogo size={28} className="phantom-glow" />
         <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
         {pro && (
           <span className="ml-auto text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">

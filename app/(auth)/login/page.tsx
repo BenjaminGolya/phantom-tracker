@@ -5,7 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { GhostMark } from "@/components/brand/ghost-mark";
+import { GhostLogo } from "@/components/brand/ghost-mark";
 import { motion } from "framer-motion";
 
 function LoginForm() {
@@ -58,9 +58,7 @@ function LoginForm() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow">
-            <GhostMark size={28} className="text-white" />
-          </div>
+          <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight">Phantom Tracker</h1>
             <p className="text-sm text-muted mt-1">Sign in to your account</p>

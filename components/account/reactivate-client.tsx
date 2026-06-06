@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Loader2, LogOut, AlertTriangle, PauseCircle } from "lucide-react";
-import { GhostMark } from "@/components/brand/ghost-mark";
+import { GhostLogo } from "@/components/brand/ghost-mark";
 
 export function ReactivateClient({
   name,
@@ -49,9 +49,7 @@ export function ReactivateClient({
     <div className="min-h-screen bg-background text-white flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-surface border border-border rounded-2xl p-6 text-center">
         <div className="flex flex-col items-center mb-5 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center phantom-glow">
-            <GhostMark size={28} className="text-white" />
-          </div>
+          <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
               pendingDeletion
