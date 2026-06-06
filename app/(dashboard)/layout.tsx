@@ -7,6 +7,7 @@ import { TopBar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/prisma";
 import { getProfileLevel } from "@/lib/utils";
 import { isPro } from "@/lib/plan";
+import { getActiveHabitsWithLogs } from "@/lib/habits";
 
 export default async function DashboardLayout({
   children,
@@ -17,10 +18,7 @@ export default async function DashboardLayout({
   if (!session) redirect("/login");
 
   const [habits, dbUser] = await Promise.all([
-    prisma.habit.findMany({
-      where: { userId: session.user.id, archived: false },
-      include: { logs: true },
-    }),
+    getActiveHabitsWithLogs(session.user.id),
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { name: true, email: true, image: true, plan: true, disabledAt: true, deletionRequestedAt: true },
