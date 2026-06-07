@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
 
@@ -108,6 +108,10 @@ export default function SignupPage() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-sm"
       >
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
+          <ArrowLeft size={14} /> Back to home
+        </Link>
+
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">

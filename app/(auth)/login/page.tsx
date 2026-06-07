@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { GhostLogo } from "@/components/brand/ghost-mark";
 import { motion } from "framer-motion";
 
@@ -57,6 +57,10 @@ function LoginForm() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-sm"
       >
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
+          <ArrowLeft size={14} /> Back to home
+        </Link>
+
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
