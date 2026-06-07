@@ -29,6 +29,8 @@ model User {
   pendingEmail         String?
   emailChangeToken     String?           @unique
   emailChangeExpires   DateTime?
+  resetToken           String?           @unique
+  resetExpires         DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   habits              Habit[]

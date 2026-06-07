@@ -294,6 +294,26 @@ export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string
   });
 }
 
+/** Send a password-reset link. */
+export async function sendPasswordResetEmail(to: string, token: string, name?: string | null) {
+  const hi = name ? `Hi ${name}` : "Hi there";
+  const url = `${appUrl()}/reset?token=${encodeURIComponent(token)}`;
+  if (!isSmtpConfigured()) {
+    console.log(`\n  🔑 (password reset skipped — no SMTP) for ${to}\n  ➜  ${url}\n`);
+    return;
+  }
+  await makeTransport().sendMail({
+    from: emailFrom(), to,
+    subject: "Reset your Phantom Tracker password",
+    text: `${hi},\n\nWe got a request to reset your password. Use this link (valid 1 hour):\n\n${url}\n\nIf you didn't request this, you can safely ignore this email — your password won't change.`,
+    html: shell("Reset your password", `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">We got a request to reset your password. Tap the button to choose a new one — this link expires in <strong style="color:#fff;">1 hour</strong>.</p>
+      <div style="text-align:center;margin-bottom:16px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Reset password</a></div>
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">If you didn't request this, ignore this email — your password stays the same.</p>`),
+  });
+}
+
 /** Send a user's bug report / question / feedback to the admin inbox. */
 export async function sendFeedbackEmail(opts: {
   fromEmail: string;

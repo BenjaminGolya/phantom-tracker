@@ -14,6 +14,7 @@ function LoginForm() {
   const { data: session, status } = useSession();
   const justVerified = params.get("verified") === "1";
   const emailChanged = params.get("emailChanged") === "1";
+  const passwordReset = params.get("reset") === "1";
   const emailChangeIssue = params.get("emailChange"); // invalid | expired | taken | error
   const emailParam = params.get("email") ?? "";
   const [email, setEmail] = useState(emailParam);
@@ -77,6 +78,12 @@ function LoginForm() {
           </div>
         )}
 
+        {passwordReset && (
+          <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm text-center">
+            ✓ Password updated — sign in with your new password
+          </div>
+        )}
+
         {emailChangeIssue && (
           <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
             {emailChangeIssue === "expired"
@@ -115,6 +122,12 @@ function LoginForm() {
             >
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
+          </div>
+
+          <div className="text-right -mt-1">
+            <Link href="/forgot" className="text-xs text-muted hover:text-primary transition-colors">
+              Forgot password?
+            </Link>
           </div>
 
           {error && (
