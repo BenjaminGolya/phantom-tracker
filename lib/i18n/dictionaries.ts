@@ -52,6 +52,20 @@ const en = {
   "auth.verifyAndSignIn": "Verify & sign in",
   "auth.useDifferent": "Use a different account",
 
+  // nav
+  "nav.habits": "Habits",
+  "nav.stats": "Stats",
+  "nav.upgrade": "Upgrade to Pro",
+  "nav.upgradeSub": "Unlimited habits & more",
+  "nav.level": "Level",
+
+  // verify
+  "auth.verifyTitle": "Check your email",
+  "auth.verifySubtitle": "Enter the 6-digit code we sent you.",
+  "auth.verifyButton": "Verify email",
+  "auth.resend": "Resend code",
+  "auth.codePlaceholder": "6-digit code",
+
   // settings (section titles)
   "settings.title": "Settings",
   "settings.plan": "Plan",
@@ -114,6 +128,18 @@ const hu: Partial<Record<DictKey, string>> = {
   "auth.verifyAndSignIn": "Ellenőrzés és belépés",
   "auth.useDifferent": "Másik fiók használata",
 
+  "nav.habits": "Szokások",
+  "nav.stats": "Statisztika",
+  "nav.upgrade": "Válts Pro-ra",
+  "nav.upgradeSub": "Korlátlan szokások és több",
+  "nav.level": "Szint",
+
+  "auth.verifyTitle": "Nézd meg az e-mailed",
+  "auth.verifySubtitle": "Írd be a 6 jegyű kódot, amit küldtünk.",
+  "auth.verifyButton": "E-mail megerősítése",
+  "auth.resend": "Kód újraküldése",
+  "auth.codePlaceholder": "6 jegyű kód",
+
   "settings.title": "Beállítások",
   "settings.plan": "Csomag",
   "settings.profile": "Profil",
@@ -172,6 +198,18 @@ const ro: Partial<Record<DictKey, string>> = {
   "auth.twoFANotice": "Ți-am trimis un cod din 6 cifre. Introdu-l mai jos.",
   "auth.verifyAndSignIn": "Verifică și conectează-te",
   "auth.useDifferent": "Folosește alt cont",
+
+  "nav.habits": "Obiceiuri",
+  "nav.stats": "Statistici",
+  "nav.upgrade": "Treci la Pro",
+  "nav.upgradeSub": "Obiceiuri nelimitate și mai mult",
+  "nav.level": "Nivel",
+
+  "auth.verifyTitle": "Verifică-ți e-mailul",
+  "auth.verifySubtitle": "Introdu codul din 6 cifre pe care ți l-am trimis.",
+  "auth.verifyButton": "Confirmă e-mailul",
+  "auth.resend": "Retrimite codul",
+  "auth.codePlaceholder": "cod din 6 cifre",
 
   "settings.title": "Setări",
   "settings.plan": "Plan",

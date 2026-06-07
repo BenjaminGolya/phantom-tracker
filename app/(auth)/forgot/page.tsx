@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Loader2, ArrowLeft, MailCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { useT } from "@/lib/i18n/context";
 
 export default function ForgotPage() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -34,14 +36,14 @@ export default function ForgotPage() {
         className="w-full max-w-sm"
       >
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
-          <ArrowLeft size={14} /> Back to home
+          <ArrowLeft size={14} /> {t("common.backToHome")}
         </Link>
 
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
-            <h1 className="text-xl font-semibold tracking-tight">Reset your password</h1>
-            <p className="text-sm text-muted mt-1">We&apos;ll email you a reset link.</p>
+            <h1 className="text-xl font-semibold tracking-tight">{t("auth.resetTitle")}</h1>
+            <p className="text-sm text-muted mt-1">{t("auth.resetSubtitle")}</p>
           </div>
         </div>
 
@@ -54,7 +56,7 @@ export default function ForgotPage() {
             <p className="text-xs text-muted mb-6">
               If an account exists for <span className="text-white">{email}</span>, a reset link is on its way. It expires in 1 hour.
             </p>
-            <Link href="/login" className="text-sm text-primary hover:underline">Back to sign in</Link>
+            <Link href="/login" className="text-sm text-primary hover:underline">{t("common.signIn")}</Link>
           </div>
         ) : (
           <>
@@ -73,11 +75,11 @@ export default function ForgotPage() {
                 className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 size={14} className="animate-spin" />}
-                Send reset link
+                {t("auth.sendResetLink")}
               </button>
             </form>
             <Link href="/login" className="flex items-center justify-center gap-1.5 text-sm text-muted hover:text-white transition-colors mt-6">
-              <ArrowLeft size={14} /> Back to sign in
+              <ArrowLeft size={14} /> {t("common.signIn")}
             </Link>
           </>
         )}

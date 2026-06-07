@@ -6,11 +6,14 @@ import { LayoutDashboard, Target, BarChart2, Settings, Sparkles } from "lucide-r
 import { cn } from "@/lib/utils";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
-const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/habits", label: "Habits", icon: Target },
-  { href: "/stats", label: "Stats", icon: BarChart2 },
-  { href: "/settings", label: "Settings", icon: Settings },
+import { useT } from "@/lib/i18n/context";
+import type { DictKey } from "@/lib/i18n/dictionaries";
+
+const nav: { href: string; key: DictKey; icon: typeof LayoutDashboard }[] = [
+  { href: "/dashboard", key: "common.dashboard", icon: LayoutDashboard },
+  { href: "/habits", key: "nav.habits", icon: Target },
+  { href: "/stats", key: "nav.stats", icon: BarChart2 },
+  { href: "/settings", key: "common.settings", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -21,6 +24,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-surface shrink-0">
@@ -37,7 +41,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-0.5">
-        {nav.map(({ href, label, icon: Icon }) => {
+        {nav.map(({ href, key, icon: Icon }) => {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
           return (
             <Link
@@ -60,7 +64,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
               >
                 <Icon size={15} />
               </span>
-              {label}
+              {t(key)}
             </Link>
           );
         })}
@@ -76,8 +80,8 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
             <Sparkles size={15} />
           </span>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-primary">Upgrade to Pro</p>
-            <p className="text-[10px] text-muted">Unlimited habits & more</p>
+            <p className="text-xs font-semibold text-primary">{t("nav.upgrade")}</p>
+            <p className="text-[10px] text-muted">{t("nav.upgradeSub")}</p>
           </div>
         </Link>
       )}
@@ -96,7 +100,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
                 <p className="text-xs font-semibold" style={{ color: profileLevel.color }}>
                   {profileLevel.label}
                 </p>
-                <p className="text-[10px] text-muted">Level {profileLevel.level}</p>
+                <p className="text-[10px] text-muted">{t("nav.level")} {profileLevel.level}</p>
               </div>
             </div>
             <span className="text-[10px] font-mono text-muted">{profileLevel.xp} XP</span>
