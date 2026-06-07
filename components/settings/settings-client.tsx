@@ -4,11 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck, Globe } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
 import { APP_VERSION, LATEST, CHANGELOG } from "@/lib/version";
+import { useLang } from "@/lib/i18n/context";
+import { LOCALES, LOCALE_NAMES, LOCALE_FLAGS } from "@/lib/i18n/config";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
@@ -56,6 +58,7 @@ function fileToAvatar(file: File): Promise<string> {
 
 export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
+  const { t, lang, setLang } = useLang();
   const router = useRouter();
   const push = usePush();
   const [justUpgraded, setJustUpgraded] = useState(false);
@@ -660,6 +663,28 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             {importMsg && <p className="text-xs text-muted">{importMsg}</p>}
           </div>
         )}
+      </div>
+
+      {/* Language */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <Globe size={15} className="text-primary" /> {t("settings.language")}
+        </h2>
+        <p className="text-xs text-muted mb-4">{t("settings.languageHint")}</p>
+        <div className="flex gap-2 flex-wrap">
+          {LOCALES.map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(l)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                lang === l ? "bg-primary/15 border-primary/40 text-primary" : "bg-surface-2 border-border text-muted hover:text-white"
+              }`}
+            >
+              <span>{LOCALE_FLAGS[l]}</span> {LOCALE_NAMES[l]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Security */}

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { useT } from "@/lib/i18n/context";
 import { motion } from "framer-motion";
 
 function LoginForm() {
@@ -24,6 +25,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [needs2fa, setNeeds2fa] = useState(false);
   const [code, setCode] = useState("");
+  const t = useT();
 
   // Already signed in → go to the dashboard. The one exception: an email link
   // for a DIFFERENT account (?email=) opened on a device logged into another
@@ -86,7 +88,7 @@ function LoginForm() {
         className="w-full max-w-sm"
       >
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
-          <ArrowLeft size={14} /> Back to home
+          <ArrowLeft size={14} /> {t("common.backToHome")}
         </Link>
 
         {/* Logo */}
@@ -94,7 +96,7 @@ function LoginForm() {
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight">Phantom Tracker</h1>
-            <p className="text-sm text-muted mt-1">Sign in to your account</p>
+            <p className="text-sm text-muted mt-1">{t("auth.signInTitle")}</p>
           </div>
         </div>
 
@@ -186,7 +188,7 @@ function LoginForm() {
           {!needs2fa && (
             <div className="text-right -mt-1">
               <Link href="/forgot" className="text-xs text-muted hover:text-primary transition-colors">
-                Forgot password?
+                {t("auth.forgot")}
               </Link>
             </div>
           )}
@@ -201,14 +203,14 @@ function LoginForm() {
             className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            {needs2fa ? "Verify & sign in" : "Sign in"}
+            {needs2fa ? t("auth.verifyAndSignIn") : t("common.signIn")}
           </button>
         </form>
 
         <p className="text-center text-sm text-muted mt-6">
-          No account?{" "}
+          {t("auth.noAccount")}{" "}
           <Link href="/signup" className="text-primary hover:underline">
-            Sign up
+            {t("common.getStarted")}
           </Link>
         </p>
       </motion.div>

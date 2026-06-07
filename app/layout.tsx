@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { LANG_COOKIE, DEFAULT_LOCALE, isLocale } from "@/lib/i18n/config";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,10 +41,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieLang = cookies().get(LANG_COOKIE)?.value;
+  const lang = isLocale(cookieLang) ? cookieLang : DEFAULT_LOCALE;
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang={lang} className="dark" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-white`}>
-        <Providers>{children}</Providers>
+        <Providers lang={lang}>{children}</Providers>
       </body>
     </html>
   );
