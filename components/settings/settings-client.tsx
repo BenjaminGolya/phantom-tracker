@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
@@ -17,6 +17,7 @@ interface SettingsClientProps {
   trialEndsAt?: string | null;
   hasBilling?: boolean;
   pendingEmail?: string | null;
+  twoFactorEnabled?: boolean;
 }
 
 // Whole days remaining until a date (rounded up). Returns 0 if already past.
@@ -53,7 +54,7 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
   const router = useRouter();
   const push = usePush();
@@ -73,6 +74,23 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [fbResult, setFbResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [fbFiles, setFbFiles] = useState<{ name: string; dataUrl: string; contentType: string }[]>([]);
   const fbFileRef = useRef<HTMLInputElement>(null);
+  const [twoFA, setTwoFA] = useState(twoFactorEnabled);
+  const [twoFABusy, setTwoFABusy] = useState(false);
+
+  async function toggle2FA() {
+    const next = !twoFA;
+    setTwoFABusy(true);
+    try {
+      const res = await fetch("/api/account/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enable: next }),
+      });
+      if (res.ok) setTwoFA(next);
+    } finally {
+      setTwoFABusy(false);
+    }
+  }
 
   const FB_MAX_FILES = 3;
   const FB_MAX_MB = 5;
@@ -642,6 +660,34 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             {importMsg && <p className="text-xs text-muted">{importMsg}</p>}
           </div>
         )}
+      </div>
+
+      {/* Security */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <ShieldCheck size={15} className="text-primary" /> Security
+        </h2>
+        <p className="text-xs text-muted mb-4">Add an extra layer of protection to your account.</p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">Two-factor authentication</p>
+            <p className="text-xs text-muted">
+              {twoFA
+                ? "On — we email a 6-digit code each time you sign in."
+                : "Off — require an emailed code at sign-in for extra security."}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={twoFA}
+            onClick={toggle2FA}
+            disabled={twoFABusy}
+            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 disabled:opacity-50 ${twoFA ? "bg-primary" : "bg-surface-2 border border-border"}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${twoFA ? "translate-x-5" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Help & feedback */}
