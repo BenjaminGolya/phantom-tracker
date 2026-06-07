@@ -345,7 +345,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
   return (
     <div className="max-w-lg mx-auto space-y-6 pb-28 lg:pb-6">
-      <h1 className="text-lg font-semibold">Settings</h1>
+      <h1 className="text-lg font-semibold">{t("settings.title")}</h1>
 
       {justUpgraded && (
         <div className="flex items-center gap-2 px-3.5 py-3 rounded-xl border border-primary/40 bg-primary/10 text-sm text-primary">
@@ -356,7 +356,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Billing / Plan */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <Crown size={15} className="text-primary" /> Plan
+          <Crown size={15} className="text-primary" /> {t("settings.plan")}
         </h2>
         {pro ? (
           <>
@@ -411,7 +411,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* Profile */}
       <div className="bg-surface border border-border rounded-xl p-5">
-        <h2 className="text-sm font-medium mb-4">Profile</h2>
+        <h2 className="text-sm font-medium mb-4">{t("settings.profile")}</h2>
 
         {/* Avatar */}
         <div className="flex items-center gap-4 mb-5">
@@ -532,7 +532,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Notifications */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <Bell size={15} className="text-primary" /> Reminders
+          <Bell size={15} className="text-primary" /> {t("settings.reminders")}
           {!pro && (
             <span className="ml-1 inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
               <Lock size={9} /> PRO
@@ -605,7 +605,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Data — Pro */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          Data
+          {t("settings.data")}
           {!pro && (
             <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
               <Lock size={9} /> PRO
@@ -690,12 +690,12 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Security */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <ShieldCheck size={15} className="text-primary" /> Security
+          <ShieldCheck size={15} className="text-primary" /> {t("settings.security")}
         </h2>
         <p className="text-xs text-muted mb-4">Add an extra layer of protection to your account.</p>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium">Two-factor authentication</p>
+            <p className="text-sm font-medium">{t("settings.twoFA")}</p>
             <p className="text-xs text-muted">
               {twoFA
                 ? "On — we email a 6-digit code each time you sign in."
@@ -718,7 +718,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Help & feedback */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <LifeBuoy size={15} className="text-primary" /> Help &amp; feedback
+          <LifeBuoy size={15} className="text-primary" /> {t("settings.help")}
         </h2>
         <p className="text-xs text-muted mb-4">Found a bug or have a question? Send it our way — we read every message.</p>
 
@@ -815,7 +815,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* Danger zone */}
       <div className="bg-surface border border-red-900/30 rounded-xl p-5">
-        <h2 className="text-sm font-medium text-red-400 mb-4">Account</h2>
+        <h2 className="text-sm font-medium text-red-400 mb-4">{t("settings.account")}</h2>
         <div className="space-y-3">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
