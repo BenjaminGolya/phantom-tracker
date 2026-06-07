@@ -76,6 +76,17 @@ const en = {
   "dash.doneMark": "Done ✓",
   "dash.all": "All",
 
+  // habits page
+  "habits.new": "New",
+  "habits.search": "Search habits… (/)",
+  "habits.noneFound": "No habits found",
+  "habits.usedFree": "habits used on the Free plan",
+  "habits.limitReached": "limit reached",
+  "habits.goPro": "Go Pro",
+  "habits.archived": "Archived",
+  "habits.cards": "cards",
+  "habits.grid": "grid",
+
   // verify
   "auth.verifyTitle": "Check your email",
   "auth.verifySubtitle": "Enter the 6-digit code we sent you.",
@@ -167,6 +178,16 @@ const hu: Partial<Record<DictKey, string>> = {
   "dash.doneMark": "Kész ✓",
   "dash.all": "Mind",
 
+  "habits.new": "Új",
+  "habits.search": "Szokások keresése… (/)",
+  "habits.noneFound": "Nincs találat",
+  "habits.usedFree": "szokás az ingyenes csomagban",
+  "habits.limitReached": "elérted a korlátot",
+  "habits.goPro": "Válts Pro-ra",
+  "habits.archived": "Archivált",
+  "habits.cards": "kártyák",
+  "habits.grid": "rács",
+
   "auth.verifyTitle": "Nézd meg az e-mailed",
   "auth.verifySubtitle": "Írd be a 6 jegyű kódot, amit küldtünk.",
   "auth.verifyButton": "E-mail megerősítése",
@@ -253,6 +274,16 @@ const ro: Partial<Record<DictKey, string>> = {
   "dash.todaysHabits": "Obiceiurile de azi",
   "dash.doneMark": "Gata ✓",
   "dash.all": "Toate",
+
+  "habits.new": "Nou",
+  "habits.search": "Caută obiceiuri… (/)",
+  "habits.noneFound": "Niciun obicei găsit",
+  "habits.usedFree": "obiceiuri folosite în planul gratuit",
+  "habits.limitReached": "limită atinsă",
+  "habits.goPro": "Treci la Pro",
+  "habits.archived": "Arhivate",
+  "habits.cards": "carduri",
+  "habits.grid": "grilă",
 
   "auth.verifyTitle": "Verifică-ți e-mailul",
   "auth.verifySubtitle": "Introdu codul din 6 cifre pe care ți l-am trimis.",
