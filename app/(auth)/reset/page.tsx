@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { PasswordRules } from "@/components/auth/password-rules";
+import { isStrongPassword } from "@/lib/password";
 
 function ResetForm() {
   const router = useRouter();
@@ -21,7 +23,7 @@ function ResetForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (!isStrongPassword(password)) { setError("Password isn't strong enough yet."); return; }
     if (password !== confirm) { setError("Passwords don't match."); return; }
     setLoading(true);
     try {
@@ -78,6 +80,7 @@ function ResetForm() {
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            <PasswordRules value={password} />
             <input
               type={showPass ? "text" : "password"}
               placeholder="Confirm new password"

@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2, X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { PasswordRules } from "@/components/auth/password-rules";
+import { isStrongPassword } from "@/lib/password";
 
 type PolicyKey = "terms" | "privacy" | "newsletter";
 
@@ -145,7 +147,6 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
               className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10"
             />
             <button
@@ -156,6 +157,7 @@ export default function SignupPage() {
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+          <PasswordRules value={password} />
 
           {/* Consent checkboxes */}
           <div className="space-y-2.5 pt-1">
@@ -199,7 +201,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading || !acceptedTerms}
+            disabled={loading || !acceptedTerms || !isStrongPassword(password)}
             className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
