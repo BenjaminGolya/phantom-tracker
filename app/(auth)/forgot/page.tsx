@@ -33,6 +33,10 @@ export default function ForgotPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm"
       >
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
+          <ArrowLeft size={14} /> Back to home
+        </Link>
+
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
