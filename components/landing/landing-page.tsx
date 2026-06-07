@@ -7,9 +7,10 @@ import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Share, Smartphone, ChevronRight, CalendarDays, Sparkles, MoreHorizontal,
-  Settings, LogOut,
+  Settings, LogOut, X,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
+import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -273,6 +274,80 @@ export function LandingPage() {
             </motion.div>
           ))}
         </div>
+      </section>
+
+      {/* Plans — Free vs Pro */}
+      <section id="plans" className="max-w-5xl mx-auto px-5 py-16">
+        <motion.div {...fadeUp} className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Free vs Pro</h2>
+          <p className="text-muted mt-3 max-w-md mx-auto">
+            Start free, forever. Upgrade when you want more — with a {TRIAL_DAYS}-day free trial.
+          </p>
+        </motion.div>
+
+        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          {/* Free */}
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">Free</p>
+            <p className="text-3xl font-bold mb-5">€0<span className="text-sm text-muted font-normal"> / forever</span></p>
+            <ul className="space-y-2.5">
+              {[
+                { t: `Up to ${PLAN_LIMITS.freeHabitLimit} habits`, ok: true },
+                { t: "Daily tracking & streaks", ok: true },
+                { t: "Contribution calendars", ok: true },
+                { t: `Profile levels (to Lv.${PLAN_LIMITS.freeProfileLevelCap})`, ok: true },
+                { t: "Timed reminders", ok: false },
+                { t: "Advanced stats", ok: false },
+                { t: `${PLAN_LIMITS.proXpMultiplier}× XP boost & elite tiers`, ok: false },
+                { t: "Data export & import", ok: false },
+              ].map((f) => (
+                <li key={f.t} className="flex items-center gap-2 text-sm">
+                  {f.ok ? <Check size={15} className="text-green-400 shrink-0" /> : <X size={15} className="text-muted/40 shrink-0" />}
+                  <span className={f.ok ? "text-white" : "text-muted line-through"}>{f.t}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={authed ? "/dashboard" : "/signup"}
+              className="mt-6 block text-center text-sm font-medium border border-border hover:border-primary/50 text-white py-2.5 rounded-xl transition-colors"
+            >
+              {authed ? "Open dashboard" : "Start free"}
+            </Link>
+          </div>
+
+          {/* Pro */}
+          <div className="relative bg-surface border-2 border-primary/50 rounded-2xl p-6 shadow-[0_0_40px_#7f49c320]">
+            <span className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md bg-primary text-white">
+              MOST POPULAR
+            </span>
+            <p className="text-xs uppercase tracking-widest text-primary font-medium mb-1 flex items-center gap-1">
+              <Sparkles size={12} /> Pro
+            </p>
+            <p className="text-3xl font-bold">{PRICE_LABEL}</p>
+            <p className="text-[11px] text-primary mb-5">or {PRICE_LABEL_YEARLY} — save {YEARLY_SAVINGS_PCT}% · {TRIAL_DAYS}-day free trial</p>
+            <ul className="space-y-2.5">
+              {[
+                "Unlimited habits",
+                "Timed push reminders",
+                "Advanced stats & insights",
+                `${PLAN_LIMITS.proXpMultiplier}× XP boost + exclusive tiers`,
+                "Data export & import",
+                "Everything in Free",
+              ].map((t) => (
+                <li key={t} className="flex items-center gap-2 text-sm">
+                  <Check size={15} className="text-primary shrink-0" />
+                  <span className="text-white">{t}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={authed ? "/pricing" : "/signup"}
+              className="mt-6 flex items-center justify-center gap-1.5 text-sm font-semibold bg-primary hover:bg-primary-dim text-white py-2.5 rounded-xl transition-all hover:shadow-glow"
+            >
+              <Sparkles size={14} /> {authed ? "Go Pro" : "Start free trial"}
+            </Link>
+          </div>
+        </motion.div>
       </section>
 
       {/* Install + notifications */}
