@@ -10,6 +10,7 @@ import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw } from "lucid
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel } from "@/lib/utils";
+import { useT } from "@/lib/i18n/context";
 import { getHabitIcon } from "@/lib/habit-icons";
 
 export type ProgressRange = "week" | "month" | "year" | "all";
@@ -374,6 +375,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   onDelete?: (id: string) => void;
   onArchive?: (id: string) => void;
 }) {
+  const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const [levelUpInfo, setLevelUpInfo] = useState<ReturnType<typeof getHabitLevel> | null>(null);
   const prevLevelRef = useRef(getHabitLevel(habit.logs).level);
@@ -475,15 +477,15 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
                 <div className="absolute right-0 top-8 z-50 w-40 bg-surface-2 border border-border rounded-xl shadow-xl py-1">
                   <button onClick={() => { onEdit?.(habit); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
-                    <Pencil size={12} /> Edit
+                    <Pencil size={12} /> {t("form.edit")}
                   </button>
                   <button onClick={() => { onArchive?.(habit.id); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
-                    <Archive size={12} /> Archive
+                    <Archive size={12} /> {habit.archived ? t("form.unarchive") : t("form.archive")}
                   </button>
                   <button onClick={() => { onDelete?.(habit.id); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-surface transition-colors">
-                    <Trash2 size={12} /> Delete
+                    <Trash2 size={12} /> {t("form.delete")}
                   </button>
                 </div>
               </>
@@ -506,7 +508,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
           onClick={() => onToggleDay?.(habit.id, yesterday, true, habit.goal ? habit.goal : undefined)}
           className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border hover:border-primary/50 text-xs text-muted hover:text-primary transition-colors"
         >
-          <RotateCcw size={12} /> Forgot yesterday? Mark it done
+          <RotateCcw size={12} /> {t("form.forgotYesterday")}
         </button>
       )}
 

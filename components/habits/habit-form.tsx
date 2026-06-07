@@ -6,6 +6,7 @@ import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock, Lock } from "lucide-r
 import { HABIT_ICONS } from "@/lib/habit-icons";
 import { HabitFormData, HabitWithLogs } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/lib/i18n/context";
 
 const COLORS = ["#7f49c3","#3b82f6","#10b981","#f59e0b","#ef4444","#ec4899","#8b5cf6","#06b6d4","#84cc16","#f97316"];
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -51,6 +52,7 @@ function CategoryPicker({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState(loadCategories);
   const [adding, setAdding] = useState(false);
@@ -119,7 +121,7 @@ function CategoryPicker({
           ) : (
             <>
               <Tag size={13} className="text-muted" />
-              <span className="text-muted">Select category…</span>
+              <span className="text-muted">{t("form.selectCategory")}</span>
             </>
           )}
         </span>
@@ -189,7 +191,7 @@ function CategoryPicker({
                       if (e.key === "Enter") addCategory();
                       if (e.key === "Escape") { setAdding(false); setNewLabel(""); }
                     }}
-                    placeholder="Category name…"
+                    placeholder={t("form.categoryName")}
                     className="flex-1 h-8 px-2 bg-surface border border-border rounded-md text-sm text-white placeholder-muted focus:outline-none focus:border-primary"
                   />
                   <button
@@ -198,7 +200,7 @@ function CategoryPicker({
                     disabled={!newLabel.trim()}
                     className="h-8 px-2.5 bg-primary hover:bg-primary-dim text-white text-xs rounded-md disabled:opacity-40 transition-colors"
                   >
-                    Add
+                    {t("form.add")}
                   </button>
                 </div>
               ) : (
@@ -208,7 +210,7 @@ function CategoryPicker({
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-muted hover:text-primary hover:bg-surface transition-colors"
                 >
                   <Plus size={13} />
-                  New category
+                  {t("form.newCategory")}
                 </button>
               )}
             </div>
@@ -221,6 +223,7 @@ function CategoryPicker({
 
 // ─── 24h time picker (dropdown only, no typing) ───────────────────────────────
 function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const hourCol = useRef<HTMLDivElement>(null);
@@ -258,7 +261,7 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
       >
         <span className="flex items-center gap-2">
           <Clock size={14} className="text-muted" />
-          {value ? <span className="text-white font-mono">{value}</span> : <span className="text-muted">Select time…</span>}
+          {value ? <span className="text-white font-mono">{value}</span> : <span className="text-muted">{t("form.selectTime")}</span>}
         </span>
         <span className="flex items-center gap-1.5">
           {value && (
@@ -327,7 +330,7 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
                 onClick={() => setOpen(false)}
                 className="w-full py-1.5 bg-primary hover:bg-primary-dim text-white text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5"
               >
-                <Check size={13} /> Done{value ? ` · ${value}` : ""}
+                <Check size={13} /> {t("form.done")}{value ? ` · ${value}` : ""}
               </button>
             </div>
           </motion.div>
@@ -346,6 +349,7 @@ interface HabitFormProps {
 }
 
 export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitFormProps) {
+  const t = useT();
   const [name, setName] = useState(initial?.name ?? "");
   const [icon, setIcon] = useState(initial?.icon ?? "Target");
   const [color, setColor] = useState(initial?.color ?? "#7f49c3");
@@ -408,7 +412,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
           {/* Fixed header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
             <h2 className="font-semibold text-sm">
-              {initial ? "Edit habit" : "New habit"}
+              {initial ? t("form.editHabit") : t("form.newHabit")}
             </h2>
             <button onClick={onClose} className="text-muted hover:text-white transition-colors">
               <X size={16} />
@@ -420,7 +424,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
             <div className="overflow-y-auto px-5 py-4 space-y-4 flex-1">
             {/* Name */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Name</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.name")}</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -432,7 +436,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
 
             {/* Icon */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Icon</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.icon")}</label>
               <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
                 {HABIT_ICONS.map(({ name, Icon, label }) => {
                   const selected = icon === name;
@@ -459,7 +463,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
 
             {/* Color */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Color</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.color")}</label>
               <div className="flex gap-1.5 flex-wrap">
                 {COLORS.map((c) => (
                   <button
@@ -477,7 +481,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
 
             {/* Frequency */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Frequency</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.frequency")}</label>
               <div className="flex gap-2 mb-2">
                 {["daily", "custom"].map((f) => (
                   <button
@@ -490,7 +494,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
                         : "bg-surface-2 text-muted hover:text-white border border-border"
                     }`}
                   >
-                    {f}
+                    {f === "daily" ? t("form.daily") : t("form.custom")}
                   </button>
                 ))}
               </div>
@@ -516,13 +520,13 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
 
             {/* Category */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Category</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.category")}</label>
               <CategoryPicker value={category} onChange={setCategory} />
             </div>
 
             {/* Goal */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">Daily goal <span className="opacity-50">(optional)</span></label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.dailyGoal")} <span className="opacity-50">{t("form.optional")}</span></label>
               <div className="relative">
                 <input
                   type="number"
@@ -536,13 +540,13 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">/ day</span>
                 )}
               </div>
-              <p className="text-[11px] text-muted mt-1.5">A count to hit each day (e.g. 50 push-ups). Leave empty for a simple done/skip habit.</p>
+              <p className="text-[11px] text-muted mt-1.5">{t("form.goalHint")}</p>
             </div>
 
             {/* Reminder — Pro only */}
             <div>
               <label className="text-xs text-muted mb-1.5 flex items-center gap-1.5">
-                Reminder <span className="opacity-50">(optional)</span>
+                {t("form.reminder")} <span className="opacity-50">{t("form.optional")}</span>
                 {!pro && (
                   <span className="ml-1 inline-flex items-center gap-1 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
                     <Lock size={9} /> PRO
@@ -552,7 +556,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
               {pro ? (
                 <>
                   <TimePicker value={reminderTime} onChange={setReminderTime} />
-                  <p className="text-[11px] text-muted mt-1.5">Get a push notification at this time if you haven&apos;t completed it yet. Enable notifications in Settings.</p>
+                  <p className="text-[11px] text-muted mt-1.5">{t("form.reminderHint")}</p>
                 </>
               ) : (
                 <Link
@@ -562,7 +566,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
                 >
                   <Clock size={14} className="text-primary shrink-0" />
                   <span className="text-xs text-muted">
-                    <span className="text-primary font-medium">Upgrade to Pro</span> to get timed push reminders.
+                    <span className="text-primary font-medium">{t("nav.upgrade")}</span> {t("form.reminderUpsell")}
                   </span>
                 </Link>
               )}
@@ -577,7 +581,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
                 className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 size={14} className="animate-spin" />}
-                {initial ? "Save changes" : "Create habit"}
+                {initial ? t("common.save") : t("form.createHabit")}
               </button>
             </div>
           </form>
