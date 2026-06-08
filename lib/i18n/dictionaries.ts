@@ -165,6 +165,9 @@ const en = {
   "form.unarchive": "Unarchive",
   "form.delete": "Delete",
   "form.forgotYesterday": "Forgot yesterday? Mark it done",
+  "form.confirmYesterdayTitle": "Complete yesterday?",
+  "form.confirmYesterdayBody": "Mark this habit as done for yesterday? This counts toward your streak.",
+  "form.markDone": "Mark done",
 
   // stats page
   "stats.profileLevel": "Profile Level",
@@ -468,6 +471,9 @@ const hu: Partial<Record<DictKey, string>> = {
   "form.unarchive": "Visszaállítás",
   "form.delete": "Törlés",
   "form.forgotYesterday": "Elfelejtetted tegnap? Jelöld késznek",
+  "form.confirmYesterdayTitle": "Tegnapi teljesítés?",
+  "form.confirmYesterdayBody": "Jelölöd késznek ezt a szokást tegnapra? Ez beleszámít a sorozatodba.",
+  "form.markDone": "Késznek jelöl",
 
   "stats.profileLevel": "Profil szint",
   "stats.of": "/",
@@ -763,6 +769,9 @@ const ro: Partial<Record<DictKey, string>> = {
   "form.unarchive": "Dezarhivează",
   "form.delete": "Șterge",
   "form.forgotYesterday": "Ai uitat ieri? Marchează ca finalizat",
+  "form.confirmYesterdayTitle": "Finalizezi pentru ieri?",
+  "form.confirmYesterdayBody": "Marchezi acest obicei ca finalizat pentru ieri? Contează pentru seria ta.",
+  "form.markDone": "Marchează finalizat",
 
   "stats.profileLevel": "Nivel profil",
   "stats.of": "din",

@@ -378,6 +378,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
 }) {
   const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmYesterday, setConfirmYesterday] = useState(false);
   const [levelUpInfo, setLevelUpInfo] = useState<ReturnType<typeof getHabitLevel> | null>(null);
   const prevLevelRef = useRef(getHabitLevel(habit.logs).level);
 
@@ -506,11 +507,46 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
       {/* Forgot-yesterday nudge */}
       {showLogYesterday && (
         <button
-          onClick={() => onToggleDay?.(habit.id, yesterday, true, habit.goal ? habit.goal : undefined)}
+          onClick={() => setConfirmYesterday(true)}
           className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border hover:border-primary/50 text-xs text-muted hover:text-primary transition-colors"
         >
           <RotateCcw size={12} /> {t("form.forgotYesterday")}
         </button>
+      )}
+
+      {/* Confirm completing yesterday */}
+      {confirmYesterday && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={() => setConfirmYesterday(false)}>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+          <div className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-2">
+              <RotateCcw size={16} className="text-primary" />
+              <h3 className="text-sm font-semibold">{t("form.confirmYesterdayTitle")}</h3>
+            </div>
+            <p className="text-xs text-muted mb-1.5 leading-relaxed">{t("form.confirmYesterdayBody")}</p>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span style={{ color: habit.color }}><HabitIcon size={14} /></span>
+              <span className="text-sm font-medium text-white">{habit.name}</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setConfirmYesterday(false)}
+                className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  onToggleDay?.(habit.id, yesterday, true, habit.goal ? habit.goal : undefined);
+                  setConfirmYesterday(false);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-dim transition-colors"
+              >
+                <RotateCcw size={13} /> {t("form.markDone")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Calendar */}
