@@ -75,7 +75,7 @@ async function runReminders() {
 
     await sendPushToUser(habit.user.id, {
       title: `⏰ ${habit.name}`,
-      body: `Time to complete "${habit.name}" — tap to mark it done.`,
+      body: `Time to complete "${habit.name}". Tap to mark it done.`,
       url: "/dashboard",
       tag: `habit-${habit.id}`,
     });

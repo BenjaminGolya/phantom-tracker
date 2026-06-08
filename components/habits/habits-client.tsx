@@ -221,7 +221,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
         <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg border border-primary/25 bg-primary/8">
           <p className="text-xs text-muted">
             <span className="font-mono font-semibold text-white">{activeCount}/{PLAN_LIMITS.freeHabitLimit}</span> {t("habits.usedFree")}
-            {atLimit && <span className="text-primary"> — {t("habits.limitReached")}</span>}
+            {atLimit && <span className="text-primary"> · {t("habits.limitReached")}</span>}
           </p>
           <Link
             href="/pricing"

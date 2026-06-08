@@ -23,7 +23,7 @@ const POLICIES: Record<PolicyKey, { title: string; body: React.ReactNode }> = {
         <ul>
           <li>The app is provided <strong>as-is</strong>, for personal habit tracking.</li>
           <li>You&apos;re responsible for your account, your password, and the data you add.</li>
-          <li>Don&apos;t misuse the service — no illegal, abusive, or automated/bulk misuse.</li>
+          <li>Don&apos;t misuse the service: no illegal, abusive, or automated/bulk misuse.</li>
           <li>We may add, change, or remove features over time.</li>
           <li>We aim for high uptime but can&apos;t guarantee the service is always available.</li>
         </ul>
@@ -39,7 +39,7 @@ const POLICIES: Record<PolicyKey, { title: string; body: React.ReactNode }> = {
         <ul>
           <li><strong>Account:</strong> your email, optional name, and optional profile picture.</li>
           <li><strong>Your data:</strong> the habits and check-ins you create.</li>
-          <li><strong>Email:</strong> used for verification, a welcome message, and — only if you opt in — product updates.</li>
+          <li><strong>Email:</strong> used for verification, a welcome message, and (only if you opt in) product updates.</li>
           <li><strong>Notifications:</strong> if you enable reminders, we store a push subscription to deliver them.</li>
         </ul>
         <p>We <strong>never sell your data</strong>. You can delete your account and data at any time from Settings.</p>

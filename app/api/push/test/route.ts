@@ -9,7 +9,7 @@ export async function POST() {
 
   const result = await sendPushToUser(session.user.id, {
     title: "👻 Phantom Tracker",
-    body: "Test notification — your reminders are working!",
+    body: "Test notification. Your reminders are working!",
     url: "/dashboard",
     tag: "test",
   });
