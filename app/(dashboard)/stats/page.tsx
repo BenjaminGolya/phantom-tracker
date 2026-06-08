@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { StatsClient } from "@/components/stats/stats-client";
 import { getCurrentPlan } from "@/lib/get-plan";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
+import { partitionHabits } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -13,5 +14,6 @@ export default async function StatsPage() {
     getCurrentPlan(),
   ]);
 
-  return <StatsClient habits={habits} pro={pro} />;
+  const { active } = partitionHabits(habits, pro);
+  return <StatsClient habits={active} pro={pro} />;
 }

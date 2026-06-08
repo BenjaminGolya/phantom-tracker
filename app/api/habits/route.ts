@@ -29,16 +29,16 @@ export async function POST(req: NextRequest) {
   });
   const pro = isPro(user);
 
-  // Free plan: limit active (non-archived) habits.
+  // Free plan: limit active (non-archived, non-locked) habits.
   if (!pro) {
     const activeCount = await prisma.habit.count({
-      where: { userId: session.user.id, archived: false },
+      where: { userId: session.user.id, archived: false, locked: false },
     });
     if (activeCount >= PLAN_LIMITS.freeHabitLimit) {
       return NextResponse.json(
         {
           error: "habit_limit",
-          message: `Free plan is limited to ${PLAN_LIMITS.freeHabitLimit} habits. Upgrade to Pro for unlimited.`,
+          message: `Free plan is limited to ${PLAN_LIMITS.freeHabitLimit} habits. Delete one to add another, or upgrade to Pro for unlimited.`,
         },
         { status: 403 }
       );

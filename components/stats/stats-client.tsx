@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import { format, subDays } from "date-fns";
+import { format, subDays, parseISO } from "date-fns";
 import { motion } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 
@@ -15,12 +15,15 @@ const WeeklyChart = dynamic(() => import("./weekly-chart"), {
 import Link from "next/link";
 import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
 import { PLAN_LIMITS } from "@/lib/plan";
-import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles } from "lucide-react";
+import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles, ChevronDown, CalendarDays } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
 import { useT, useLang } from "@/lib/i18n/context";
 import { levelLabel } from "@/lib/i18n/levels";
 import { dfLocale } from "@/lib/i18n/date";
+import { categoryLabel } from "@/lib/i18n/category";
+import { PersonalityConstellation } from "@/components/profile/personality-constellation";
+import { GrowingPlanet } from "@/components/profile/growing-planet";
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
@@ -147,10 +150,13 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
         </div>
       </div>
 
-      {/* XP breakdown — how you earn it + how to earn more */}
-      <div className="border-t border-border pt-4">
-        <p className="text-xs text-muted uppercase tracking-wider mb-3 font-medium">{t("stats.howEarnXp")}</p>
-        <div className="space-y-3">
+      {/* XP breakdown — how you earn it + how to earn more (collapsible) */}
+      <details className="group border-t border-border pt-4">
+        <summary className="flex items-center justify-between cursor-pointer list-none select-none group/sum">
+          <span className="text-xs text-muted uppercase tracking-wider font-medium transition-colors group-hover/sum:text-primary">{t("stats.howEarnXp")}</span>
+          <ChevronDown size={15} className="text-muted transition-all group-open:rotate-180 group-hover/sum:text-primary" />
+        </summary>
+        <div className="space-y-3 mt-3">
           {xpSources.map((src) => {
             const capped = "cap" in src;
             return (
@@ -185,7 +191,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
             );
           })}
         </div>
-      </div>
+      </details>
     </motion.div>
   );
 }
@@ -308,9 +314,11 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
 function AdvancedStats({
   pro,
   metrics,
+  children,
 }: {
   pro: boolean;
   metrics: { label: string; value: string | number; icon: React.ReactNode; hint: string }[];
+  children?: React.ReactNode;
 }) {
   const t = useT();
   return (
@@ -325,17 +333,20 @@ function AdvancedStats({
       </div>
 
       <div className="relative">
-        <div className={`grid grid-cols-2 gap-3 ${pro ? "" : "blur-sm select-none pointer-events-none"}`} aria-hidden={!pro}>
-          {metrics.map(({ label, value, icon, hint }) => (
-            <div key={label} className="bg-surface border border-border rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted">{label}</span>
-                {icon}
+        <div className={`space-y-3 ${pro ? "" : "blur-sm select-none pointer-events-none"}`} aria-hidden={!pro}>
+          <div className="grid grid-cols-2 gap-3">
+            {metrics.map(({ label, value, icon, hint }) => (
+              <div key={label} className="bg-surface border border-border rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-muted">{label}</span>
+                  {icon}
+                </div>
+                <div className="text-2xl font-mono font-bold">{value}</div>
+                <p className="text-[10px] text-muted mt-1">{hint}</p>
               </div>
-              <div className="text-2xl font-mono font-bold">{value}</div>
-              <p className="text-[10px] text-muted mt-1">{hint}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+          {children}
         </div>
 
         {!pro && (
@@ -391,6 +402,40 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
     : 0;
   const categoriesUsed = Math.round(profileInfo.breakdown.diversity / 10);
 
+  // ── More advanced (Pro) metrics ──
+  const completedDates = habits.flatMap((h) => h.logs.filter((l) => l.completed).map((l) => l.date));
+  const activeDays = new Set(completedDates).size;
+
+  // 30-day momentum: this month's volume vs the previous 30 days.
+  const inWindow = (d: string, fromAgo: number, toAgo: number) => {
+    const dt = parseISO(d);
+    return dt > subDays(new Date(), fromAgo) && dt <= subDays(new Date(), toAgo);
+  };
+  const last30 = completedDates.filter((d) => inWindow(d, 30, 0)).length;
+  const prev30 = completedDates.filter((d) => inWindow(d, 60, 30)).length;
+  const trendPct = prev30 > 0 ? Math.round(((last30 - prev30) / prev30) * 100) : last30 > 0 ? 100 : 0;
+  const avgPerDay = (last30 / 30).toFixed(1);
+
+  // Day-of-week distribution (0 = Sunday) across all completions.
+  const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
+  for (const d of completedDates) weekdayCounts[parseISO(d).getDay()]++;
+  const maxWeekday = Math.max(1, ...weekdayCounts);
+  const busiestIdx = completedDates.length ? weekdayCounts.indexOf(Math.max(...weekdayCounts)) : -1;
+  const busiestDay = busiestIdx >= 0
+    ? format(new Date(2023, 0, 1 + busiestIdx), "EEE", { locale: dfLocale(lang) })
+    : "—";
+
+  // Completions per category (top 6).
+  const catTotals = new Map<string, number>();
+  for (const h of habits) {
+    const done = h.logs.filter((l) => l.completed).length;
+    if (!done) continue;
+    const key = h.category || "__none";
+    catTotals.set(key, (catTotals.get(key) ?? 0) + done);
+  }
+  const catRows = Array.from(catTotals.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const catMax = Math.max(1, ...catRows.map(([, v]) => v));
+
   // Date-based charts/streaks differ server vs client — render a shell until mounted.
   if (!mounted) {
     return (
@@ -419,6 +464,10 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
         <>
           {/* Profile level hero */}
           <ProfileLevelCard habits={habits} pro={pro} />
+
+          {/* Profile portrait — growing world + personality */}
+          <GrowingPlanet habits={habits} pro={pro} />
+          <PersonalityConstellation habits={habits} pro={pro} />
 
           {/* Overview cards */}
           <div className="grid grid-cols-2 gap-3">
@@ -458,8 +507,63 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
               { label: t("stats.consistency7"), value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: t("stats.consistency7Hint") },
               { label: t("stats.activeStreaks"), value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: t("stats.activeStreaksHint") },
               { label: t("stats.categoriesUsed"), value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: t("stats.categoriesUsedHint") },
+              { label: t("stats.trend30"), value: `${trendPct >= 0 ? "+" : ""}${trendPct}%`, icon: <TrendingUp size={16} className={trendPct >= 0 ? "text-green-400" : "text-red-400"} />, hint: t("stats.trend30Hint") },
+              { label: t("stats.dailyAvg"), value: avgPerDay, icon: <BarChart2 size={16} className="text-primary" />, hint: t("stats.dailyAvgHint") },
+              { label: t("stats.busiestDay"), value: busiestDay, icon: <CalendarDays size={16} className="text-sky-400" />, hint: t("stats.busiestDayHint") },
+              { label: t("stats.activeDays"), value: activeDays, icon: <Award size={16} className="text-yellow-400" />, hint: t("stats.activeDaysHint") },
             ]}
-          />
+          >
+            {/* Day-of-week distribution */}
+            <div className="bg-surface border border-border rounded-xl p-4">
+              <h3 className="text-xs font-medium text-muted mb-3">{t("stats.byWeekday")}</h3>
+              <div className="flex items-end justify-between gap-1.5 h-24">
+                {weekdayCounts.map((c, i) => {
+                  const isBusiest = i === busiestIdx && c > 0;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="w-full flex-1 flex items-end">
+                        <motion.div
+                          className="w-full rounded-t-md"
+                          style={{ background: isBusiest ? "#7f49c3" : "#7f49c355" }}
+                          initial={{ height: 0 }}
+                          animate={{ height: `${Math.round((c / maxWeekday) * 100)}%` }}
+                          transition={{ duration: 0.5, delay: i * 0.04 }}
+                        />
+                      </div>
+                      <span className="text-[9px] text-muted">
+                        {format(new Date(2023, 0, 1 + i), "EEEEE", { locale: dfLocale(lang) })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Completions by category */}
+            {catRows.length > 0 && (
+              <div className="bg-surface border border-border rounded-xl p-4">
+                <h3 className="text-xs font-medium text-muted mb-3">{t("stats.byCategory")}</h3>
+                <div className="space-y-2">
+                  {catRows.map(([key, v], i) => (
+                    <div key={key}>
+                      <div className="flex items-center justify-between text-[11px] mb-0.5">
+                        <span className="text-white/80">{key === "__none" ? t("stats.noCategory") : categoryLabel(key, lang)}</span>
+                        <span className="font-mono text-muted">{v}</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full bg-primary"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.round((v / catMax) * 100)}%` }}
+                          transition={{ duration: 0.6, delay: i * 0.05 }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </AdvancedStats>
 
           {/* Habit level tracker */}
           <HabitLevelTracker habits={habits} />

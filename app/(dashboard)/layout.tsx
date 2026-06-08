@@ -6,10 +6,11 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { TopBar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/prisma";
 import { getProfileLevel } from "@/lib/utils";
-import { isPro } from "@/lib/plan";
+import { isPro, partitionHabits } from "@/lib/plan";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
 import { isLocale } from "@/lib/i18n/config";
 import { LangSync } from "@/components/i18n/lang-sync";
+import { HabitLockGate } from "@/components/habits/habit-lock-gate";
 
 export default async function DashboardLayout({
   children,
@@ -40,14 +41,22 @@ export default async function DashboardLayout({
     image: dbUser?.image ?? null,
   };
 
+  const { active: activeHabits } = partitionHabits(habits, pro);
   const profileLevel = getProfileLevel(
-    habits.map((h) => ({ logs: h.logs, category: h.category })),
+    activeHabits.map((h) => ({ logs: h.logs, category: h.category })),
     { isPro: pro }
   );
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {isLocale(dbUser?.language) && <LangSync dbLang={dbUser.language} />}
+      <HabitLockGate
+        pro={pro}
+        habits={habits.map((h) => ({
+          id: h.id, name: h.name, icon: h.icon, color: h.color,
+          category: h.category, archived: h.archived, locked: h.locked,
+        }))}
+      />
       <Sidebar
         user={user}
         pro={pro}

@@ -8,6 +8,7 @@ export interface HabitWithLogs {
   category: string | null;
   reminderTime: string | null;
   archived: boolean;
+  locked: boolean;
   createdAt: Date;
   logs: HabitLog[];
 }
