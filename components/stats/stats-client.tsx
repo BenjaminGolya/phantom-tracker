@@ -18,7 +18,9 @@ import { PLAN_LIMITS } from "@/lib/plan";
 import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
-import { useT } from "@/lib/i18n/context";
+import { useT, useLang } from "@/lib/i18n/context";
+import { levelLabel } from "@/lib/i18n/levels";
+import { dfLocale } from "@/lib/i18n/date";
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
@@ -42,7 +44,7 @@ function XPProgressBar({ progress, color, delay = 0 }: { progress: number; color
 
 // ─── Profile level hero card ──────────────────────────────────────────────────
 function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boolean }) {
-  const t = useT();
+  const { t, lang } = useLang();
   const info = useMemo(() => getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category })),
     { isPro: pro }
@@ -89,7 +91,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
           <div className="flex items-center gap-2">
             <span className="text-5xl font-light leading-none" style={{ color: info.color }}>{info.emoji}</span>
             <div>
-              <h2 className="text-2xl font-bold" style={{ color: info.color }}>{info.label}</h2>
+              <h2 className="text-2xl font-bold" style={{ color: info.color }}>{levelLabel(info.label, lang)}</h2>
               <p className="text-xs text-muted">{t("nav.level")} {info.level} {t("stats.of")} {visibleLevels.length}</p>
             </div>
           </div>
@@ -122,7 +124,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
       <div className="mb-4">
         <div className="flex justify-between text-xs text-muted mb-1.5">
           <span>{info.isMax ? t("stats.maxLevel") : `${info.xp - info.xpRequired} / ${info.xpNext - info.xpRequired} ${t("stats.xpToNext")}`}</span>
-          {next && <span><span style={{ color: next.color }}>{next.emoji}</span> {next.label}</span>}
+          {next && <span><span style={{ color: next.color }}>{next.emoji}</span> {levelLabel(next.label, lang)}</span>}
         </div>
         <XPProgressBar progress={info.progress} color={info.color} />
         {/* Level milestones */}
@@ -130,7 +132,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
           {visibleLevels.map((lvl) => (
             <div
               key={lvl.level}
-              title={`Lv.${lvl.level} ${lvl.label}${lvl.pro ? " (Pro)" : ""}`}
+              title={`Lv.${lvl.level} ${levelLabel(lvl.label, lang)}${lvl.pro ? " (Pro)" : ""}`}
               className="flex flex-col items-center gap-0.5"
             >
               <div
@@ -190,7 +192,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
 
 // ─── Per-habit level tracker ──────────────────────────────────────────────────
 function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
-  const t = useT();
+  const { t, lang } = useLang();
   const sorted = [...habits].sort((a, b) => {
     const la = getHabitLevel(a.logs);
     const lb = getHabitLevel(b.logs);
@@ -238,13 +240,13 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[11px] font-medium" style={{ color: info.color }}>{info.label}</span>
+                    <span className="text-[11px] font-medium" style={{ color: info.color }}>{levelLabel(info.label, lang)}</span>
                     {info.nextTierEmoji && (
                       <span className="text-[11px] text-muted flex items-center gap-1">
                         <span className="opacity-40">·</span>
-                        <span>next</span>
+                        <span>{t("form.next")}</span>
                         <span>{info.nextTierEmoji}</span>
-                        <span>{info.nextTierLabel} at Lv.{info.nextTierMinLevel}</span>
+                        <span>{levelLabel(info.nextTierLabel ?? "", lang)} {t("form.atLv")}{info.nextTierMinLevel}</span>
                       </span>
                     )}
                   </div>
@@ -359,16 +361,16 @@ function AdvancedStats({
 // ─── Main stats page ──────────────────────────────────────────────────────────
 export function StatsClient({ habits, pro = false }: StatsClientProps) {
   const mounted = useMounted();
-  const t = useT();
+  const { t, lang } = useLang();
   const weekData = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const date = format(subDays(new Date(), 6 - i), "yyyy-MM-dd");
-      const label = format(subDays(new Date(), 6 - i), "EEE");
+      const label = format(subDays(new Date(), 6 - i), "EEE", { locale: dfLocale(lang) });
       const count = habits.reduce((acc, h) =>
         acc + (h.logs.some((l) => l.date === date && l.completed) ? 1 : 0), 0);
       return { date, label, count, total: habits.length };
     });
-  }, [habits]);
+  }, [habits, lang]);
 
   const totalCompletions = habits.reduce((acc, h) => acc + h.logs.filter((l) => l.completed).length, 0);
   const overallRate = habits.length

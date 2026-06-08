@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { format, parseISO, isAfter, startOfDay } from "date-fns";
 import { getYearDays } from "@/lib/utils";
 import { HabitWithLogs } from "@/types";
+import { useLang } from "@/lib/i18n/context";
+import { dfLocale } from "@/lib/i18n/date";
 
 interface HabitGridProps {
   habit: HabitWithLogs;
@@ -12,6 +14,7 @@ interface HabitGridProps {
 }
 
 export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
+  const { lang } = useLang();
   const currentYear = year ?? new Date().getFullYear();
   const days = useMemo(() => getYearDays(currentYear), [currentYear]);
 
@@ -58,7 +61,9 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
     onToggle(habit.id, day, completed);
   }
 
-  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const MONTHS = Array.from({ length: 12 }, (_, m) =>
+    format(new Date(2000, m, 1), "MMM", { locale: dfLocale(lang) })
+  );
 
   return (
     <div className="w-full overflow-x-auto">
