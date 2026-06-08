@@ -454,6 +454,7 @@ export function LandingPage() {
                 <Link href="/signup" className="hover:text-white transition-colors">{t("common.getStarted")}</Link>
               </>
             )}
+            <LanguageSwitcher openUp className="-my-1" />
           </div>
         </div>
       </footer>

@@ -33,9 +33,9 @@ export function TopBar({ user }: TopBarProps) {
 
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-surface shrink-0">
-      <div className="lg:hidden flex items-center gap-2">
-        <GhostLogo size={28} className="phantom-glow" />
-        <span className="font-semibold text-sm">Phantom Tracker</span>
+      <div className="lg:hidden flex items-center gap-2 min-w-0">
+        <GhostLogo size={28} className="phantom-glow shrink-0" />
+        <span className="font-semibold text-sm whitespace-nowrap">Phantom Tracker</span>
       </div>
 
       {/* Back to the public landing page */}
@@ -47,7 +47,7 @@ export function TopBar({ user }: TopBarProps) {
         {t("common.home")}
       </Link>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         <LanguageSwitcher />
         <div className="relative" ref={ref}>
         <button

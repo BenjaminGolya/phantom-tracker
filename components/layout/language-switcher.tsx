@@ -5,7 +5,7 @@ import { Globe, Check } from "lucide-react";
 import { useLang } from "@/lib/i18n/context";
 import { LOCALES, LOCALE_NAMES, LOCALE_FLAGS } from "@/lib/i18n/config";
 
-export function LanguageSwitcher({ className = "" }: { className?: string }) {
+export function LanguageSwitcher({ className = "", openUp = false }: { className?: string; openUp?: boolean }) {
   const { lang, setLang } = useLang();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 w-40 bg-surface-2 border border-border rounded-xl shadow-xl z-[60] py-1 overflow-hidden">
+        <div className={`absolute right-0 w-40 bg-surface-2 border border-border rounded-xl shadow-xl z-[60] py-1 overflow-hidden ${openUp ? "bottom-10" : "top-10"}`}>
           {LOCALES.map((l) => (
             <button
               key={l}
