@@ -51,6 +51,8 @@ const en = {
   "auth.twoFANotice": "We emailed a 6-digit code. Enter it below.",
   "auth.verifyAndSignIn": "Verify & sign in",
   "auth.useDifferent": "Use a different account",
+  "auth.continueGoogle": "Continue with Google",
+  "auth.or": "or",
 
   // nav
   "nav.habits": "Habits",
@@ -206,6 +208,8 @@ const hu: Partial<Record<DictKey, string>> = {
   "auth.twoFANotice": "Küldtünk egy 6 jegyű kódot. Írd be alább.",
   "auth.verifyAndSignIn": "Ellenőrzés és belépés",
   "auth.useDifferent": "Másik fiók használata",
+  "auth.continueGoogle": "Folytatás Google-lel",
+  "auth.or": "vagy",
 
   "nav.habits": "Szokások",
   "nav.stats": "Statisztika",
@@ -352,6 +356,8 @@ const ro: Partial<Record<DictKey, string>> = {
   "auth.twoFANotice": "Ți-am trimis un cod din 6 cifre. Introdu-l mai jos.",
   "auth.verifyAndSignIn": "Verifică și conectează-te",
   "auth.useDifferent": "Folosește alt cont",
+  "auth.continueGoogle": "Continuă cu Google",
+  "auth.or": "sau",
 
   "nav.habits": "Obiceiuri",
   "nav.stats": "Statistici",
