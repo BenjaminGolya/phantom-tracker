@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { GhostLogo } from "@/components/brand/ghost-mark";
 import { useT } from "@/lib/i18n/context";
-import { GoogleButton } from "@/components/auth/google-button";
+import { SocialAuthButtons } from "@/components/auth/social-buttons";
 import { motion } from "framer-motion";
 
 function LoginForm() {
@@ -129,7 +129,7 @@ function LoginForm() {
           </div>
         )}
 
-        {!needs2fa && <GoogleButton />}
+        {!needs2fa && <SocialAuthButtons />}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>

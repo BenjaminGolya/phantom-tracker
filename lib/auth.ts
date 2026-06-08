@@ -1,7 +1,9 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
 import { randomBytes } from "crypto";
+import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendTwoFactorCodeEmail } from "@/lib/email";
@@ -11,6 +13,28 @@ function gen2faCode(): string {
 }
 
 export const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+export const appleEnabled = !!(
+  process.env.APPLE_CLIENT_ID &&
+  process.env.APPLE_TEAM_ID &&
+  process.env.APPLE_KEY_ID &&
+  process.env.APPLE_PRIVATE_KEY
+);
+
+// Apple's "client secret" is a short-lived JWT signed with your .p8 key.
+function appleClientSecret(): string {
+  const privateKey = (process.env.APPLE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+  return jwt.sign({}, privateKey, {
+    algorithm: "ES256",
+    expiresIn: "180d",
+    audience: "https://appleid.apple.com",
+    issuer: process.env.APPLE_TEAM_ID!,
+    subject: process.env.APPLE_CLIENT_ID!, // the Services ID
+    keyid: process.env.APPLE_KEY_ID!,
+  });
+}
+
+// OAuth providers we upsert a local User for.
+const OAUTH_PROVIDERS = new Set(["google", "apple"]);
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -24,6 +48,15 @@ export const authOptions: NextAuthOptions = {
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          }),
+        ]
+      : []),
+    // Apple OAuth (only registered when configured).
+    ...(appleEnabled
+      ? [
+          AppleProvider({
+            clientId: process.env.APPLE_CLIENT_ID!,
+            clientSecret: appleClientSecret(),
           }),
         ]
       : []),
@@ -75,17 +108,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    // For Google sign-in, ensure a matching row exists in our User table
-    // (the whole app keys habits/etc. off User.id).
+    // For OAuth sign-in (Google/Apple), ensure a matching row exists in our
+    // User table (the whole app keys habits/etc. off User.id).
     async signIn({ account, profile }) {
-      if (account?.provider !== "google") return true;
+      if (!account || !OAUTH_PROVIDERS.has(account.provider)) return true;
       const email = profile?.email;
       if (!email) return false;
 
       const existing = await prisma.user.findUnique({ where: { email } });
       if (!existing) {
-        // Random unusable password (the column is required; Google users
-        // sign in via OAuth, not this password).
+        // Random unusable password (column is required; OAuth users sign in
+        // via the provider, not this password).
         const placeholder = await bcrypt.hash(randomBytes(24).toString("hex"), 12);
         await prisma.user.create({
           data: {
@@ -93,13 +126,12 @@ export const authOptions: NextAuthOptions = {
             name: profile?.name ?? null,
             image: (profile as { picture?: string } | null)?.picture ?? null,
             password: placeholder,
-            emailVerified: new Date(),
+            emailVerified: new Date(), // OAuth proves email ownership
             acceptedTerms: true,
             acceptedTermsAt: new Date(),
           },
         });
       } else if (!existing.emailVerified) {
-        // Signing in with Google verifies ownership of the email.
         await prisma.user.update({
           where: { id: existing.id },
           data: { emailVerified: new Date() },
@@ -108,12 +140,12 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, account }) {
-      if (user?.id && account?.provider !== "google") {
-        // Credentials path already returns our DB id.
-        token.id = user.id;
-      } else if (account?.provider === "google" && token.email) {
+      if (account && OAUTH_PROVIDERS.has(account.provider) && token.email) {
         const dbUser = await prisma.user.findUnique({ where: { email: token.email } });
         if (dbUser) token.id = dbUser.id;
+      } else if (user?.id) {
+        // Credentials path already returns our DB id.
+        token.id = user.id;
       }
       return token;
     },
