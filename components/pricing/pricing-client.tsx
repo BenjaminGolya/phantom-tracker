@@ -54,7 +54,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
       setError(
         data?.message ??
           (data?.error === "billing_unavailable"
-            ? "Billing isn't set up yet — check back soon."
+            ? "Billing isn't set up yet. Please check back soon."
             : "Couldn't start checkout. Please try again.")
       );
     } catch {
@@ -74,14 +74,14 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
         </p>
         {!pro && trialEligible && (
           <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30 text-xs font-medium text-primary">
-            <Sparkles size={12} /> Start with a {TRIAL_DAYS}-day free trial — cancel anytime
+            <Sparkles size={12} /> Start with a {TRIAL_DAYS}-day free trial, cancel anytime
           </div>
         )}
       </div>
 
       {canceled && (
         <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-border bg-surface text-xs text-muted">
-          <X size={13} /> Checkout canceled — no charge was made.
+          <X size={13} /> Checkout canceled. No charge was made.
         </div>
       )}
       {error && (
@@ -181,7 +181,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
 
           {pro ? (
             <div className="mt-5 text-center text-xs text-primary py-2.5 border border-primary/40 bg-primary/10 rounded-lg font-medium">
-              ✦ You&apos;re on Pro — thank you!
+              ✦ You&apos;re on Pro. Thank you!
             </div>
           ) : (
             <button
@@ -192,7 +192,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
               {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
               {trialEligible
                 ? `Start ${TRIAL_DAYS}-day free trial`
-                : `Upgrade — ${interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL}`}
+                : `Upgrade · ${interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL}`}
             </button>
           )}
           <p className="text-[10px] text-muted text-center mt-2">

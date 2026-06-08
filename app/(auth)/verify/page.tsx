@@ -151,7 +151,7 @@ function VerifyForm() {
           )}
 
           {resent && (
-            <p className="text-green-400 text-sm text-center">New code sent — check your inbox.</p>
+            <p className="text-green-400 text-sm text-center">New code sent. Check your inbox.</p>
           )}
 
           <button

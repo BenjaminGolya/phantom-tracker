@@ -103,19 +103,19 @@ function LoginForm() {
 
         {justVerified && (
           <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm text-center">
-            ✓ Email verified — you can now sign in
+            ✓ Email verified. You can now sign in
           </div>
         )}
 
         {emailChanged && (
           <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm text-center">
-            ✓ Email updated — sign in with your new address
+            ✓ Email updated. Sign in with your new address
           </div>
         )}
 
         {passwordReset && (
           <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm text-center">
-            ✓ Password updated — sign in with your new password
+            ✓ Password updated. Sign in with your new password
           </div>
         )}
 

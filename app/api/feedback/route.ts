@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!res.ok) {
-      return NextResponse.json({ error: "unavailable", message: "Couldn't send right now — please try again later." }, { status: 503 });
+      return NextResponse.json({ error: "unavailable", message: "Couldn't send right now. Please try again later." }, { status: 503 });
     }
     return NextResponse.json({ ok: true });
   } catch (err) {

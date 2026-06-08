@@ -69,7 +69,7 @@ export function ReactivateClient({
         {pendingDeletion ? (
           <p className="text-sm text-muted mb-1">
             We&apos;re keeping your data for <span className="text-white font-medium">{daysLeft} more day{daysLeft === 1 ? "" : "s"}</span>.
-            Reactivate before <span className="text-white font-medium">{purgeLabel}</span> to keep everything — after that it&apos;s permanently erased.
+            Reactivate before <span className="text-white font-medium">{purgeLabel}</span> to keep everything. After that it&apos;s permanently erased.
           </p>
         ) : (
           <p className="text-sm text-muted mb-1">

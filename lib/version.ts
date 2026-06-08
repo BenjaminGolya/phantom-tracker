@@ -1,7 +1,7 @@
 // Single source of truth for the app version + a short changelog.
 // Bump APP_VERSION and prepend a CHANGELOG entry whenever you ship something.
 
-export const APP_VERSION = "1.9.2";
+export const APP_VERSION = "1.9.3";
 
 export type ChangelogEntry = {
   version: string;
@@ -12,6 +12,11 @@ export type ChangelogEntry = {
 // Most recent first.
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.9.3",
+    date: "2026-06-08",
+    summary: "Polished the copy across the app and emails for a warmer, more human tone.",
+  },
+  {
     version: "1.9.2",
     date: "2026-06-08",
     summary: "Localized the landing-page demo cards and the top-bar menu (Home, Settings, Sign out).",
@@ -19,7 +24,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "1.9.1",
     date: "2026-06-08",
-    summary: "Localized calendars, dates, weekday/month names and level tiers — no more English on the Magyar/Română UI.",
+    summary: "Localized calendars, dates, weekday/month names and level tiers, so there's no more English on the Magyar/Română UI.",
   },
   {
     version: "1.9.0",
@@ -39,7 +44,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "1.5.0",
     date: "2026-06-07",
-    summary: "Forgot-password — reset your password via an emailed link from the sign-in page.",
+    summary: "Forgot-password: reset your password via an emailed link from the sign-in page.",
   },
   {
     version: "1.4.0",
@@ -49,7 +54,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "1.3.0",
     date: "2026-06-07",
-    summary: "Help & feedback — report bugs or ask questions right from Settings.",
+    summary: "Help & feedback: report bugs or ask questions right from Settings.",
   },
   {
     version: "1.2.0",

@@ -151,7 +151,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         setFbMessage("");
         setFbFiles([]);
       } else {
-        setFbResult({ ok: false, text: data?.message ?? "Couldn't send — please try again." });
+        setFbResult({ ok: false, text: data?.message ?? "Couldn't send. Please try again." });
       }
     } catch {
       setFbResult({ ok: false, text: "Network error. Please try again." });
@@ -227,7 +227,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       }
       setPortalErr(
         data?.error === "no_customer"
-          ? "No billing account is linked — there's nothing to manage."
+          ? "No billing account is linked, so there's nothing to manage."
           : "Billing portal is unavailable right now. Please try again later."
       );
     } catch {
@@ -250,12 +250,12 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
     setTestMsg("Sending…");
     const r = await push.sendTest();
     if (r.ok && (r.sent ?? 0) > 0) {
-      setTestMsg("Sent ✓ — check your notifications.");
+      setTestMsg("Sent ✓ Check your notifications.");
     } else if (r.total === 0 || r.error) {
-      setTestMsg("No device subscribed — turn it off and on again.");
+      setTestMsg("No device subscribed. Turn reminders off and on again.");
     } else {
       const code = r.errors?.[0]?.statusCode;
-      setTestMsg(`Delivery failed${code ? ` (code ${code})` : ""} — the push was rejected.`);
+      setTestMsg(`Delivery failed${code ? ` (code ${code})` : ""}. The push was rejected.`);
     }
     setTimeout(() => setTestMsg(""), 7000);
   }
@@ -333,10 +333,10 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         setImportMsg(`Imported ${data.habitsCreated} habit(s) and ${data.logsImported} log(s).`);
         router.refresh();
       } else {
-        setImportMsg(data?.message ?? "Import failed — make sure it's a Phantom Tracker backup file.");
+        setImportMsg(data?.message ?? "Import failed. Make sure it's a Phantom Tracker backup file.");
       }
     } catch {
-      setImportMsg("Couldn't read that file — it must be a valid .json backup.");
+      setImportMsg("Couldn't read that file. It must be a valid .json backup.");
     } finally {
       setTimeout(() => setImportMsg(""), 8000);
     }
@@ -348,7 +348,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {justUpgraded && (
         <div className="flex items-center gap-2 px-3.5 py-3 rounded-xl border border-primary/40 bg-primary/10 text-sm text-primary">
-          <Sparkles size={15} /> Welcome to Pro — your perks are now active. Thank you! ✦
+          <Sparkles size={15} /> Welcome to Pro! Your perks are now active. Thank you! ✦
         </div>
       )}
 
@@ -480,7 +480,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 </div>
                 {pendingEmail && (
                   <p className="text-[11px] text-amber-300 mt-1.5">
-                    {t("set.pending")}: <span className="font-medium">{pendingEmail}</span> — {t("set.checkInbox")}
+                    {t("set.pending")}: <span className="font-medium">{pendingEmail}</span>. {t("set.checkInbox")}
                   </p>
                 )}
               </>

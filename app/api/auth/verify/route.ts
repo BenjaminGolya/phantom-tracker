@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (new Date() > user.verificationExpires) {
-    return NextResponse.json({ error: "Code expired — please register again to get a new one" }, { status: 400 });
+    return NextResponse.json({ error: "Code expired. Please register again to get a new one" }, { status: 400 });
   }
 
   if (user.verificationCode !== code) {
