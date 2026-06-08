@@ -6,12 +6,14 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useT } from "@/lib/i18n/context";
 
 interface TopBarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
 }
 
 export function TopBar({ user }: TopBarProps) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -42,7 +44,7 @@ export function TopBar({ user }: TopBarProps) {
         className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-muted hover:text-white hover:bg-surface-2 transition-colors"
       >
         <Home size={15} />
-        Home
+        {t("common.home")}
       </Link>
 
       <div className="flex items-center gap-1">
@@ -75,7 +77,7 @@ export function TopBar({ user }: TopBarProps) {
                 <GhostAvatar size={36} className="border border-primary/30 shrink-0" />
               )}
               <div className="min-w-0">
-                <p className="text-xs font-medium text-white truncate">{user?.name ?? "User"}</p>
+                <p className="text-xs font-medium text-white truncate">{user?.name ?? t("common.user")}</p>
                 <p className="text-xs text-muted truncate">{user?.email}</p>
               </div>
             </div>
@@ -85,7 +87,7 @@ export function TopBar({ user }: TopBarProps) {
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
             >
               <Home size={14} />
-              Back to home
+              {t("common.backToHome")}
             </Link>
             <Link
               href="/settings"
@@ -93,7 +95,7 @@ export function TopBar({ user }: TopBarProps) {
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
             >
               <Settings size={14} />
-              Settings
+              {t("common.settings")}
             </Link>
             <Link
               href="/welcome"
@@ -101,14 +103,14 @@ export function TopBar({ user }: TopBarProps) {
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
             >
               <Info size={14} />
-              About &amp; install
+              {t("common.aboutInstall")}
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-surface transition-colors"
             >
               <LogOut size={14} />
-              Sign out
+              {t("common.signOut")}
             </button>
           </div>
         )}

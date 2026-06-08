@@ -23,6 +23,7 @@ const fadeUp = {
 
 // ─── A stylized mock habit card (the signature contribution-grid look) ────────
 function HabitCardMock() {
+  const t = useT();
   // Deterministic "activity" pattern so it never looks random/empty
   const weeks = 14;
   const days = 7;
@@ -38,8 +39,8 @@ function HabitCardMock() {
           <Target size={16} />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-white leading-tight">Morning run</p>
-          <p className="text-xs text-muted">Fitness</p>
+          <p className="text-sm font-medium text-white leading-tight">{t("lp.demoHabitName")}</p>
+          <p className="text-xs text-muted">{t("lp.demoHabitCat")}</p>
         </div>
         <div className="flex items-center gap-1 bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded-md text-xs font-mono">
           <Flame size={10} /> 12
@@ -72,15 +73,16 @@ function HabitCardMock() {
 
 // ─── Mock "today" checklist card ──────────────────────────────────────────────
 function ChecklistMock() {
+  const t = useT();
   const items = [
-    { name: "Drink water", icon: <Sparkles size={13} />, done: true },
-    { name: "Read 10 pages", icon: <CalendarDays size={13} />, done: true },
-    { name: "Meditate", icon: <Ghost size={13} />, done: false },
-    { name: "No sugar", icon: <Check size={13} />, done: false },
+    { name: t("lp.demoDrinkWater"), icon: <Sparkles size={13} />, done: true },
+    { name: t("lp.demoRead"), icon: <CalendarDays size={13} />, done: true },
+    { name: t("lp.demoMeditate"), icon: <Ghost size={13} />, done: false },
+    { name: t("lp.demoNoSugar"), icon: <Check size={13} />, done: false },
   ];
   return (
     <div className="bg-surface border border-border rounded-2xl p-4 shadow-2xl shadow-black/40 w-full">
-      <p className="text-sm font-medium text-white mb-3">Today&apos;s habits</p>
+      <p className="text-sm font-medium text-white mb-3">{t("lp.demoToday")}</p>
       <div className="space-y-2">
         {items.map((it) => (
           <div key={it.name} className="flex items-center gap-3 p-2.5 bg-surface-2 border border-border rounded-xl">
