@@ -18,6 +18,7 @@ import { PLAN_LIMITS } from "@/lib/plan";
 import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
+import { useT } from "@/lib/i18n/context";
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
@@ -41,6 +42,7 @@ function XPProgressBar({ progress, color, delay = 0 }: { progress: number; color
 
 // ─── Profile level hero card ──────────────────────────────────────────────────
 function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boolean }) {
+  const t = useT();
   const info = useMemo(() => getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category })),
     { isPro: pro }
@@ -83,21 +85,21 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
       {/* Top row */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-xs text-muted mb-1 uppercase tracking-widest font-medium">Profile Level</p>
+          <p className="text-xs text-muted mb-1 uppercase tracking-widest font-medium">{t("stats.profileLevel")}</p>
           <div className="flex items-center gap-2">
             <span className="text-5xl font-light leading-none" style={{ color: info.color }}>{info.emoji}</span>
             <div>
               <h2 className="text-2xl font-bold" style={{ color: info.color }}>{info.label}</h2>
-              <p className="text-xs text-muted">Level {info.level} of {visibleLevels.length}</p>
+              <p className="text-xs text-muted">{t("nav.level")} {info.level} {t("stats.of")} {visibleLevels.length}</p>
             </div>
           </div>
         </div>
         <div className="text-right">
           <p className="text-3xl font-mono font-bold" style={{ color: info.color }}>{info.xp}</p>
-          <p className="text-xs text-muted">total XP</p>
+          <p className="text-xs text-muted">{t("stats.totalXp")}</p>
           {pro && (
             <p className="text-[10px] text-primary font-medium flex items-center gap-1 justify-end mt-0.5">
-              <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× Pro boost
+              <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× {t("stats.proBoost")}
             </p>
           )}
         </div>
@@ -145,7 +147,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
 
       {/* XP breakdown — how you earn it + how to earn more */}
       <div className="border-t border-border pt-4">
-        <p className="text-xs text-muted uppercase tracking-wider mb-3 font-medium">How you earn XP</p>
+        <p className="text-xs text-muted uppercase tracking-wider mb-3 font-medium">{t("stats.howEarnXp")}</p>
         <div className="space-y-3">
           {xpSources.map((src) => {
             const capped = "cap" in src;
@@ -188,6 +190,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
 
 // ─── Per-habit level tracker ──────────────────────────────────────────────────
 function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
+  const t = useT();
   const sorted = [...habits].sort((a, b) => {
     const la = getHabitLevel(a.logs);
     const lb = getHabitLevel(b.logs);
@@ -196,7 +199,7 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
 
   return (
     <div>
-      <h2 className="text-sm font-medium mb-3">Habit Levels</h2>
+      <h2 className="text-sm font-medium mb-3">{t("stats.habitLevels")}</h2>
       <div className="space-y-2">
         {sorted.map((habit, i) => {
           const info = getHabitLevel(habit.logs) as ReturnType<typeof getHabitLevel> & {
@@ -307,11 +310,12 @@ function AdvancedStats({
   pro: boolean;
   metrics: { label: string; value: string | number; icon: React.ReactNode; hint: string }[];
 }) {
+  const t = useT();
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium flex items-center gap-1.5">
-          Advanced Stats
+          {t("stats.advanced")}
           <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
             <Sparkles size={9} /> PRO
           </span>
@@ -337,13 +341,13 @@ function AdvancedStats({
             <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center mb-2">
               <Lock size={18} className="text-primary" />
             </div>
-            <p className="text-sm font-medium mb-0.5">Unlock advanced stats</p>
-            <p className="text-xs text-muted mb-3">Perfect days, consistency, streak insights & more.</p>
+            <p className="text-sm font-medium mb-0.5">{t("stats.unlockTitle")}</p>
+            <p className="text-xs text-muted mb-3">{t("stats.unlockSub")}</p>
             <Link
               href="/pricing"
               className="flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-dim text-white text-xs font-medium rounded-lg transition-all hover:shadow-glow"
             >
-              <Sparkles size={13} /> Upgrade to Pro
+              <Sparkles size={13} /> {t("stats.upgradePro")}
             </Link>
           </div>
         )}
@@ -355,6 +359,7 @@ function AdvancedStats({
 // ─── Main stats page ──────────────────────────────────────────────────────────
 export function StatsClient({ habits, pro = false }: StatsClientProps) {
   const mounted = useMounted();
+  const t = useT();
   const weekData = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const date = format(subDays(new Date(), 6 - i), "yyyy-MM-dd");
@@ -388,7 +393,7 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
   if (!mounted) {
     return (
       <div className="max-w-3xl mx-auto space-y-6 pb-28 lg:pb-6">
-        <h1 className="text-lg font-semibold">Stats</h1>
+        <h1 className="text-lg font-semibold">{t("nav.stats")}</h1>
         <div className="h-48 bg-surface border border-border rounded-2xl animate-pulse" />
         <div className="grid grid-cols-2 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -406,7 +411,7 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
       {habits.length === 0 ? (
         <div className="flex flex-col items-center py-20 text-center">
           <div className="text-5xl mb-3">📊</div>
-          <p className="text-sm text-muted">No data yet — start tracking habits!</p>
+          <p className="text-sm text-muted">{t("stats.noData")}</p>
         </div>
       ) : (
         <>
@@ -416,10 +421,10 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
           {/* Overview cards */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Total Completions", value: totalCompletions, icon: <BarChart2 size={16} className="text-primary" /> },
-              { label: "30-day Rate",        value: `${overallRate}%`, icon: <TrendingUp size={16} className="text-green-400" /> },
-              { label: "Best Streak Ever",   value: `${topLongest}d`, icon: <Flame size={16} className="text-orange-400" /> },
-              { label: "Habits Tracked",     value: habits.length,    icon: <Award size={16} className="text-primary" /> },
+              { label: t("stats.totalCompletions"), value: totalCompletions, icon: <BarChart2 size={16} className="text-primary" /> },
+              { label: t("stats.rate30"),        value: `${overallRate}%`, icon: <TrendingUp size={16} className="text-green-400" /> },
+              { label: t("stats.bestStreakEver"),   value: `${topLongest}d`, icon: <Flame size={16} className="text-orange-400" /> },
+              { label: t("stats.habitsTracked"),     value: habits.length,    icon: <Award size={16} className="text-primary" /> },
             ].map(({ label, value, icon }, i) => (
               <motion.div
                 key={label}
@@ -439,7 +444,7 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
 
           {/* Weekly bar chart */}
           <div className="bg-surface border border-border rounded-xl p-4">
-            <h2 className="text-sm font-medium mb-4">Last 7 days</h2>
+            <h2 className="text-sm font-medium mb-4">{t("stats.last7")}</h2>
             <WeeklyChart data={weekData} total={habits.length} />
           </div>
 
@@ -447,10 +452,10 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
           <AdvancedStats
             pro={pro}
             metrics={[
-              { label: "Perfect Days", value: perfectDays, icon: <Star size={16} className="text-yellow-400" />, hint: "Days you completed every habit" },
-              { label: "7-day Consistency", value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: "Completion rate this week" },
-              { label: "Active Streaks", value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: "Sum of all current streaks" },
-              { label: "Categories Used", value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: "Diversity of your habits" },
+              { label: t("stats.perfectDays"), value: perfectDays, icon: <Star size={16} className="text-yellow-400" />, hint: "Days you completed every habit" },
+              { label: t("stats.consistency7"), value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: "Completion rate this week" },
+              { label: t("stats.activeStreaks"), value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: "Sum of all current streaks" },
+              { label: t("stats.categoriesUsed"), value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: "Diversity of your habits" },
             ]}
           />
 

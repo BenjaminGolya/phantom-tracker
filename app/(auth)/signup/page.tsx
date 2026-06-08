@@ -7,6 +7,9 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2, X, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { PasswordRules } from "@/components/auth/password-rules";
+import { isStrongPassword } from "@/lib/password";
+import { useT } from "@/lib/i18n/context";
 
 type PolicyKey = "terms" | "privacy" | "newsletter";
 
@@ -61,6 +64,7 @@ const POLICIES: Record<PolicyKey, { title: string; body: React.ReactNode }> = {
 export default function SignupPage() {
   const router = useRouter();
   const { status } = useSession();
+  const t = useT();
 
   // Already signed in → no need to register again.
   useEffect(() => {
@@ -109,14 +113,14 @@ export default function SignupPage() {
         className="w-full max-w-sm"
       >
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
-          <ArrowLeft size={14} /> Back to home
+          <ArrowLeft size={14} /> {t("common.backToHome")}
         </Link>
 
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight">Phantom Tracker</h1>
-            <p className="text-sm text-muted mt-1">Create your account</p>
+            <p className="text-sm text-muted mt-1">{t("auth.signUpTitle")}</p>
           </div>
         </div>
 
@@ -145,7 +149,6 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
               className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10"
             />
             <button
@@ -156,6 +159,7 @@ export default function SignupPage() {
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+          <PasswordRules value={password} />
 
           {/* Consent checkboxes */}
           <div className="space-y-2.5 pt-1">
@@ -199,11 +203,11 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading || !acceptedTerms}
+            disabled={loading || !acceptedTerms || !isStrongPassword(password)}
             className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            Create account
+            {t("common.getStarted")}
           </button>
           {!acceptedTerms && (
             <p className="text-[11px] text-muted text-center">Accept the terms to continue.</p>
@@ -211,9 +215,9 @@ export default function SignupPage() {
         </form>
 
         <p className="text-center text-sm text-muted mt-6">
-          Already have an account?{" "}
+          {t("auth.haveAccount")}{" "}
           <Link href="/login" className="text-primary hover:underline">
-            Sign in
+            {t("common.signIn")}
           </Link>
         </p>
       </motion.div>

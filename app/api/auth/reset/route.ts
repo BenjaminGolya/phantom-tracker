@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { isStrongPassword, PASSWORD_HINT } from "@/lib/password";
 import { logError } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +12,8 @@ export async function POST(req: NextRequest) {
   const pw = String(password ?? "");
 
   if (!t) return NextResponse.json({ error: "invalid", message: "Invalid reset link." }, { status: 400 });
-  if (pw.length < 8) {
-    return NextResponse.json({ error: "weak", message: "Password must be at least 8 characters." }, { status: 400 });
+  if (!isStrongPassword(pw)) {
+    return NextResponse.json({ error: "weak", message: PASSWORD_HINT }, { status: 400 });
   }
 
   try {

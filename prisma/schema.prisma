@@ -31,6 +31,10 @@ model User {
   emailChangeExpires   DateTime?
   resetToken           String?           @unique
   resetExpires         DateTime?
+  language             String            @default("en")
+  twoFactorEnabled     Boolean           @default(false)
+  twoFactorCode        String?
+  twoFactorCodeExpires DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   habits              Habit[]

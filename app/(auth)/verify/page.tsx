@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { useT } from "@/lib/i18n/context";
 import { signIn } from "next-auth/react";
 
 function VerifyForm() {
@@ -13,6 +14,7 @@ function VerifyForm() {
   const params = useSearchParams();
   const email = params.get("email") ?? "";
   const password = params.get("password") ?? "";
+  const t = useT();
 
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [error, setError] = useState("");
@@ -110,16 +112,16 @@ function VerifyForm() {
         className="w-full max-w-sm"
       >
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
-          <ArrowLeft size={14} /> Back to home
+          <ArrowLeft size={14} /> {t("common.backToHome")}
         </Link>
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
-            <h1 className="text-xl font-semibold tracking-tight">Check your email</h1>
+            <h1 className="text-xl font-semibold tracking-tight">{t("auth.verifyTitle")}</h1>
             <p className="text-sm text-muted mt-1">
-              We sent a 6-digit code to
+              {t("auth.verifySubtitle")}
             </p>
             <p className="text-sm font-medium text-white mt-0.5">{email}</p>
           </div>
@@ -158,7 +160,7 @@ function VerifyForm() {
             className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            Verify email
+            {t("auth.verifyButton")}
           </button>
         </form>
 
@@ -170,7 +172,7 @@ function VerifyForm() {
             disabled={resending}
             className="text-primary hover:underline disabled:opacity-50"
           >
-            {resending ? "Sending…" : "Resend code"}
+            {resending ? t("common.loading") : t("auth.resend")}
           </button>
         </p>
 

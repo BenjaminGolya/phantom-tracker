@@ -4,11 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck, Globe } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { DELETION_GRACE_DAYS } from "@/lib/account";
 import { APP_VERSION, LATEST, CHANGELOG } from "@/lib/version";
+import { useLang } from "@/lib/i18n/context";
+import { LOCALES, LOCALE_NAMES, LOCALE_FLAGS } from "@/lib/i18n/config";
 
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
@@ -17,6 +19,7 @@ interface SettingsClientProps {
   trialEndsAt?: string | null;
   hasBilling?: boolean;
   pendingEmail?: string | null;
+  twoFactorEnabled?: boolean;
 }
 
 // Whole days remaining until a date (rounded up). Returns 0 if already past.
@@ -53,8 +56,9 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
+  const { t, lang, setLang } = useLang();
   const router = useRouter();
   const push = usePush();
   const [justUpgraded, setJustUpgraded] = useState(false);
@@ -73,6 +77,23 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const [fbResult, setFbResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [fbFiles, setFbFiles] = useState<{ name: string; dataUrl: string; contentType: string }[]>([]);
   const fbFileRef = useRef<HTMLInputElement>(null);
+  const [twoFA, setTwoFA] = useState(twoFactorEnabled);
+  const [twoFABusy, setTwoFABusy] = useState(false);
+
+  async function toggle2FA() {
+    const next = !twoFA;
+    setTwoFABusy(true);
+    try {
+      const res = await fetch("/api/account/2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enable: next }),
+      });
+      if (res.ok) setTwoFA(next);
+    } finally {
+      setTwoFABusy(false);
+    }
+  }
 
   const FB_MAX_FILES = 3;
   const FB_MAX_MB = 5;
@@ -324,7 +345,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
   return (
     <div className="max-w-lg mx-auto space-y-6 pb-28 lg:pb-6">
-      <h1 className="text-lg font-semibold">Settings</h1>
+      <h1 className="text-lg font-semibold">{t("settings.title")}</h1>
 
       {justUpgraded && (
         <div className="flex items-center gap-2 px-3.5 py-3 rounded-xl border border-primary/40 bg-primary/10 text-sm text-primary">
@@ -335,7 +356,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Billing / Plan */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <Crown size={15} className="text-primary" /> Plan
+          <Crown size={15} className="text-primary" /> {t("settings.plan")}
         </h2>
         {pro ? (
           <>
@@ -390,7 +411,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* Profile */}
       <div className="bg-surface border border-border rounded-xl p-5">
-        <h2 className="text-sm font-medium mb-4">Profile</h2>
+        <h2 className="text-sm font-medium mb-4">{t("settings.profile")}</h2>
 
         {/* Avatar */}
         <div className="flex items-center gap-4 mb-5">
@@ -511,7 +532,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Notifications */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <Bell size={15} className="text-primary" /> Reminders
+          <Bell size={15} className="text-primary" /> {t("settings.reminders")}
           {!pro && (
             <span className="ml-1 inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
               <Lock size={9} /> PRO
@@ -584,7 +605,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
       {/* Data — Pro */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          Data
+          {t("settings.data")}
           {!pro && (
             <span className="inline-flex items-center gap-1 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
               <Lock size={9} /> PRO
@@ -644,10 +665,60 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         )}
       </div>
 
+      {/* Language */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <Globe size={15} className="text-primary" /> {t("settings.language")}
+        </h2>
+        <p className="text-xs text-muted mb-4">{t("settings.languageHint")}</p>
+        <div className="flex gap-2 flex-wrap">
+          {LOCALES.map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(l)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                lang === l ? "bg-primary/15 border-primary/40 text-primary" : "bg-surface-2 border-border text-muted hover:text-white"
+              }`}
+            >
+              <span>{LOCALE_FLAGS[l]}</span> {LOCALE_NAMES[l]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Security */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+          <ShieldCheck size={15} className="text-primary" /> {t("settings.security")}
+        </h2>
+        <p className="text-xs text-muted mb-4">Add an extra layer of protection to your account.</p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">{t("settings.twoFA")}</p>
+            <p className="text-xs text-muted">
+              {twoFA
+                ? "On — we email a 6-digit code each time you sign in."
+                : "Off — require an emailed code at sign-in for extra security."}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={twoFA}
+            onClick={toggle2FA}
+            disabled={twoFABusy}
+            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 disabled:opacity-50 ${twoFA ? "bg-primary" : "bg-surface-2 border border-border"}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${twoFA ? "translate-x-5" : ""}`} />
+          </button>
+        </div>
+      </div>
+
       {/* Help & feedback */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-          <LifeBuoy size={15} className="text-primary" /> Help &amp; feedback
+          <LifeBuoy size={15} className="text-primary" /> {t("settings.help")}
         </h2>
         <p className="text-xs text-muted mb-4">Found a bug or have a question? Send it our way — we read every message.</p>
 
@@ -744,7 +815,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* Danger zone */}
       <div className="bg-surface border border-red-900/30 rounded-xl p-5">
-        <h2 className="text-sm font-medium text-red-400 mb-4">Account</h2>
+        <h2 className="text-sm font-medium text-red-400 mb-4">{t("settings.account")}</h2>
         <div className="space-y-3">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}

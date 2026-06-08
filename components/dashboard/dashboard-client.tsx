@@ -11,6 +11,7 @@ import { useMounted } from "@/lib/use-mounted";
 import { HabitForm } from "@/components/habits/habit-form";
 import { TodayChecklist } from "@/components/dashboard/today-checklist";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { useT } from "@/lib/i18n/context";
 import confetti from "canvas-confetti";
 
 interface DashboardClientProps {
@@ -21,6 +22,7 @@ interface DashboardClientProps {
 export function DashboardClient({ habits: initialHabits, pro = false }: DashboardClientProps) {
   const router = useRouter();
   const mounted = useMounted();
+  const t = useT();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
 
@@ -122,7 +124,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">Dashboard</h1>
+          <h1 className="text-lg font-semibold">{t("common.dashboard")}</h1>
           <p className="text-sm text-muted">{format(new Date(), "EEEE, MMMM d")}</p>
         </div>
         <button
@@ -130,33 +132,33 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
           className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow"
         >
           <Plus size={14} />
-          New habit
+          {t("dash.newHabit")}
         </button>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
-          label="Active Habits"
+          label={t("dash.activeHabits")}
           value={habits.length}
           icon={<Target size={16} className="text-primary" />}
         />
         <StatCard
-          label="Best Streak"
-          value={`${bestStreak} day${bestStreak !== 1 ? "s" : ""}`}
+          label={t("dash.bestStreak")}
+          value={`${bestStreak} ${bestStreak !== 1 ? t("dash.days") : t("dash.day")}`}
           icon={<Flame size={16} className="text-orange-400" />}
         />
         <StatCard
-          label="Today"
+          label={t("dash.today")}
           value={`${todayPct}%`}
           icon={<CheckCircle2 size={16} className="text-green-400" />}
-          sub={`${todayCompleted}/${todayTotal} done`}
+          sub={`${todayCompleted}/${todayTotal} ${t("dash.done")}`}
         />
         <StatCard
-          label="Phantom Score"
+          label={t("dash.phantomScore")}
           value={score}
           icon={<Zap size={16} className="text-primary" />}
-          sub="weekly"
+          sub={t("dash.weekly")}
           highlight={score >= 80}
         />
       </div>
@@ -180,6 +182,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
 }
 
 function EmptyState({ onNew }: { onNew: () => void }) {
+  const t = useT();
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -189,15 +192,15 @@ function EmptyState({ onNew }: { onNew: () => void }) {
       <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
         <Ghost size={32} className="text-primary opacity-60" />
       </div>
-      <h2 className="text-lg font-medium mb-2">No habits yet</h2>
+      <h2 className="text-lg font-medium mb-2">{t("dash.noHabits")}</h2>
       <p className="text-sm text-muted mb-6 max-w-xs">
-        Start tracking your first habit and build consistency over time.
+        {t("dash.noHabitsSub")}
       </p>
       <button
         onClick={onNew}
         className="px-4 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow"
       >
-        Create your first habit
+        {t("dash.createFirst")}
       </button>
     </motion.div>
   );

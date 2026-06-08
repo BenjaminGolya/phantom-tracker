@@ -10,6 +10,8 @@ import {
   Settings, LogOut, X,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useT } from "@/lib/i18n/context";
 import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
 
 const fadeUp = {
@@ -114,6 +116,7 @@ const FEATURES = [
 function NavAccount() {
   const { data } = useSession();
   const user = data?.user;
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -136,7 +139,7 @@ function NavAccount() {
         href="/dashboard"
         className="flex items-center gap-1 text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow"
       >
-        Open app <ChevronRight size={14} />
+        {t("common.openApp")} <ChevronRight size={14} />
       </Link>
 
       <div className="relative" ref={ref}>
@@ -165,14 +168,14 @@ function NavAccount() {
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-white hover:bg-surface transition-colors"
             >
               <Settings size={14} />
-              Settings
+              {t("common.settings")}
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-surface transition-colors"
             >
               <LogOut size={14} />
-              Sign out
+              {t("common.signOut")}
             </button>
           </div>
         )}
@@ -184,6 +187,7 @@ function NavAccount() {
 export function LandingPage() {
   const { status } = useSession();
   const authed = status === "authenticated";
+  const t = useT();
 
   return (
     <div className="min-h-screen bg-background text-white overflow-x-hidden">
@@ -198,15 +202,16 @@ export function LandingPage() {
             <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             {authed ? (
               <NavAccount />
             ) : (
               <>
                 <Link href="/login" className="text-sm text-muted hover:text-white transition-colors px-3 py-1.5">
-                  Sign in
+                  {t("common.signIn")}
                 </Link>
                 <Link href="/signup" className="text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow">
-                  Get started
+                  {t("common.getStarted")}
                 </Link>
               </>
             )}
@@ -279,17 +284,17 @@ export function LandingPage() {
       {/* Plans — Free vs Pro */}
       <section id="plans" className="max-w-5xl mx-auto px-5 py-16">
         <motion.div {...fadeUp} className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Free vs Pro</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("landing.plansTitle")}</h2>
           <p className="text-muted mt-3 max-w-md mx-auto">
-            Start free, forever. Upgrade when you want more — with a {TRIAL_DAYS}-day free trial.
+            {t("landing.plansSubtitle")}
           </p>
         </motion.div>
 
         <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
           {/* Free */}
           <div className="bg-surface border border-border rounded-2xl p-6">
-            <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">Free</p>
-            <p className="text-3xl font-bold mb-5">€0<span className="text-sm text-muted font-normal"> / forever</span></p>
+            <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">{t("landing.free")}</p>
+            <p className="text-3xl font-bold mb-5">€0<span className="text-sm text-muted font-normal">{t("landing.perForever")}</span></p>
             <ul className="space-y-2.5">
               {[
                 { t: `Up to ${PLAN_LIMITS.freeHabitLimit} habits`, ok: true },
@@ -311,14 +316,14 @@ export function LandingPage() {
               href={authed ? "/dashboard" : "/signup"}
               className="mt-6 block text-center text-sm font-medium border border-border hover:border-primary/50 text-white py-2.5 rounded-xl transition-colors"
             >
-              {authed ? "Open dashboard" : "Start free"}
+              {authed ? t("common.dashboard") : t("common.startFree")}
             </Link>
           </div>
 
           {/* Pro */}
           <div className="relative bg-surface border-2 border-primary/50 rounded-2xl p-6 shadow-[0_0_40px_#7f49c320]">
             <span className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md bg-primary text-white">
-              MOST POPULAR
+              {t("landing.mostPopular")}
             </span>
             <p className="text-xs uppercase tracking-widest text-primary font-medium mb-1 flex items-center gap-1">
               <Sparkles size={12} /> Pro
@@ -344,7 +349,7 @@ export function LandingPage() {
               href={authed ? "/pricing" : "/signup"}
               className="mt-6 flex items-center justify-center gap-1.5 text-sm font-semibold bg-primary hover:bg-primary-dim text-white py-2.5 rounded-xl transition-all hover:shadow-glow"
             >
-              <Sparkles size={14} /> {authed ? "Go Pro" : "Start free trial"}
+              <Sparkles size={14} /> {authed ? "Go Pro" : t("common.startFree")}
             </Link>
           </div>
         </motion.div>
@@ -434,18 +439,18 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-muted">
             <GhostLogo size={16} />
-            <span className="text-xs">Phantom Tracker — built for consistency.</span>
+            <span className="text-xs">{t("landing.footer")}</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted">
             {authed ? (
               <>
-                <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-                <Link href="/settings" className="hover:text-white transition-colors">Settings</Link>
+                <Link href="/dashboard" className="hover:text-white transition-colors">{t("common.dashboard")}</Link>
+                <Link href="/settings" className="hover:text-white transition-colors">{t("common.settings")}</Link>
               </>
             ) : (
               <>
-                <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
-                <Link href="/signup" className="hover:text-white transition-colors">Get started</Link>
+                <Link href="/login" className="hover:text-white transition-colors">{t("common.signIn")}</Link>
+                <Link href="/signup" className="hover:text-white transition-colors">{t("common.getStarted")}</Link>
               </>
             )}
           </div>

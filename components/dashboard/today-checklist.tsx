@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
+import { useT } from "@/lib/i18n/context";
 
 interface TodayChecklistProps {
   habits: HabitWithLogs[];
@@ -18,6 +19,7 @@ function GoalRow({ habit, today, onToggle }: {
   today: string;
   onToggle: TodayChecklistProps["onToggle"];
 }) {
+  const t = useT();
   const goal = habit.goal!;
   const todayLog = habit.logs.find((l) => l.date === today);
   // Fall back to the goal if the log is complete but has no numeric value
@@ -107,9 +109,9 @@ function GoalRow({ habit, today, onToggle }: {
             onClick={() => commit(goal)}
             style={{ backgroundColor: `${habit.color}15`, color: habit.color, borderColor: `${habit.color}40` }}
             className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
-          >All</button>
+          >{t("dash.all")}</button>
         )}
-        {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">Done ✓</span>}
+        {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">{t("dash.doneMark")}</span>}
       </div>
     </motion.div>
   );
@@ -118,10 +120,11 @@ function GoalRow({ habit, today, onToggle }: {
 // ─── Main checklist ───────────────────────────────────────────────────────────
 export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
   const today = format(new Date(), "yyyy-MM-dd");
+  const t = useT();
 
   return (
     <div>
-      <h2 className="text-sm font-medium text-muted mb-3">Today&apos;s habits</h2>
+      <h2 className="text-sm font-medium text-muted mb-3">{t("dash.todaysHabits")}</h2>
       <div className="space-y-2">
         {habits.map((habit, i) => {
           // Habits with a numeric goal get the counter UI
@@ -169,7 +172,7 @@ export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
                 </p>
                 {habit.category && <p className="text-xs text-muted">{habit.category}</p>}
               </div>
-              {done && <span className="text-xs text-primary font-medium shrink-0">Done ✓</span>}
+              {done && <span className="text-xs text-primary font-medium shrink-0">{t("dash.doneMark")}</span>}
             </motion.button>
           );
         })}

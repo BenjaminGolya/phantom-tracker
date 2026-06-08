@@ -12,6 +12,7 @@ import { HabitCard, ProgressRange } from "@/components/habits/habit-card";
 import { HabitGrid } from "@/components/habits/habit-grid";
 import { HabitForm } from "@/components/habits/habit-form";
 import { useMounted } from "@/lib/use-mounted";
+import { useT } from "@/lib/i18n/context";
 
 interface HabitsClientProps {
   habits: HabitWithLogs[];
@@ -21,6 +22,7 @@ interface HabitsClientProps {
 export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClientProps) {
   const router = useRouter();
   const mounted = useMounted();
+  const t = useT();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState<HabitWithLogs | null>(null);
@@ -160,7 +162,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
     <div className="max-w-4xl mx-auto space-y-6 pb-28 lg:pb-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h1 className="text-lg font-semibold">Habits</h1>
+        <h1 className="text-lg font-semibold">{t("nav.habits")}</h1>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Range toggle — only shown in cards view */}
           {view === "cards" && (
@@ -173,7 +175,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                     range === r ? "bg-primary/20 text-primary" : "text-muted hover:text-white"
                   }`}
                 >
-                  {r === "week" ? "7d" : r === "month" ? "30d" : r === "year" ? "1y" : "All"}
+                  {r === "week" ? "7d" : r === "month" ? "30d" : r === "year" ? "1y" : t("dash.all")}
                 </button>
               ))}
             </div>
@@ -188,7 +190,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                   view === v ? "bg-surface-2 text-white" : "text-muted"
                 }`}
               >
-                {v}
+                {v === "cards" ? t("habits.cards") : t("habits.grid")}
               </button>
             ))}
           </div>
@@ -197,7 +199,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
             className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow"
           >
             <Plus size={14} />
-            New
+            {t("habits.new")}
           </button>
         </div>
       </div>
@@ -209,7 +211,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
           id="habit-search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search habits… (/)"
+          placeholder={t("habits.search")}
           className="w-full pl-8 pr-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
         />
       </div>
@@ -218,14 +220,14 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
       {!pro && (
         <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg border border-primary/25 bg-primary/8">
           <p className="text-xs text-muted">
-            <span className="font-mono font-semibold text-white">{activeCount}/{PLAN_LIMITS.freeHabitLimit}</span> habits used on the Free plan
-            {atLimit && <span className="text-primary"> — limit reached</span>}
+            <span className="font-mono font-semibold text-white">{activeCount}/{PLAN_LIMITS.freeHabitLimit}</span> {t("habits.usedFree")}
+            {atLimit && <span className="text-primary"> — {t("habits.limitReached")}</span>}
           </p>
           <Link
             href="/pricing"
             className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline shrink-0"
           >
-            <Sparkles size={12} /> Go Pro
+            <Sparkles size={12} /> {t("habits.goPro")}
           </Link>
         </div>
       )}
@@ -236,7 +238,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
           <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
             <Ghost size={24} className="text-primary opacity-60" />
           </div>
-          <p className="text-sm text-muted">No habits found</p>
+          <p className="text-sm text-muted">{t("habits.noneFound")}</p>
         </div>
       ) : view === "cards" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -275,7 +277,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
       {/* Archived */}
       {archived.length > 0 && (
         <div>
-          <h2 className="text-xs text-muted uppercase tracking-wider mb-3">Archived</h2>
+          <h2 className="text-xs text-muted uppercase tracking-wider mb-3">{t("habits.archived")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 opacity-60">
             {archived.map((habit) => (
               <HabitCard

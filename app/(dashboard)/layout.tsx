@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { getProfileLevel } from "@/lib/utils";
 import { isPro } from "@/lib/plan";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
+import { isLocale } from "@/lib/i18n/config";
+import { LangSync } from "@/components/i18n/lang-sync";
 
 export default async function DashboardLayout({
   children,
@@ -21,7 +23,7 @@ export default async function DashboardLayout({
     getActiveHabitsWithLogs(session.user.id),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, image: true, plan: true, disabledAt: true, deletionRequestedAt: true },
+      select: { name: true, email: true, image: true, plan: true, disabledAt: true, deletionRequestedAt: true, language: true },
     }),
   ]);
 
@@ -45,6 +47,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      {isLocale(dbUser?.language) && <LangSync dbLang={dbUser.language} />}
       <Sidebar
         user={user}
         pro={pro}

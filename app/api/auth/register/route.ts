@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
+import { isStrongPassword, PASSWORD_HINT } from "@/lib/password";
 import bcrypt from "bcryptjs";
 
 function generateCode(): string {
@@ -12,6 +13,10 @@ export async function POST(req: NextRequest) {
 
   if (!email || !password) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  if (!isStrongPassword(password)) {
+    return NextResponse.json({ error: PASSWORD_HINT }, { status: 400 });
   }
 
   if (!acceptedTerms) {

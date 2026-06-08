@@ -5,6 +5,7 @@ import { LogOut, Settings, Info, Home } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 interface TopBarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
@@ -44,7 +45,9 @@ export function TopBar({ user }: TopBarProps) {
         Home
       </Link>
 
-      <div className="relative" ref={ref}>
+      <div className="flex items-center gap-1">
+        <LanguageSwitcher />
+        <div className="relative" ref={ref}>
         <button
           onClick={() => setOpen(!open)}
           className="flex items-center gap-2 p-1.5 sm:pr-3 rounded-full hover:bg-surface-2 transition-colors"
@@ -109,6 +112,7 @@ export function TopBar({ user }: TopBarProps) {
             </button>
           </div>
         )}
+        </div>
       </div>
     </header>
   );

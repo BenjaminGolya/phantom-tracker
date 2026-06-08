@@ -6,11 +6,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { PasswordRules } from "@/components/auth/password-rules";
+import { isStrongPassword } from "@/lib/password";
+import { useT } from "@/lib/i18n/context";
 
 function ResetForm() {
   const router = useRouter();
   const params = useSearchParams();
   const token = params.get("token") ?? "";
+  const t = useT();
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -21,7 +25,7 @@ function ResetForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (!isStrongPassword(password)) { setError("Password isn't strong enough yet."); return; }
     if (password !== confirm) { setError("Passwords don't match."); return; }
     setLoading(true);
     try {
@@ -47,14 +51,14 @@ function ResetForm() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white transition-colors mb-6">
-          <ArrowLeft size={14} /> Back to home
+          <ArrowLeft size={14} /> {t("common.backToHome")}
         </Link>
 
         <div className="flex flex-col items-center mb-8 gap-3">
           <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow" />
           <div className="text-center">
-            <h1 className="text-xl font-semibold tracking-tight">Choose a new password</h1>
-            <p className="text-sm text-muted mt-1">Enter and confirm your new password.</p>
+            <h1 className="text-xl font-semibold tracking-tight">{t("auth.newPassword")}</h1>
+            <p className="text-sm text-muted mt-1">{t("auth.confirmPassword")}</p>
           </div>
         </div>
 
@@ -78,9 +82,10 @@ function ResetForm() {
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            <PasswordRules value={password} />
             <input
               type={showPass ? "text" : "password"}
-              placeholder="Confirm new password"
+              placeholder={t("auth.confirmPassword")}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
@@ -93,7 +98,7 @@ function ResetForm() {
               className="w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 size={14} className="animate-spin" />}
-              Reset password
+              {t("auth.resetPassword")}
             </button>
           </form>
         )}

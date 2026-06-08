@@ -294,6 +294,27 @@ export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string
   });
 }
 
+/** Send a 2FA login code. */
+export async function sendTwoFactorCodeEmail(to: string, code: string, name?: string | null) {
+  const hi = name ? `Hi ${name}` : "Hi there";
+  if (!isSmtpConfigured()) {
+    console.log(`\n  🔐 2FA CODE for ${to}: ${code}  (SMTP not configured — logged only)\n`);
+    return;
+  }
+  await makeTransport().sendMail({
+    from: emailFrom(), to,
+    subject: `${code} — Your Phantom Tracker login code`,
+    text: `${hi},\n\nYour login verification code is: ${code}\n\nIt expires in 10 minutes. If you didn't try to sign in, change your password.`,
+    html: shell("Your login code", `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">Enter this code to finish signing in. It expires in <strong style="color:#fff;">10 minutes</strong>.</p>
+      <div style="background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:22px;text-align:center;margin-bottom:18px;">
+        <span style="font-family:monospace;font-size:34px;font-weight:700;letter-spacing:10px;color:#7f49c3;">${code}</span>
+      </div>
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">If you didn't try to sign in, change your password immediately.</p>`),
+  });
+}
+
 /** Send a password-reset link. */
 export async function sendPasswordResetEmail(to: string, token: string, name?: string | null) {
   const hi = name ? `Hi ${name}` : "Hi there";

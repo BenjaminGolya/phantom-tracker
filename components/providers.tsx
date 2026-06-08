@@ -1,8 +1,10 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
+import { LanguageProvider } from "@/lib/i18n/context";
+import { type Locale } from "@/lib/i18n/config";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children, lang }: { children: React.ReactNode; lang?: Locale }) {
   return (
     <SessionProvider
       // Don't refetch the session on every window focus / interval — it caused
@@ -11,7 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       refetchOnWindowFocus={false}
       refetchInterval={0}
     >
-      {children}
+      <LanguageProvider initialLang={lang}>{children}</LanguageProvider>
     </SessionProvider>
   );
 }
