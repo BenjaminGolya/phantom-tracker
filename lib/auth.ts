@@ -1,5 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendTwoFactorCodeEmail } from "@/lib/email";
@@ -8,12 +10,23 @@ function gen2faCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
+export const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
   },
   providers: [
+    // Google OAuth (only registered when configured).
+    ...(googleEnabled
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -62,8 +75,46 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
-      if (user) token.id = user.id;
+    // For Google sign-in, ensure a matching row exists in our User table
+    // (the whole app keys habits/etc. off User.id).
+    async signIn({ account, profile }) {
+      if (account?.provider !== "google") return true;
+      const email = profile?.email;
+      if (!email) return false;
+
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (!existing) {
+        // Random unusable password (the column is required; Google users
+        // sign in via OAuth, not this password).
+        const placeholder = await bcrypt.hash(randomBytes(24).toString("hex"), 12);
+        await prisma.user.create({
+          data: {
+            email,
+            name: profile?.name ?? null,
+            image: (profile as { picture?: string } | null)?.picture ?? null,
+            password: placeholder,
+            emailVerified: new Date(),
+            acceptedTerms: true,
+            acceptedTermsAt: new Date(),
+          },
+        });
+      } else if (!existing.emailVerified) {
+        // Signing in with Google verifies ownership of the email.
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: { emailVerified: new Date() },
+        });
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (user?.id && account?.provider !== "google") {
+        // Credentials path already returns our DB id.
+        token.id = user.id;
+      } else if (account?.provider === "google" && token.email) {
+        const dbUser = await prisma.user.findUnique({ where: { email: token.email } });
+        if (dbUser) token.id = dbUser.id;
+      }
       return token;
     },
     session({ session, token }) {

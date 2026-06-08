@@ -10,6 +10,7 @@ import { GhostLogo } from "@/components/brand/ghost-mark";
 import { PasswordRules } from "@/components/auth/password-rules";
 import { isStrongPassword } from "@/lib/password";
 import { useT } from "@/lib/i18n/context";
+import { GoogleButton } from "@/components/auth/google-button";
 
 type PolicyKey = "terms" | "privacy" | "newsletter";
 
@@ -123,6 +124,8 @@ export default function SignupPage() {
             <p className="text-sm text-muted mt-1">{t("auth.signUpTitle")}</p>
           </div>
         </div>
+
+        <GoogleButton />
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
