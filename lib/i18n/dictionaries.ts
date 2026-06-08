@@ -52,7 +52,6 @@ const en = {
   "auth.verifyAndSignIn": "Verify & sign in",
   "auth.useDifferent": "Use a different account",
   "auth.continueGoogle": "Continue with Google",
-  "auth.continueApple": "Continue with Apple",
   "auth.or": "or",
 
   // nav
@@ -210,7 +209,6 @@ const hu: Partial<Record<DictKey, string>> = {
   "auth.verifyAndSignIn": "Ellenőrzés és belépés",
   "auth.useDifferent": "Másik fiók használata",
   "auth.continueGoogle": "Folytatás Google-lel",
-  "auth.continueApple": "Folytatás Apple-lel",
   "auth.or": "vagy",
 
   "nav.habits": "Szokások",
@@ -359,7 +357,6 @@ const ro: Partial<Record<DictKey, string>> = {
   "auth.verifyAndSignIn": "Verifică și conectează-te",
   "auth.useDifferent": "Folosește alt cont",
   "auth.continueGoogle": "Continuă cu Google",
-  "auth.continueApple": "Continuă cu Apple",
   "auth.or": "sau",
 
   "nav.habits": "Obiceiuri",
