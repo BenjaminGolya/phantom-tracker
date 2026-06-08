@@ -916,15 +916,25 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             <span className="hidden group-open:inline">{t("set.hideChangelog")}</span>
           </summary>
           <ul className="mt-2 space-y-2 border-t border-border pt-2">
-            {CHANGELOG.map((c) => (
-              <li key={c.version} className="text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-primary">v{c.version}</span>
-                  <span className="text-[10px] text-muted">{c.date}</span>
-                </div>
-                <p className="text-muted leading-relaxed">{c.summary}</p>
-              </li>
-            ))}
+            {CHANGELOG.map((c) => {
+              const kind = {
+                feature: { label: t("set.kindFeature"), cls: "bg-primary/15 text-primary border-primary/30" },
+                fix: { label: t("set.kindFix"), cls: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
+                improvement: { label: t("set.kindImprovement"), cls: "bg-sky-500/15 text-sky-400 border-sky-500/30" },
+              }[c.kind];
+              return (
+                <li key={c.version} className="text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${kind.cls}`}>
+                      {kind.label}
+                    </span>
+                    <span className="font-mono text-primary">v{c.version}</span>
+                    <span className="text-[10px] text-muted">{c.date}</span>
+                  </div>
+                  <p className="text-muted leading-relaxed mt-0.5">{c.summary}</p>
+                </li>
+              );
+            })}
           </ul>
         </details>
       </div>
