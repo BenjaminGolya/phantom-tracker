@@ -364,7 +364,7 @@ const hu: Partial<Record<DictKey, string>> = {
   "common.loading": "Betöltés…",
 
   "landing.tagline": "Építs jobb szokásokat, a sötétben.",
-  "landing.heroTitle": "Kövesd a szokásaid. Építs sorozatot. Lépj szintet.",
+  "landing.heroTitle": "Kövesd a szokásaidat. Tartsd a lendületet. Lépj szintet.",
   "landing.heroSubtitle": "Letisztult, sötét szokáskövető. Jelölj be naponta, nézd, ahogy nő a sorozatod, és gyűjts XP-t a phantom rangodhoz.",
   "landing.ctaPrimary": "Hozd létre ingyenes fiókod",
   "landing.ctaOpen": "Irányítópult megnyitása",
@@ -382,7 +382,7 @@ const hu: Partial<Record<DictKey, string>> = {
   "lp.heroBadge": "Sötét, minimalista szokáskövető",
   "lp.heroTitle1": "Építs szokásokat, amik",
   "lp.heroAccent": "tényleg megmaradnak",
-  "lp.heroSubtitle": "Kövesd a szokásaid, építs sorozatokat, lépj szintet, és kapj emlékeztetőket, amik nap mint nap rávesznek a teljesítésre. Ingyenes, minden eszközön.",
+  "lp.heroSubtitle": "Kövesd a szokásaidat, tartsd a lendületet napról napra, és lépj szintet olyan emlékeztetőkkel, amelyek tényleg ráveszenek a napi teljesítésre. Ingyenes, minden eszközön.",
   "lp.ctaFree": "Kezdés ingyen",
   "lp.ctaOpen": "Irányítópult megnyitása",
   "lp.howItWorks": "Hogyan működik",
