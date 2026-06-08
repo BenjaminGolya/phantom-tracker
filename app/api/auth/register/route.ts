@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
 import { isStrongPassword, PASSWORD_HINT } from "@/lib/password";
+import { LANG_COOKIE, isLocale, DEFAULT_LOCALE } from "@/lib/i18n/config";
 import bcrypt from "bcryptjs";
 
 function generateCode(): string {
@@ -35,6 +36,8 @@ export async function POST(req: NextRequest) {
   const hashed = await bcrypt.hash(password, 12);
   const code = generateCode();
   const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  const cookieLang = req.cookies.get(LANG_COOKIE)?.value;
+  const lang = isLocale(cookieLang) ? cookieLang : DEFAULT_LOCALE;
 
   if (existing && !existing.emailVerified) {
     // Resend code for unverified account
@@ -46,6 +49,7 @@ export async function POST(req: NextRequest) {
         acceptedTerms: true,
         acceptedTermsAt: new Date(),
         newsletterOptIn: !!newsletterOptIn,
+        language: lang,
         verificationCode: code,
         verificationExpires: expires,
       },
@@ -59,6 +63,7 @@ export async function POST(req: NextRequest) {
         acceptedTerms: true,
         acceptedTermsAt: new Date(),
         newsletterOptIn: !!newsletterOptIn,
+        language: lang,
         verificationCode: code,
         verificationExpires: expires,
       },
@@ -66,7 +71,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await sendVerificationEmail(email, code);
+    await sendVerificationEmail(email, code, lang);
   } catch {
     return NextResponse.json(
       { error: "Could not send the verification email. Please try again." },

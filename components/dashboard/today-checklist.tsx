@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
-import { useT } from "@/lib/i18n/context";
+import { useLang } from "@/lib/i18n/context";
+import { categoryLabel } from "@/lib/i18n/category";
 
 interface TodayChecklistProps {
   habits: HabitWithLogs[];
@@ -19,7 +20,7 @@ function GoalRow({ habit, today, onToggle }: {
   today: string;
   onToggle: TodayChecklistProps["onToggle"];
 }) {
-  const t = useT();
+  const { t, lang } = useLang();
   const goal = habit.goal!;
   const todayLog = habit.logs.find((l) => l.date === today);
   // Fall back to the goal if the log is complete but has no numeric value
@@ -65,7 +66,7 @@ function GoalRow({ habit, today, onToggle }: {
         </div>
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-medium ${done ? "line-through text-muted" : "text-white"}`}>{habit.name}</p>
-          {habit.category && <p className="text-xs text-muted">{habit.category}</p>}
+          {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
         </div>
         <span className="text-xs font-mono shrink-0">
           <span style={{ color: habit.color }}>{val}</span>
@@ -120,7 +121,7 @@ function GoalRow({ habit, today, onToggle }: {
 // ─── Main checklist ───────────────────────────────────────────────────────────
 export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
   const today = format(new Date(), "yyyy-MM-dd");
-  const t = useT();
+  const { t, lang } = useLang();
 
   return (
     <div>
@@ -170,7 +171,7 @@ export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
                 <p className={`text-sm font-medium transition-colors ${done ? "line-through text-muted" : "text-white"}`}>
                   {habit.name}
                 </p>
-                {habit.category && <p className="text-xs text-muted">{habit.category}</p>}
+                {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
               </div>
               {done && <span className="text-xs text-primary font-medium shrink-0">{t("dash.doneMark")}</span>}
             </motion.button>

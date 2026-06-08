@@ -1,7 +1,7 @@
 // Single source of truth for the app version + a short changelog.
 // Bump APP_VERSION and prepend a CHANGELOG entry whenever you ship something.
 
-export const APP_VERSION = "1.7.0";
+export const APP_VERSION = "1.9.0";
 
 export type ChangelogEntry = {
   version: string;
@@ -11,6 +11,11 @@ export type ChangelogEntry = {
 
 // Most recent first.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.9.0",
+    date: "2026-06-07",
+    summary: "Full Hungarian & Romanian translations across the whole app and emails.",
+  },
   {
     version: "1.7.0",
     date: "2026-06-07",

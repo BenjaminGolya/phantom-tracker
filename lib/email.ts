@@ -1,10 +1,12 @@
 import nodemailer from "nodemailer";
+import { emailStrings } from "@/lib/email-i18n";
 
 function isSmtpConfigured() {
   return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-export async function sendVerificationEmail(to: string, code: string) {
+export async function sendVerificationEmail(to: string, code: string, lang?: string) {
+  const es = emailStrings(lang);
   // ── Dev fallback: log to console when SMTP isn't configured ──────────────
   if (!isSmtpConfigured()) {
     console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -30,8 +32,8 @@ export async function sendVerificationEmail(to: string, code: string) {
   await transporter.sendMail({
     from,
     to,
-    subject: `${code} — Your Phantom Tracker verification code`,
-    text: `Your verification code is: ${code}\n\nIt expires in 15 minutes. Do not share it with anyone.`,
+    subject: es.verifySubject(code),
+    text: `${code}\n\n${es.verifyIntro}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -46,20 +48,20 @@ export async function sendVerificationEmail(to: string, code: string) {
                       <span style="font-size:22px;">👻</span>
                     </div>
                     <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:600;letter-spacing:-0.3px;">Phantom Tracker</h1>
-                    <p style="margin:8px 0 0;color:#a1a1aa;font-size:13px;">Verify your email address</p>
+                    <p style="margin:8px 0 0;color:#a1a1aa;font-size:13px;">${es.verifyHeading}</p>
                   </td>
                 </tr>
                 <!-- Code -->
                 <tr>
                   <td style="padding:32px;">
                     <p style="margin:0 0 20px;color:#a1a1aa;font-size:14px;line-height:1.6;">
-                      Enter this 6-digit code to complete your registration. It expires in <strong style="color:#ffffff;">15 minutes</strong>.
+                      ${es.verifyIntro}
                     </p>
                     <div style="background:#1a1a1a;border:1px solid #222222;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
                       <span style="font-family:monospace;font-size:36px;font-weight:700;letter-spacing:12px;color:#7f49c3;">${code}</span>
                     </div>
                     <p style="margin:0;color:#71717a;font-size:12px;text-align:center;">
-                      If you didn't create an account, you can safely ignore this email.
+                      ${es.verifyIgnore}
                     </p>
                   </td>
                 </tr>
@@ -73,7 +75,8 @@ export async function sendVerificationEmail(to: string, code: string) {
 }
 
 /** Welcome a newly-verified user. No-op when SMTP isn't configured. */
-export async function sendWelcomeEmail(to: string, name?: string | null) {
+export async function sendWelcomeEmail(to: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   if (!isSmtpConfigured()) {
     console.log(`\n  👋 (welcome email skipped — no SMTP) for ${to}\n`);
     return;
@@ -91,13 +94,12 @@ export async function sendWelcomeEmail(to: string, name?: string | null) {
   // Point at /login (pre-filled) rather than /dashboard, so opening this email on
   // any device signs the user into THIS account — not whatever the device was on.
   const openUrl = `${appUrl}/login?email=${encodeURIComponent(to)}`;
-  const hi = name ? `Hey ${name}` : "Hey there";
 
   await transporter.sendMail({
     from,
     to,
-    subject: "Welcome to Phantom Tracker 👻",
-    text: `${hi},\n\nYour account is verified — welcome to Phantom Tracker!\n\nStart by creating your first habit, check it off each day, and watch your streaks and levels grow.\n\nOpen the app: ${openUrl}\n\nStay consistent.`,
+    subject: es.welcomeSubject,
+    text: `${es.welcomeHi(name)}\n\n${es.welcomeLine}\n\n${openUrl}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -110,19 +112,18 @@ export async function sendWelcomeEmail(to: string, name?: string | null) {
                     <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#7f49c3;border-radius:14px;margin-bottom:16px;">
                       <span style="font-size:24px;">👻</span>
                     </div>
-                    <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">Welcome to Phantom Tracker</h1>
+                    <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">${es.welcomeHeading}</h1>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 32px 28px;">
-                    <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi}, your account is verified — you're in. 🎉</p>
+                    <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.welcomeHi(name)}</p>
                     <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 24px;">
-                      Create your first habit, check it off each day, and watch your streaks, levels, and Phantom score grow. Set reminders so you never miss a day.
+                      ${es.welcomeLine}
                     </p>
                     <div style="text-align:center;margin-bottom:20px;">
-                      <a href="${openUrl}" style="display:inline-block;background:#7f49c3;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Open Phantom Tracker</a>
+                      <a href="${openUrl}" style="display:inline-block;background:#7f49c3;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${es.welcomeBtn}</a>
                     </div>
-                    <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">Stay consistent. 👻</p>
                   </td>
                 </tr>
               </table>
@@ -210,58 +211,58 @@ function shell(title: string, bodyHtml: string) {
 }
 
 /** Confirm the account was disabled (deactivated). */
-export async function sendAccountDisabledEmail(to: string, name?: string | null) {
-  const hi = name ? `Hi ${name}` : "Hi there";
+export async function sendAccountDisabledEmail(to: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   if (!isSmtpConfigured()) { console.log(`\n  ⏸️  (account disabled email skipped — no SMTP) for ${to}\n`); return; }
   const url = `${appUrl()}/login?email=${encodeURIComponent(to)}`;
   await makeTransport().sendMail({
     from: emailFrom(), to,
-    subject: "Your Phantom Tracker account has been disabled",
-    text: `${hi},\n\nYour account has been disabled. You won't receive reminders and you can't use the app until you reactivate.\n\nYour data is safe. Sign back in any time to reactivate: ${url}`,
-    html: shell("Account disabled", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">Your account has been <strong style="color:#fff;">disabled</strong>. Reminders are paused and the app is locked, but <strong style="color:#fff;">all your data is kept safe</strong>. Sign back in any time to reactivate instantly.</p>
-      <div style="text-align:center;margin-bottom:8px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Reactivate my account</a></div>`),
+    subject: es.disabledSubject,
+    text: `${es.disabledHi(name)}\n\n${es.disabledLine}\n\n${url}`,
+    html: shell(es.disabledHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.disabledHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.disabledLine}</p>
+      <div style="text-align:center;margin-bottom:8px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${es.disabledBtn}</a></div>`),
   });
 }
 
 /** Confirm deletion was requested; data purged after the grace period. */
-export async function sendAccountDeletionScheduledEmail(to: string, name: string | null, purgeOn: Date, graceDays: number) {
-  const hi = name ? `Hi ${name}` : "Hi there";
-  const when = purgeOn.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+export async function sendAccountDeletionScheduledEmail(to: string, name: string | null, purgeOn: Date, graceDays: number, lang?: string) {
+  const es = emailStrings(lang);
+  const when = purgeOn.toLocaleDateString(lang === "hu" ? "hu-HU" : lang === "ro" ? "ro-RO" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
   if (!isSmtpConfigured()) { console.log(`\n  🗑️  (deletion-scheduled email skipped — no SMTP) for ${to} — purge ${when}\n`); return; }
   const url = `${appUrl()}/login?email=${encodeURIComponent(to)}`;
   await makeTransport().sendMail({
     from: emailFrom(), to,
-    subject: `Your Phantom Tracker account is scheduled for deletion`,
-    text: `${hi},\n\nWe've scheduled your account for deletion. You have ${graceDays} days to change your mind — sign in before ${when} to reactivate and keep everything.\n\nAfter ${when}, your account and all related data will be permanently deleted.\n\nReactivate: ${url}`,
-    html: shell("Account scheduled for deletion", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">Your account is scheduled for permanent deletion. You have a <strong style="color:#fff;">${graceDays}-day grace period</strong> — change your mind any time before <strong style="color:#fff;">${when}</strong> and everything is restored exactly as it was.</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">After <strong style="color:#fff;">${when}</strong>, your account and <strong style="color:#fff;">all related data will be permanently erased</strong> and cannot be recovered.</p>
-      <div style="text-align:center;margin-bottom:8px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Keep my account</a></div>`),
+    subject: es.delSubject,
+    text: `${es.delHi(name)}\n\n${es.delLine1(graceDays, when)}\n\n${es.delLine2(when)}\n\n${url}`,
+    html: shell(es.delHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.delHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">${es.delLine1(graceDays, when)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.delLine2(when)}</p>
+      <div style="text-align:center;margin-bottom:8px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${es.delBtn}</a></div>`),
   });
 }
 
 /** Welcome the user back after reactivating. */
-export async function sendAccountReactivatedEmail(to: string, name?: string | null) {
-  const hi = name ? `Welcome back, ${name}` : "Welcome back";
+export async function sendAccountReactivatedEmail(to: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   if (!isSmtpConfigured()) { console.log(`\n  ✅ (reactivated email skipped — no SMTP) for ${to}\n`); return; }
   const url = `${appUrl()}/dashboard`;
   await makeTransport().sendMail({
     from: emailFrom(), to,
-    subject: "Your Phantom Tracker account is active again 👻",
-    text: `${hi}! Your account has been reactivated and all your data is intact. Pick up right where you left off: ${url}`,
-    html: shell("You're back!", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi}! 🎉</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">Your account has been reactivated and <strong style="color:#fff;">all your habits and history are intact</strong>. Any pending deletion has been cancelled.</p>
-      <div style="text-align:center;margin-bottom:8px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Open Phantom Tracker</a></div>`),
+    subject: es.reactSubject,
+    text: `${es.reactHi(name)}\n\n${es.reactLine}\n\n${url}`,
+    html: shell(es.reactHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.reactHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.reactLine}</p>
+      <div style="text-align:center;margin-bottom:8px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${es.reactBtn}</a></div>`),
   });
 }
 
 /** Send a confirm-your-new-email link to the pending address. */
-export async function sendEmailChangeConfirmation(toNewEmail: string, token: string, name?: string | null) {
-  const hi = name ? `Hi ${name}` : "Hi there";
+export async function sendEmailChangeConfirmation(toNewEmail: string, token: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   const url = `${appUrl()}/api/user/email/confirm?token=${encodeURIComponent(token)}`;
   if (!isSmtpConfigured()) {
     console.log(`\n  ✉️  (email-change confirm skipped — no SMTP) for ${toNewEmail}\n  ➜  ${url}\n`);
@@ -269,55 +270,55 @@ export async function sendEmailChangeConfirmation(toNewEmail: string, token: str
   }
   await makeTransport().sendMail({
     from: emailFrom(), to: toNewEmail,
-    subject: "Confirm your new Phantom Tracker email",
-    text: `${hi},\n\nYou requested to change your Phantom Tracker email to this address. Confirm it to finish:\n\n${url}\n\nThis link expires in 1 hour. If you didn't request this, you can ignore this email.`,
-    html: shell("Confirm your new email", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">You asked to change your Phantom Tracker email to <strong style="color:#fff;">${toNewEmail}</strong>. Tap the button to confirm — the link expires in <strong style="color:#fff;">1 hour</strong>.</p>
-      <div style="text-align:center;margin-bottom:16px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Confirm new email</a></div>
-      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">If you didn't request this, you can safely ignore this email.</p>`),
+    subject: es.ecConfirmSubject,
+    text: `${es.ecConfirmHi(name)}\n\n${es.ecConfirmLine(toNewEmail)}\n\n${url}`,
+    html: shell(es.ecConfirmHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.ecConfirmHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.ecConfirmLine(toNewEmail)}</p>
+      <div style="text-align:center;margin-bottom:16px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${es.ecConfirmBtn}</a></div>
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">${es.ecConfirmIgnore}</p>`),
   });
 }
 
 /** Notify the OLD email that a change was requested (security heads-up). */
-export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string, name?: string | null) {
-  const hi = name ? `Hi ${name}` : "Hi there";
+export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   if (!isSmtpConfigured()) { console.log(`\n  ✉️  (email-change notice skipped — no SMTP) for ${toOldEmail}\n`); return; }
   await makeTransport().sendMail({
     from: emailFrom(), to: toOldEmail,
-    subject: "A Phantom Tracker email change was requested",
-    text: `${hi},\n\nSomeone requested to change your Phantom Tracker account email to ${newEmail}. The change only takes effect after it's confirmed from the new address.\n\nIf this wasn't you, change your password immediately.`,
-    html: shell("Email change requested", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">A request was made to change your account email to <strong style="color:#fff;">${newEmail}</strong>. It only takes effect once confirmed from that new address.</p>
-      <p style="color:#71717a;font-size:12px;margin:0;">If this wasn't you, please change your password right away.</p>`),
+    subject: es.ecNoticeSubject,
+    text: `${es.ecNoticeHi(name)}\n\n${es.ecNoticeLine(newEmail)}\n\n${es.ecNoticeWarn}`,
+    html: shell(es.ecNoticeHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.ecNoticeHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">${es.ecNoticeLine(newEmail)}</p>
+      <p style="color:#71717a;font-size:12px;margin:0;">${es.ecNoticeWarn}</p>`),
   });
 }
 
 /** Send a 2FA login code. */
-export async function sendTwoFactorCodeEmail(to: string, code: string, name?: string | null) {
-  const hi = name ? `Hi ${name}` : "Hi there";
+export async function sendTwoFactorCodeEmail(to: string, code: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   if (!isSmtpConfigured()) {
     console.log(`\n  🔐 2FA CODE for ${to}: ${code}  (SMTP not configured — logged only)\n`);
     return;
   }
   await makeTransport().sendMail({
     from: emailFrom(), to,
-    subject: `${code} — Your Phantom Tracker login code`,
-    text: `${hi},\n\nYour login verification code is: ${code}\n\nIt expires in 10 minutes. If you didn't try to sign in, change your password.`,
-    html: shell("Your login code", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">Enter this code to finish signing in. It expires in <strong style="color:#fff;">10 minutes</strong>.</p>
+    subject: es.twoFASubject(code),
+    text: `${es.twoFAHi(name)}\n\n${code}\n\n${es.twoFALine}`,
+    html: shell(es.twoFAHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.twoFAHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.twoFALine}</p>
       <div style="background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:22px;text-align:center;margin-bottom:18px;">
         <span style="font-family:monospace;font-size:34px;font-weight:700;letter-spacing:10px;color:#7f49c3;">${code}</span>
       </div>
-      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">If you didn't try to sign in, change your password immediately.</p>`),
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">${es.twoFAIgnore}</p>`),
   });
 }
 
 /** Send a password-reset link. */
-export async function sendPasswordResetEmail(to: string, token: string, name?: string | null) {
-  const hi = name ? `Hi ${name}` : "Hi there";
+export async function sendPasswordResetEmail(to: string, token: string, name?: string | null, lang?: string) {
+  const es = emailStrings(lang);
   const url = `${appUrl()}/reset?token=${encodeURIComponent(token)}`;
   if (!isSmtpConfigured()) {
     console.log(`\n  🔑 (password reset skipped — no SMTP) for ${to}\n  ➜  ${url}\n`);
@@ -325,13 +326,13 @@ export async function sendPasswordResetEmail(to: string, token: string, name?: s
   }
   await makeTransport().sendMail({
     from: emailFrom(), to,
-    subject: "Reset your Phantom Tracker password",
-    text: `${hi},\n\nWe got a request to reset your password. Use this link (valid 1 hour):\n\n${url}\n\nIf you didn't request this, you can safely ignore this email — your password won't change.`,
-    html: shell("Reset your password", `
-      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${hi},</p>
-      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">We got a request to reset your password. Tap the button to choose a new one — this link expires in <strong style="color:#fff;">1 hour</strong>.</p>
-      <div style="text-align:center;margin-bottom:16px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">Reset password</a></div>
-      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">If you didn't request this, ignore this email — your password stays the same.</p>`),
+    subject: es.resetSubject,
+    text: `${es.resetHi(name)}\n\n${es.resetLine}\n\n${url}\n\n${es.resetIgnore}`,
+    html: shell(es.resetHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.resetHi(name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.resetLine}</p>
+      <div style="text-align:center;margin-bottom:16px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${es.resetBtn}</a></div>
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:0;">${es.resetIgnore}</p>`),
   });
 }
 

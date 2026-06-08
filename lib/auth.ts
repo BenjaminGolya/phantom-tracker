@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
               where: { id: user.id },
               data: { twoFactorCode: newCode, twoFactorCodeExpires: new Date(Date.now() + 10 * 60 * 1000) },
             });
-            try { await sendTwoFactorCodeEmail(user.email, newCode, user.name); } catch { /* surfaced as resend option */ }
+            try { await sendTwoFactorCodeEmail(user.email, newCode, user.name, user.language); } catch { /* surfaced as resend option */ }
             throw new Error("2FA_REQUIRED");
           }
           // Second step: validate the code.

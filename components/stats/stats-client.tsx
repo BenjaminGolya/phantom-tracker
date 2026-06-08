@@ -58,15 +58,15 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
   const cats = Math.round(info.breakdown.diversity / 10);
 
   const xpSources = [
-    { label: "Base completions",  value: info.breakdown.base,         icon: <Zap size={12} />,    color: "#3b82f6", hint: "1 XP for every habit you check off" },
-    { label: "Streak bonuses",    value: info.breakdown.streakBonus,  icon: <Flame size={12} />,  color: "#f97316", hint: "+1 / +2 / +3 per check at 7 / 14 / 30-day streaks" },
-    { label: "Perfect days",      value: info.breakdown.perfectDays,  icon: <Star size={12} />,   color: "#eab308", hint: "+5 for each day you complete every habit" },
+    { label: t("stats.srcBase"),  value: info.breakdown.base,         icon: <Zap size={12} />,    color: "#3b82f6", hint: t("stats.srcBaseHint") },
+    { label: t("stats.srcStreak"),    value: info.breakdown.streakBonus,  icon: <Flame size={12} />,  color: "#f97316", hint: t("stats.srcStreakHint") },
+    { label: t("stats.srcPerfect"),      value: info.breakdown.perfectDays,  icon: <Star size={12} />,   color: "#eab308", hint: t("stats.srcPerfectHint") },
     {
-      label: "Category diversity", value: info.breakdown.diversity, icon: <Shield size={12} />, color: "#22c55e",
-      hint: cats >= 5 ? "Maxed — all 5 category slots used 🎉" : `${cats}/5 categories · add ${5 - cats} more for +${(5 - cats) * 10} XP`,
+      label: t("stats.srcDiversity"), value: info.breakdown.diversity, icon: <Shield size={12} />, color: "#22c55e",
+      hint: cats >= 5 ? t("stats.diversityMaxed") : `${cats}/5 ${t("stats.catsWord")} · ${t("stats.addWord")} ${5 - cats} ${t("stats.moreForWord")} +${(5 - cats) * 10} XP`,
       cap: 5, used: cats,
     },
-    { label: "Habit mastery",     value: info.breakdown.masteryBonus, icon: <Trophy size={12} />, color: "#a855f7", hint: "+20 each time a habit reaches a new tier (E, D, C…)" },
+    { label: t("stats.srcMastery"),     value: info.breakdown.masteryBonus, icon: <Trophy size={12} />, color: "#a855f7", hint: t("stats.srcMasteryHint") },
   ];
 
   return (
@@ -113,7 +113,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
         >
           <Lock size={13} className="text-primary shrink-0" />
           <span className="text-[11px] text-muted">
-            You&apos;ve maxed the Free ladder. <span className="text-primary font-medium">Go Pro</span> for {PLAN_LIMITS.proXpMultiplier}× XP and exclusive tiers (🌌 ✴️ ♾️).
+            {t("stats.cappedPre")} <span className="text-primary font-medium">{t("habits.goPro")}</span> {t("stats.cappedPost")}
           </span>
         </Link>
       )}
@@ -121,7 +121,7 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
       {/* XP bar to next level */}
       <div className="mb-4">
         <div className="flex justify-between text-xs text-muted mb-1.5">
-          <span>{info.isMax ? "Max level reached ✦" : `${info.xp - info.xpRequired} / ${info.xpNext - info.xpRequired} XP to next`}</span>
+          <span>{info.isMax ? t("stats.maxLevel") : `${info.xp - info.xpRequired} / ${info.xpNext - info.xpRequired} ${t("stats.xpToNext")}`}</span>
           {next && <span><span style={{ color: next.color }}>{next.emoji}</span> {next.label}</span>}
         </div>
         <XPProgressBar progress={info.progress} color={info.color} />
@@ -452,10 +452,10 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
           <AdvancedStats
             pro={pro}
             metrics={[
-              { label: t("stats.perfectDays"), value: perfectDays, icon: <Star size={16} className="text-yellow-400" />, hint: "Days you completed every habit" },
-              { label: t("stats.consistency7"), value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: "Completion rate this week" },
-              { label: t("stats.activeStreaks"), value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: "Sum of all current streaks" },
-              { label: t("stats.categoriesUsed"), value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: "Diversity of your habits" },
+              { label: t("stats.perfectDays"), value: perfectDays, icon: <Star size={16} className="text-yellow-400" />, hint: t("stats.perfectDaysHint") },
+              { label: t("stats.consistency7"), value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: t("stats.consistency7Hint") },
+              { label: t("stats.activeStreaks"), value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: t("stats.activeStreaksHint") },
+              { label: t("stats.categoriesUsed"), value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: t("stats.categoriesUsedHint") },
             ]}
           />
 

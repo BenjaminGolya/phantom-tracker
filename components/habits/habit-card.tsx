@@ -10,7 +10,8 @@ import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw } from "lucid
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel } from "@/lib/utils";
-import { useT } from "@/lib/i18n/context";
+import { useLang } from "@/lib/i18n/context";
+import { categoryLabel } from "@/lib/i18n/category";
 import { getHabitIcon } from "@/lib/habit-icons";
 
 export type ProgressRange = "week" | "month" | "year" | "all";
@@ -375,7 +376,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   onDelete?: (id: string) => void;
   onArchive?: (id: string) => void;
 }) {
-  const t = useT();
+  const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [levelUpInfo, setLevelUpInfo] = useState<ReturnType<typeof getHabitLevel> | null>(null);
   const prevLevelRef = useRef(getHabitLevel(habit.logs).level);
@@ -450,7 +451,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
           </button>
           <div>
             <h3 className="text-sm font-medium text-white leading-tight">{habit.name}</h3>
-            {habit.category && <span className="text-xs text-muted">{habit.category}</span>}
+            {habit.category && <span className="text-xs text-muted">{categoryLabel(habit.category, lang)}</span>}
           </div>
         </div>
 

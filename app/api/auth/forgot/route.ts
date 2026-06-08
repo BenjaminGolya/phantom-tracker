@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         where: { id: user.id },
         data: { resetToken: token, resetExpires: expires },
       });
-      try { await sendPasswordResetEmail(user.email, token, user.name); }
+      try { await sendPasswordResetEmail(user.email, token, user.name, user.language); }
       catch (e) { logError("auth/forgot:email", e); }
     }
   } catch (err) {
