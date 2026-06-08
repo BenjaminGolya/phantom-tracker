@@ -12,7 +12,7 @@ export function isPro(user: { plan?: string | null } | null | undefined): boolea
 
 export const PLAN_LIMITS = {
   /** Max active habits a free user can create. Pro = unlimited. */
-  freeHabitLimit: 3,
+  freeHabitLimit: 4,
   /** Pro users earn this multiplier on all profile XP. */
   proXpMultiplier: 1.5,
   /**
