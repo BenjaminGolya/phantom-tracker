@@ -6,13 +6,13 @@ import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
-  Share, Smartphone, ChevronRight, CalendarDays, Sparkles, MoreHorizontal,
+  Smartphone, ChevronRight, CalendarDays, Sparkles,
   Settings, LogOut, X,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useT } from "@/lib/i18n/context";
-import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
+import { PRICE_LABEL } from "@/lib/plan";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -104,13 +104,13 @@ function ChecklistMock() {
 }
 
 const FEATURES = [
-  { icon: <CalendarDays size={18} />, title: "Visual habit grid", desc: "Every day you show up fills a square. Watch your consistency build into a satisfying streak." },
-  { icon: <Trophy size={18} />, title: "Levels & XP", desc: "Each habit levels up as you complete it, and you earn XP toward a profile rank from Wanderer to Phantom." },
-  { icon: <Flame size={18} />, title: "Streaks", desc: "Build momentum with streak counters and bonus XP at 7, 14, and 30 days." },
-  { icon: <Target size={18} />, title: "Daily goals", desc: "Track a count per day — 50 push-ups, 8 glasses of water — with a built-in counter." },
-  { icon: <Bell size={18} />, title: "Smart reminders", desc: "Get a push notification at the time you choose — even with the app closed — until you've done it." },
-  { icon: <BarChart2 size={18} />, title: "Stats & insights", desc: "See your weekly completion, best streaks, and exactly where your XP comes from." },
-];
+  { icon: <CalendarDays size={18} />, titleKey: "lp.f1Title", descKey: "lp.f1Desc" },
+  { icon: <Trophy size={18} />, titleKey: "lp.f2Title", descKey: "lp.f2Desc" },
+  { icon: <Flame size={18} />, titleKey: "lp.f3Title", descKey: "lp.f3Desc" },
+  { icon: <Target size={18} />, titleKey: "lp.f4Title", descKey: "lp.f4Desc" },
+  { icon: <Bell size={18} />, titleKey: "lp.f5Title", descKey: "lp.f5Desc" },
+  { icon: <BarChart2 size={18} />, titleKey: "lp.f6Title", descKey: "lp.f6Desc" },
+] as const;
 
 // Account control shown in the landing nav when the visitor is logged in.
 function NavAccount() {
@@ -223,22 +223,21 @@ export function LandingPage() {
       <section className="relative max-w-5xl mx-auto px-5 pt-16 pb-12 text-center">
         <motion.div {...fadeUp}>
           <div className="inline-flex items-center gap-1.5 text-xs text-muted bg-surface border border-border rounded-full px-3 py-1 mb-6">
-            <Sparkles size={12} className="text-primary" /> A dark, minimalist habit tracker
+            <Sparkles size={12} className="text-primary" /> {t("lp.heroBadge")}
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
-            Build habits that
-            <span className="bg-gradient-to-r from-primary to-phantom-300 bg-clip-text text-transparent"> actually stick</span>.
+            {t("lp.heroTitle1")}{" "}
+            <span className="bg-gradient-to-r from-primary to-phantom-300 bg-clip-text text-transparent">{t("lp.heroAccent")}</span>.
           </h1>
           <p className="text-base sm:text-lg text-muted mt-5 max-w-xl mx-auto leading-relaxed">
-            Track your habits, build streaks, level up, and get reminders that get you to show up —
-            every single day. Free, on every device.
+            {t("lp.heroSubtitle")}
           </p>
           <div className="flex items-center justify-center gap-3 mt-8">
             <Link href={authed ? "/dashboard" : "/signup"} className="flex items-center gap-1.5 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-all hover:shadow-glow">
-              {authed ? "Open your dashboard" : "Get started — it's free"} <ChevronRight size={15} />
+              {authed ? t("lp.ctaOpen") : t("lp.ctaFree")} <ChevronRight size={15} />
             </Link>
             <Link href="#install" className="text-sm font-medium text-muted hover:text-white border border-border hover:border-primary/40 px-5 py-2.5 rounded-xl transition-colors">
-              How it works
+              {t("lp.howItWorks")}
             </Link>
           </div>
         </motion.div>
@@ -258,15 +257,15 @@ export function LandingPage() {
       {/* Features */}
       <section className="max-w-5xl mx-auto px-5 py-16">
         <motion.h2 {...fadeUp} className="text-2xl sm:text-3xl font-bold text-center tracking-tight">
-          Everything you need to stay consistent
+          {t("lp.featuresTitle")}
         </motion.h2>
         <motion.p {...fadeUp} className="text-muted text-center mt-3 max-w-lg mx-auto">
-          Simple to use, satisfying to keep up — designed to make showing up the easy choice.
+          {t("lp.featuresSubtitle")}
         </motion.p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
           {FEATURES.map((f, i) => (
             <motion.div
-              key={f.title}
+              key={f.titleKey}
               {...fadeUp}
               transition={{ duration: 0.5, delay: i * 0.05 }}
               className="bg-surface border border-border rounded-2xl p-5 hover:border-primary/30 transition-colors"
@@ -274,8 +273,8 @@ export function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
                 {f.icon}
               </div>
-              <h3 className="text-sm font-semibold mb-1.5">{f.title}</h3>
-              <p className="text-sm text-muted leading-relaxed">{f.desc}</p>
+              <h3 className="text-sm font-semibold mb-1.5">{t(f.titleKey)}</h3>
+              <p className="text-sm text-muted leading-relaxed">{t(f.descKey)}</p>
             </motion.div>
           ))}
         </div>
@@ -297,18 +296,18 @@ export function LandingPage() {
             <p className="text-3xl font-bold mb-5">€0<span className="text-sm text-muted font-normal">{t("landing.perForever")}</span></p>
             <ul className="space-y-2.5">
               {[
-                { t: `Up to ${PLAN_LIMITS.freeHabitLimit} habits`, ok: true },
-                { t: "Daily tracking & streaks", ok: true },
-                { t: "Contribution calendars", ok: true },
-                { t: `Profile levels (to Lv.${PLAN_LIMITS.freeProfileLevelCap})`, ok: true },
-                { t: "Timed reminders", ok: false },
-                { t: "Advanced stats", ok: false },
-                { t: `${PLAN_LIMITS.proXpMultiplier}× XP boost & elite tiers`, ok: false },
-                { t: "Data export & import", ok: false },
+                { label: t("lp.freeHabits"), ok: true },
+                { label: t("lp.dailyTracking"), ok: true },
+                { label: t("lp.calendars"), ok: true },
+                { label: t("lp.freeLevels"), ok: true },
+                { label: t("lp.timedReminders"), ok: false },
+                { label: t("lp.advStats"), ok: false },
+                { label: t("lp.xpEliteFree"), ok: false },
+                { label: t("lp.dataIO"), ok: false },
               ].map((f) => (
-                <li key={f.t} className="flex items-center gap-2 text-sm">
+                <li key={f.label} className="flex items-center gap-2 text-sm">
                   {f.ok ? <Check size={15} className="text-green-400 shrink-0" /> : <X size={15} className="text-muted/40 shrink-0" />}
-                  <span className={f.ok ? "text-white" : "text-muted line-through"}>{f.t}</span>
+                  <span className={f.ok ? "text-white" : "text-muted line-through"}>{f.label}</span>
                 </li>
               ))}
             </ul>
@@ -329,19 +328,19 @@ export function LandingPage() {
               <Sparkles size={12} /> Pro
             </p>
             <p className="text-3xl font-bold">{PRICE_LABEL}</p>
-            <p className="text-[11px] text-primary mb-5">or {PRICE_LABEL_YEARLY} — save {YEARLY_SAVINGS_PCT}% · {TRIAL_DAYS}-day free trial</p>
+            <p className="text-[11px] text-primary mb-5">{t("lp.proPriceSub")}</p>
             <ul className="space-y-2.5">
               {[
-                "Unlimited habits",
-                "Timed push reminders",
-                "Advanced stats & insights",
-                `${PLAN_LIMITS.proXpMultiplier}× XP boost + exclusive tiers`,
-                "Data export & import",
-                "Everything in Free",
-              ].map((t) => (
-                <li key={t} className="flex items-center gap-2 text-sm">
+                t("lp.unlimited"),
+                t("lp.pushReminders"),
+                t("lp.advStatsInsights"),
+                t("lp.xpExclusive"),
+                t("lp.dataIO"),
+                t("lp.everythingFree"),
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm">
                   <Check size={15} className="text-primary shrink-0" />
-                  <span className="text-white">{t}</span>
+                  <span className="text-white">{item}</span>
                 </li>
               ))}
             </ul>
@@ -349,7 +348,7 @@ export function LandingPage() {
               href={authed ? "/pricing" : "/signup"}
               className="mt-6 flex items-center justify-center gap-1.5 text-sm font-semibold bg-primary hover:bg-primary-dim text-white py-2.5 rounded-xl transition-all hover:shadow-glow"
             >
-              <Sparkles size={14} /> {authed ? "Go Pro" : t("common.startFree")}
+              <Sparkles size={14} /> {authed ? t("lp.goPro") : t("common.startFree")}
             </Link>
           </div>
         </motion.div>
@@ -358,9 +357,9 @@ export function LandingPage() {
       {/* Install + notifications */}
       <section id="install" className="max-w-5xl mx-auto px-5 py-16">
         <motion.div {...fadeUp} className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Use it like a real app</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("lp.installTitle")}</h2>
           <p className="text-muted mt-3 max-w-lg mx-auto">
-            No app store needed. Add Phantom Tracker to your home screen and turn on reminders in under a minute.
+            {t("lp.installSubtitle")}
           </p>
         </motion.div>
 
@@ -370,13 +369,13 @@ export function LandingPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
               <Smartphone size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">Add to your iPhone</h3>
+              <h3 className="text-sm font-semibold">{t("lp.step1Title")}</h3>
             </div>
             <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
-              <li>Open <span className="text-white">phantomtracker.io</span> in Safari</li>
-              <li>Tap the <span className="inline-flex items-center gap-1 text-white"><Share size={12} /> Share</span> button</li>
-              <li>Choose <span className="text-white">Add to Home Screen</span></li>
-              <li>Open the app from your new icon 👻</li>
+              <li>{t("lp.step1a")}</li>
+              <li>{t("lp.step1b")}</li>
+              <li>{t("lp.step1c")}</li>
+              <li>{t("lp.step1d")}</li>
             </ol>
           </motion.div>
 
@@ -385,13 +384,13 @@ export function LandingPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
               <Plus size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">…or your Android / desktop</h3>
+              <h3 className="text-sm font-semibold">{t("lp.step2Title")}</h3>
             </div>
             <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
-              <li>Open the site in Chrome</li>
-              <li>Tap the <span className="inline-flex items-center gap-1 text-white"><MoreHorizontal size={12} /> menu</span></li>
-              <li>Choose <span className="text-white">Install app</span> / Add to Home screen</li>
-              <li>Launch it like any installed app</li>
+              <li>{t("lp.step2a")}</li>
+              <li>{t("lp.step2b")}</li>
+              <li>{t("lp.step2c")}</li>
+              <li>{t("lp.step2d")}</li>
             </ol>
           </motion.div>
 
@@ -400,19 +399,19 @@ export function LandingPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
               <Bell size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">Turn on reminders</h3>
+              <h3 className="text-sm font-semibold">{t("lp.step3Title")}</h3>
             </div>
             <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
-              <li>Go to <span className="text-white">Settings → Reminders</span></li>
-              <li>Tap <span className="text-white">Enable notifications</span> and allow</li>
-              <li>Set a reminder time on any habit</li>
-              <li>Get a push at that time — even with the app closed 🔔</li>
+              <li>{t("lp.step3a")}</li>
+              <li>{t("lp.step3b")}</li>
+              <li>{t("lp.step3c")}</li>
+              <li>{t("lp.step3d")}</li>
             </ol>
           </motion.div>
         </div>
 
         <motion.p {...fadeUp} className="text-xs text-muted text-center mt-5">
-          📱 On iPhone, notifications require adding the app to your Home Screen first (Apple&apos;s rule) — the steps above set that up.
+          {t("lp.installNote")}
         </motion.p>
       </section>
 
@@ -425,10 +424,10 @@ export function LandingPage() {
           <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-primary/15 blur-3xl" />
           <div className="relative">
             <GhostLogo size={56} rounded="rounded-2xl" className="phantom-glow mx-auto mb-5" />
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Start building better habits today</h2>
-            <p className="text-muted mt-3 max-w-md mx-auto">It&apos;s free, takes a minute to set up, and works on every device.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("landing.ctaFinalTitle")}</h2>
+            <p className="text-muted mt-3 max-w-md mx-auto">{t("landing.ctaFinalSubtitle")}</p>
             <Link href={authed ? "/dashboard" : "/signup"} className="inline-flex items-center gap-1.5 mt-7 bg-primary hover:bg-primary-dim text-white text-sm font-medium px-6 py-3 rounded-xl transition-all hover:shadow-glow">
-              {authed ? "Open Phantom Tracker" : "Create your free account"} <ChevronRight size={15} />
+              {authed ? t("lp.ctaOpen") : t("lp.ctaFree")} <ChevronRight size={15} />
             </Link>
           </div>
         </motion.div>
