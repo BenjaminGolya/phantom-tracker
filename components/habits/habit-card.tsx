@@ -12,11 +12,11 @@ import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel } from "@/lib/utils";
 import { useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
+import { levelLabel } from "@/lib/i18n/levels";
+import { dfLocale, weekdayInitials } from "@/lib/i18n/date";
 import { getHabitIcon } from "@/lib/habit-icons";
 
 export type ProgressRange = "week" | "month" | "year" | "all";
-
-const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
 // ─── Level badge ──────────────────────────────────────────────────────────────
 function LevelBadge({ logs }: { logs: { completed: boolean }[] }) {
@@ -38,6 +38,7 @@ function LevelBadge({ logs }: { logs: { completed: boolean }[] }) {
 
 // ─── XP progress bar ──────────────────────────────────────────────────────────
 function XPBar({ logs, habitColor }: { logs: { completed: boolean }[]; habitColor: string }) {
+  const { t, lang } = useLang();
   const info = getHabitLevel(logs) as ReturnType<typeof getHabitLevel> & {
     nextTierEmoji?: string; nextTierLabel?: string; nextTierColor?: string; nextTierMinLevel?: number;
   };
@@ -47,13 +48,13 @@ function XPBar({ logs, habitColor }: { logs: { completed: boolean }[]; habitColo
       <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] text-muted flex items-center gap-1">
           <span>{info.emoji}</span>
-          <span style={{ color: info.color }}>{info.label}</span>
+          <span style={{ color: info.color }}>{levelLabel(info.label, lang)}</span>
           {info.nextTierEmoji && (
             <>
               <span className="opacity-30">·</span>
-              <span className="opacity-50">next</span>
+              <span className="opacity-50">{t("form.next")}</span>
               <span>{info.nextTierEmoji}</span>
-              <span className="opacity-50">{info.nextTierLabel} at Lv.{info.nextTierMinLevel}</span>
+              <span className="opacity-50">{levelLabel(info.nextTierLabel ?? "", lang)} {t("form.atLv")}{info.nextTierMinLevel}</span>
             </>
           )}
         </span>
@@ -82,6 +83,7 @@ function GoalCounter({
   today: string;
   onLog: (habitId: string, date: string, completed: boolean, value: number) => void;
 }) {
+  const { t } = useLang();
   const goal = habit.goal!;
   const todayLog = habit.logs.find((l) => l.date === today);
   // Fall back to the goal if the log is marked complete but has no numeric value
@@ -110,7 +112,7 @@ function GoalCounter({
   return (
     <div className="mt-3 pt-3 border-t border-border/40">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] text-muted">Daily goal</span>
+        <span className="text-[10px] text-muted">{t("form.dailyGoal")}</span>
         <span className="text-[10px] font-mono">
           <span style={{ color: habit.color }}>{val}</span>
           <span className="text-muted">/{goal}</span>
@@ -170,6 +172,7 @@ function GoalCounter({
 
 // ─── Level-up overlay ─────────────────────────────────────────────────────────
 function LevelUpFlash({ info, onDone }: { info: ReturnType<typeof getHabitLevel>; onDone: () => void }) {
+  const { t, lang } = useLang();
   useEffect(() => {
     const t = setTimeout(onDone, 2200);
     return () => clearTimeout(t);
@@ -194,9 +197,9 @@ function LevelUpFlash({ info, onDone }: { info: ReturnType<typeof getHabitLevel>
           className="text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full border"
           style={{ color: info.color, borderColor: info.color, background: `${info.color}20` }}
         >
-          Level up! · Lv.{info.level}
+          {t("form.levelUp")} · Lv.{info.level}
         </div>
-        <span className="text-[11px] text-white/80 mt-0.5">{info.label}</span>
+        <span className="text-[11px] text-white/80 mt-0.5">{levelLabel(info.label, lang)}</span>
       </motion.div>
     </motion.div>
   );
@@ -204,13 +207,14 @@ function LevelUpFlash({ info, onDone }: { info: ReturnType<typeof getHabitLevel>
 
 // ─── Calendar views ───────────────────────────────────────────────────────────
 function WeekCalendar({ habit, completedSet }: { habit: HabitWithLogs; completedSet: Set<string> }) {
+  const { lang } = useLang();
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 0 });
   const days = eachDayOfInterval({ start: weekStart, end: endOfWeek(today, { weekStartsOn: 0 }) });
 
   return (
     <div className="mt-3 grid grid-cols-7 gap-[2px]">
-      {DAY_LABELS.map((d, i) => (
+      {weekdayInitials(lang).map((d, i) => (
         <div key={i} className="text-center text-[8px] text-muted font-medium pb-0.5">{d}</div>
       ))}
       {days.map((day) => {
@@ -240,6 +244,7 @@ function WeekCalendar({ habit, completedSet }: { habit: HabitWithLogs; completed
 }
 
 function MonthCalendar({ habit, completedSet }: { habit: HabitWithLogs; completedSet: Set<string> }) {
+  const { lang } = useLang();
   const today = new Date();
   const monthStart = startOfMonth(today);
   const monthEnd = endOfMonth(today);
@@ -250,10 +255,10 @@ function MonthCalendar({ habit, completedSet }: { habit: HabitWithLogs; complete
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] text-muted font-medium">{format(today, "MMMM yyyy")}</p>
+        <p className="text-[10px] text-muted font-medium">{format(today, "MMMM yyyy", { locale: dfLocale(lang) })}</p>
       </div>
       <div className="grid grid-cols-7 gap-[2px]">
-        {DAY_LABELS.map((d, i) => (
+        {weekdayInitials(lang).map((d, i) => (
           <div key={i} className="text-center text-[8px] text-muted font-medium pb-0.5">{d}</div>
         ))}
         {days.map((day) => {
@@ -287,6 +292,7 @@ function MonthCalendar({ habit, completedSet }: { habit: HabitWithLogs; complete
 function ContribCalendar({ habit, completedSet, startDate }: {
   habit: HabitWithLogs; completedSet: Set<string>; startDate: Date;
 }) {
+  const { lang } = useLang();
   const today = new Date();
   const gridStart = startOfISOWeek(startDate);
   // Extend to end of the year so the grid is always a full rectangle
@@ -300,14 +306,15 @@ function ContribCalendar({ habit, completedSet, startDate }: {
   weeks.forEach((week, wi) => {
     const first = week[0];
     if (first.getDate() <= 7) {
-      const label = format(first, "MMM");
+      const label = format(first, "MMM", { locale: dfLocale(lang) });
       if (!monthLabels.length || monthLabels[monthLabels.length - 1].label !== label)
         monthLabels.push({ weekIdx: wi, label });
     }
   });
 
-  const DAYS_SHORT = ["M", "W", "F"];
+  const inits = weekdayInitials(lang);
   const DAYS_IDX = [1, 3, 5];
+  const DAYS_SHORT = DAYS_IDX.map((i) => inits[i]);
 
   return (
     <div className="mt-3 overflow-x-auto">
@@ -378,6 +385,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
 }) {
   const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmYesterday, setConfirmYesterday] = useState(false);
   const [levelUpInfo, setLevelUpInfo] = useState<ReturnType<typeof getHabitLevel> | null>(null);
   const prevLevelRef = useRef(getHabitLevel(habit.logs).level);
 
@@ -506,11 +514,46 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
       {/* Forgot-yesterday nudge */}
       {showLogYesterday && (
         <button
-          onClick={() => onToggleDay?.(habit.id, yesterday, true, habit.goal ? habit.goal : undefined)}
+          onClick={() => setConfirmYesterday(true)}
           className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border hover:border-primary/50 text-xs text-muted hover:text-primary transition-colors"
         >
           <RotateCcw size={12} /> {t("form.forgotYesterday")}
         </button>
+      )}
+
+      {/* Confirm completing yesterday */}
+      {confirmYesterday && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={() => setConfirmYesterday(false)}>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+          <div className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-2">
+              <RotateCcw size={16} className="text-primary" />
+              <h3 className="text-sm font-semibold">{t("form.confirmYesterdayTitle")}</h3>
+            </div>
+            <p className="text-xs text-muted mb-1.5 leading-relaxed">{t("form.confirmYesterdayBody")}</p>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span style={{ color: habit.color }}><HabitIcon size={14} /></span>
+              <span className="text-sm font-medium text-white">{habit.name}</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setConfirmYesterday(false)}
+                className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  onToggleDay?.(habit.id, yesterday, true, habit.goal ? habit.goal : undefined);
+                  setConfirmYesterday(false);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-dim transition-colors"
+              >
+                <RotateCcw size={13} /> {t("form.markDone")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Calendar */}

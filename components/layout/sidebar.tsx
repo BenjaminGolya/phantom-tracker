@@ -6,7 +6,8 @@ import { LayoutDashboard, Target, BarChart2, Settings, Sparkles } from "lucide-r
 import { cn } from "@/lib/utils";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
-import { useT } from "@/lib/i18n/context";
+import { useLang } from "@/lib/i18n/context";
+import { levelLabel } from "@/lib/i18n/levels";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 
 const nav: { href: string; key: DictKey; icon: typeof LayoutDashboard }[] = [
@@ -24,7 +25,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
   const pathname = usePathname();
-  const t = useT();
+  const { t, lang } = useLang();
 
   return (
     <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-surface shrink-0">
@@ -98,7 +99,7 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
               <span className="text-lg leading-none font-light" style={{ color: profileLevel.color }}>{profileLevel.emoji}</span>
               <div>
                 <p className="text-xs font-semibold" style={{ color: profileLevel.color }}>
-                  {profileLevel.label}
+                  {levelLabel(profileLevel.label, lang)}
                 </p>
                 <p className="text-[10px] text-muted">{t("nav.level")} {profileLevel.level}</p>
               </div>

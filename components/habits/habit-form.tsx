@@ -429,7 +429,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Morning run"
+                placeholder={t("form.namePlaceholder")}
                 required
                 className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />

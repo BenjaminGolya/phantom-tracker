@@ -11,7 +11,8 @@ import { useMounted } from "@/lib/use-mounted";
 import { HabitForm } from "@/components/habits/habit-form";
 import { TodayChecklist } from "@/components/dashboard/today-checklist";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { useT } from "@/lib/i18n/context";
+import { useT, useLang } from "@/lib/i18n/context";
+import { dfLocale } from "@/lib/i18n/date";
 import confetti from "canvas-confetti";
 
 interface DashboardClientProps {
@@ -22,7 +23,7 @@ interface DashboardClientProps {
 export function DashboardClient({ habits: initialHabits, pro = false }: DashboardClientProps) {
   const router = useRouter();
   const mounted = useMounted();
-  const t = useT();
+  const { t, lang } = useLang();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
 
@@ -125,7 +126,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">{t("common.dashboard")}</h1>
-          <p className="text-sm text-muted">{format(new Date(), "EEEE, MMMM d")}</p>
+          <p className="text-sm text-muted">{format(new Date(), "EEEE, MMMM d", { locale: dfLocale(lang) })}</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
