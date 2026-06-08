@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         where: { id: user.id },
         data: { twoFactorCode: code, twoFactorCodeExpires: new Date(Date.now() + 10 * 60 * 1000) },
       });
-      try { await sendTwoFactorCodeEmail(user.email, code, user.name); }
+      try { await sendTwoFactorCodeEmail(user.email, code, user.name, user.language); }
       catch (e) { logError("auth/precheck:email", e); }
       return NextResponse.json({ valid: true, twoFactor: true });
     }

@@ -20,9 +20,9 @@ export async function POST() {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data: { deletionRequestedAt: now, disabledAt: now },
-      select: { email: true, name: true },
+      select: { email: true, name: true, language: true },
     });
-    try { await sendAccountDeletionScheduledEmail(user.email, user.name, purgeDate(now), DELETION_GRACE_DAYS); }
+    try { await sendAccountDeletionScheduledEmail(user.email, user.name, purgeDate(now), DELETION_GRACE_DAYS, user.language); }
     catch (e) { logError("account/delete:email", e); }
 
     return NextResponse.json({ ok: true, purgeOn: purgeDate(now).toISOString() });

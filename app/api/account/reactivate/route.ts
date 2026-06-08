@@ -16,9 +16,9 @@ export async function POST() {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data: { disabledAt: null, deletionRequestedAt: null },
-      select: { email: true, name: true },
+      select: { email: true, name: true, language: true },
     });
-    try { await sendAccountReactivatedEmail(user.email, user.name); }
+    try { await sendAccountReactivatedEmail(user.email, user.name, user.language); }
     catch (e) { logError("account/reactivate:email", e); }
 
     return NextResponse.json({ ok: true });

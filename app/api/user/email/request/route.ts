@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   try {
     const me = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { email: true, name: true },
+      select: { email: true, name: true, language: true },
     });
     if (!me) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
@@ -47,9 +47,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Confirm link to the new address; heads-up to the old one.
-    try { await sendEmailChangeConfirmation(email, token, me.name); }
+    try { await sendEmailChangeConfirmation(email, token, me.name, me.language); }
     catch (e) { logError("user/email/request:confirm-mail", e); }
-    try { await sendEmailChangeNotice(me.email, email, me.name); }
+    try { await sendEmailChangeNotice(me.email, email, me.name, me.language); }
     catch (e) { logError("user/email/request:notice-mail", e); }
 
     return NextResponse.json({ ok: true, pendingEmail: email });

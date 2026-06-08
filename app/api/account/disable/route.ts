@@ -15,10 +15,10 @@ export async function POST() {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data: { disabledAt: new Date() },
-      select: { email: true, name: true },
+      select: { email: true, name: true, language: true },
     });
     // Best-effort confirmation email.
-    try { await sendAccountDisabledEmail(user.email, user.name); }
+    try { await sendAccountDisabledEmail(user.email, user.name, user.language); }
     catch (e) { logError("account/disable:email", e); }
 
     return NextResponse.json({ ok: true });

@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   // Best-effort emails — sent sequentially (Hostinger SMTP rejects concurrent
   // connections) and each wrapped so a failure never blocks the signup.
   try {
-    await sendWelcomeEmail(user.email, user.name);
+    await sendWelcomeEmail(user.email, user.name, user.language);
   } catch (err) {
     logError("verify/welcome-email", err);
   }
