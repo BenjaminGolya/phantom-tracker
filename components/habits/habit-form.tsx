@@ -6,7 +6,8 @@ import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock, Lock } from "lucide-r
 import { HABIT_ICONS } from "@/lib/habit-icons";
 import { HabitFormData, HabitWithLogs } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
-import { useT } from "@/lib/i18n/context";
+import { useT, useLang } from "@/lib/i18n/context";
+import { categoryLabel } from "@/lib/i18n/category";
 
 const COLORS = ["#7f49c3","#3b82f6","#10b981","#f59e0b","#ef4444","#ec4899","#8b5cf6","#06b6d4","#84cc16","#f97316"];
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -52,7 +53,7 @@ function CategoryPicker({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const t = useT();
+  const { t, lang } = useLang();
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState(loadCategories);
   const [adding, setAdding] = useState(false);
@@ -116,7 +117,7 @@ function CategoryPicker({
           {selected ? (
             <>
               <span className="text-primary font-medium">{selected.emoji}</span>
-              <span className="text-white">{selected.label}</span>
+              <span className="text-white">{categoryLabel(selected.label, lang)}</span>
             </>
           ) : (
             <>
@@ -153,7 +154,7 @@ function CategoryPicker({
                     <div className="flex items-center gap-2.5">
                       <span className="text-sm font-medium" style={{ color: active ? "#7f49c3" : "#a1a1aa" }}>{cat.emoji}</span>
                       <span className={`text-sm ${active ? "text-primary font-medium" : "text-white"}`}>
-                        {cat.label}
+                        {categoryLabel(cat.label, lang)}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
