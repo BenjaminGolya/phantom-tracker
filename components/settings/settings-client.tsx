@@ -7,7 +7,6 @@ import { signOut } from "next-auth/react";
 import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck, Globe } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
-import { DELETION_GRACE_DAYS } from "@/lib/account";
 import { APP_VERSION, LATEST, CHANGELOG } from "@/lib/version";
 import { useLang } from "@/lib/i18n/context";
 import { LOCALES, LOCALE_NAMES, LOCALE_FLAGS } from "@/lib/i18n/config";
@@ -370,10 +369,10 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 </p>
                 <p className="text-xs text-muted mt-0.5">
                   {trialDaysLeft !== null
-                    ? `Free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} · then billing starts`
+                    ? `${t("set.trialEndsIn")} ${trialDaysLeft} ${trialDaysLeft === 1 ? t("dash.day") : t("dash.days")} · ${t("set.trialThen")}`
                     : proSince
-                      ? `Member since ${new Date(proSince).toLocaleDateString()}`
-                      : "Thanks for supporting Phantom Tracker."}
+                      ? `${t("set.memberSince")} ${new Date(proSince).toLocaleDateString()}`
+                      : t("set.thanksPro")}
                 </p>
               </div>
               {hasBilling ? (
@@ -387,7 +386,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 </button>
               ) : (
                 <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
-                  Complimentary Pro — no billing to manage
+                  {t("set.complimentary")}
                 </span>
               )}
             </div>
@@ -397,7 +396,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           <div className="flex items-center justify-between gap-3 mt-3">
             <div>
               <p className="text-sm font-medium">Free</p>
-              <p className="text-xs text-muted mt-0.5">Upgrade for unlimited habits, reminders & more.</p>
+              <p className="text-xs text-muted mt-0.5">{t("set.upgradeBlurb")}</p>
             </div>
             <Link
               href="/pricing"
@@ -437,7 +436,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
               className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors disabled:opacity-50"
             >
               <Camera size={13} />
-              {image ? "Change photo" : "Upload photo"}
+              {image ? t("set.changePhoto") : t("set.uploadPhoto")}
             </button>
             {image && (
               <button
@@ -454,7 +453,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
         <form onSubmit={handleSave} className="space-y-3">
           <div>
-            <label className="text-xs text-muted block mb-1.5">Display name</label>
+            <label className="text-xs text-muted block mb-1.5">{t("set.displayName")}</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -481,7 +480,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 </div>
                 {pendingEmail && (
                   <p className="text-[11px] text-amber-300 mt-1.5">
-                    Pending: <span className="font-medium">{pendingEmail}</span> — check that inbox to confirm.
+                    {t("set.pending")}: <span className="font-medium">{pendingEmail}</span> — {t("set.checkInbox")}
                   </p>
                 )}
               </>
@@ -503,7 +502,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                     className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50"
                   >
                     {emailSaving && <Loader2 size={13} className="animate-spin" />}
-                    Send confirmation
+                    {t("set.sendConfirmation")}
                   </button>
                   <button
                     type="button"
@@ -513,7 +512,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                     Cancel
                   </button>
                 </div>
-                <p className="text-[11px] text-muted">We&apos;ll email a confirmation link to the new address. Your email changes only after you click it.</p>
+                <p className="text-[11px] text-muted">{t("set.emailChangeHint")}</p>
               </div>
             )}
             {emailMsg && <p className="text-[11px] text-muted mt-1.5">{emailMsg}</p>}
@@ -540,7 +539,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           )}
         </h2>
         <p className="text-xs text-muted mb-4">
-          Get a push notification when a habit&apos;s reminder time arrives.
+          {t("set.remindersDesc")}
         </p>
 
         {!pro ? (
@@ -563,15 +562,15 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             </p>
           </div>
         ) : !push.supported ? (
-          <p className="text-xs text-muted">Notifications aren&apos;t supported on this browser.</p>
+          <p className="text-xs text-muted">{t("set.notifUnsupported")}</p>
         ) : push.permission === "denied" ? (
           <p className="text-xs text-red-400">
-            Notifications are blocked in your browser settings. Re-enable them for this site, then refresh.
+            {t("set.notifBlocked")}
           </p>
         ) : push.subscribed ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm text-green-400">
-              <BellRing size={15} /> Notifications enabled on this device
+              <BellRing size={15} /> {t("set.notifEnabled")}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -597,7 +596,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50"
           >
             {push.busy ? <Loader2 size={14} className="animate-spin" /> : <Bell size={14} />}
-            Enable notifications
+            {t("set.enableNotif")}
           </button>
         )}
       </div>
@@ -612,7 +611,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             </span>
           )}
         </h2>
-        <p className="text-xs text-muted mb-4">Export a backup of your habits, or import one into this account.</p>
+        <p className="text-xs text-muted mb-4">{t("set.dataDesc")}</p>
 
         {!pro ? (
           <Link
@@ -628,8 +627,8 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium">Export</p>
-                <p className="text-xs text-muted">CSV for spreadsheets, or a full JSON backup</p>
+                <p className="text-sm font-medium">{t("set.export")}</p>
+                <p className="text-xs text-muted">{t("set.exportDesc")}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -649,8 +648,8 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
             <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
               <div>
-                <p className="text-sm font-medium">Import</p>
-                <p className="text-xs text-muted">Restore from a .json backup (merges, never deletes)</p>
+                <p className="text-sm font-medium">{t("set.import")}</p>
+                <p className="text-xs text-muted">{t("set.importDesc")}</p>
               </div>
               <input ref={importRef} type="file" accept="application/json,.json" onChange={handleImport} className="hidden" />
               <button
@@ -692,14 +691,14 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
           <ShieldCheck size={15} className="text-primary" /> {t("settings.security")}
         </h2>
-        <p className="text-xs text-muted mb-4">Add an extra layer of protection to your account.</p>
+        <p className="text-xs text-muted mb-4">{t("set.securityDesc")}</p>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-medium">{t("settings.twoFA")}</p>
             <p className="text-xs text-muted">
               {twoFA
-                ? "On — we email a 6-digit code each time you sign in."
-                : "Off — require an emailed code at sign-in for extra security."}
+                ? t("set.twoFAOn")
+                : t("set.twoFAOff")}
             </p>
           </div>
           <button
@@ -720,23 +719,23 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
           <LifeBuoy size={15} className="text-primary" /> {t("settings.help")}
         </h2>
-        <p className="text-xs text-muted mb-4">Found a bug or have a question? Send it our way — we read every message.</p>
+        <p className="text-xs text-muted mb-4">{t("set.helpDesc")}</p>
 
         <div className="flex gap-2 mb-3">
           {([
-            { v: "bug", label: "Bug" },
-            { v: "question", label: "Question" },
-            { v: "feedback", label: "Feedback" },
-          ] as const).map((t) => (
+            { v: "bug", label: t("set.bug") },
+            { v: "question", label: t("set.question") },
+            { v: "feedback", label: t("set.feedback") },
+          ] as const).map((opt) => (
             <button
-              key={t.v}
+              key={opt.v}
               type="button"
-              onClick={() => setFbType(t.v)}
+              onClick={() => setFbType(opt.v)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                fbType === t.v ? "bg-primary text-white" : "bg-surface-2 text-muted hover:text-white border border-border"
+                fbType === opt.v ? "bg-primary text-white" : "bg-surface-2 text-muted hover:text-white border border-border"
               }`}
             >
-              {t.label}
+              {opt.label}
             </button>
           ))}
         </div>
@@ -748,10 +747,10 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           maxLength={5000}
           placeholder={
             fbType === "bug"
-              ? "What happened? What did you expect? Steps to reproduce help a lot."
+              ? t("set.bugPlaceholder")
               : fbType === "question"
-                ? "What would you like to know?"
-                : "Share your thoughts…"
+                ? t("set.questionPlaceholder")
+                : t("set.feedbackPlaceholder")
           }
           className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
         />
@@ -792,14 +791,14 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
               </button>
             )}
           </div>
-          <p className="text-[10px] text-muted mt-1">Optional · up to {FB_MAX_FILES} images, {FB_MAX_MB} MB each.</p>
+          <p className="text-[10px] text-muted mt-1">{t("set.imagesNote")}</p>
         </div>
 
         <div className="flex items-center justify-between gap-3 mt-2">
           {fbResult ? (
             <p className={`text-xs ${fbResult.ok ? "text-green-400" : "text-red-400"}`}>{fbResult.text}</p>
           ) : (
-            <span className="text-[11px] text-muted">Replies come to your account email.</span>
+            <span className="text-[11px] text-muted">{t("set.repliesNote")}</span>
           )}
           <button
             type="button"
@@ -808,7 +807,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow disabled:opacity-50 shrink-0"
           >
             {fbSending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
-            Send
+            {t("set.send")}
           </button>
         </div>
       </div>
@@ -822,32 +821,32 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
             className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-900/30 transition-colors"
           >
             <LogOut size={13} />
-            Sign out
+            {t("common.signOut")}
           </button>
 
           <div className="border-t border-red-900/20 pt-3 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium">Disable account</p>
-                <p className="text-xs text-muted">Pause your account. Data is kept; sign back in to reactivate.</p>
+                <p className="text-sm font-medium">{t("set.disableAccount")}</p>
+                <p className="text-xs text-muted">{t("set.disableAccountDesc")}</p>
               </div>
               <button
                 onClick={() => setConfirm("disable")}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg border border-amber-700/30 transition-colors shrink-0"
               >
-                <PauseCircle size={14} /> Disable
+                <PauseCircle size={14} /> {t("set.disable")}
               </button>
             </div>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium">Delete account</p>
-                <p className="text-xs text-muted">Kept {DELETION_GRACE_DAYS} days to undo, then permanently erased.</p>
+                <p className="text-sm font-medium">{t("set.deleteAccount")}</p>
+                <p className="text-xs text-muted">{t("set.deleteAccountDesc")}</p>
               </div>
               <button
                 onClick={() => setConfirm("delete")}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-900/30 transition-colors shrink-0"
               >
-                <Trash2 size={14} /> Delete
+                <Trash2 size={14} /> {t("form.delete")}
               </button>
             </div>
           </div>
@@ -864,13 +863,11 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 ? <Trash2 size={16} className="text-red-400" />
                 : <PauseCircle size={16} className="text-amber-300" />}
               <h3 className="text-sm font-semibold">
-                {confirm === "delete" ? "Delete your account?" : "Disable your account?"}
+                {confirm === "delete" ? t("set.deleteConfirmTitle") : t("set.disableConfirmTitle")}
               </h3>
             </div>
             <p className="text-xs text-muted mb-4 leading-relaxed">
-              {confirm === "delete"
-                ? `Your account will be scheduled for deletion. We'll keep your data for ${DELETION_GRACE_DAYS} days — sign in any time before then to reactivate and keep everything. After ${DELETION_GRACE_DAYS} days it's permanently erased. We'll email you a confirmation.`
-                : "Your account will be disabled and reminders paused. Your data stays safe and you can reactivate any time by signing back in. We'll email you a confirmation."}
+              {confirm === "delete" ? t("set.deleteConfirmBody") : t("set.disableConfirmBody")}
             </p>
             {actErr && <p className="text-xs text-red-400 mb-3">{actErr}</p>}
             <div className="flex items-center gap-2 justify-end">
@@ -879,7 +876,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 disabled={acting}
                 className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 onClick={handleAccountAction}
@@ -889,7 +886,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 }`}
               >
                 {acting && <Loader2 size={13} className="animate-spin" />}
-                {confirm === "delete" ? "Delete account" : "Disable account"}
+                {confirm === "delete" ? t("set.deleteAccount") : t("set.disableAccount")}
               </button>
             </div>
           </div>
@@ -908,15 +905,15 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         </div>
 
         <div className="mb-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted mb-1">Latest update</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted mb-1">{t("set.latestUpdate")}</p>
           <p className="text-xs text-white leading-relaxed">{LATEST.summary}</p>
           <p className="text-[10px] text-muted mt-0.5">{LATEST.date}</p>
         </div>
 
         <details className="group">
           <summary className="text-xs text-primary cursor-pointer list-none flex items-center gap-1 select-none">
-            <span className="group-open:hidden">Show changelog</span>
-            <span className="hidden group-open:inline">Hide changelog</span>
+            <span className="group-open:hidden">{t("set.showChangelog")}</span>
+            <span className="hidden group-open:inline">{t("set.hideChangelog")}</span>
           </summary>
           <ul className="mt-2 space-y-2 border-t border-border pt-2">
             {CHANGELOG.map((c) => (
@@ -934,7 +931,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
 
       {/* Footer note */}
       <div className="text-center pt-2">
-        <p className="text-xs text-muted">Dark mode only. Built for consistency.</p>
+        <p className="text-xs text-muted">{t("set.tagline")}</p>
       </div>
     </div>
   );
