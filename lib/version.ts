@@ -3,7 +3,7 @@
 // users actually notice. Skip pure copy tweaks and tiny i18n fixes — keep this
 // list to features, fixes, and meaningful improvements.
 
-export const APP_VERSION = "1.10.0";
+export const APP_VERSION = "1.11.0";
 
 // What kind of change it is, so the UI can tag and prioritize it.
 //   feature      — new capability users can do something with
@@ -20,6 +20,12 @@ export type ChangelogEntry = {
 
 // Most recent first. Curated: only entries worth a user's attention.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.11.0",
+    date: "2026-06-09",
+    kind: "feature",
+    summary: "Your profile world: a living planet that grows with you and a personality constellation, plus deeper Pro stats.",
+  },
   {
     version: "1.10.0",
     date: "2026-06-08",

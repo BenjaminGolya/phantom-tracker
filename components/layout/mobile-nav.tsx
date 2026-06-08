@@ -23,7 +23,7 @@ export function MobileNav() {
       className="lg:hidden fixed left-1/2 -translate-x-1/2 z-50"
       style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
     >
-      <div className="flex items-center gap-1.5 p-2 rounded-full bg-surface/95 backdrop-blur-xl border border-border shadow-2xl shadow-black/50">
+      <div className="flex items-center gap-1 p-2 rounded-3xl bg-surface/95 backdrop-blur-xl border border-border shadow-2xl shadow-black/50">
         {nav.map(({ href, key, icon: Icon }) => {
           const active =
             pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
@@ -33,13 +33,14 @@ export function MobileNav() {
               href={href}
               aria-label={t(key)}
               className={cn(
-                "flex items-center justify-center w-12 h-12 rounded-2xl transition-all active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 w-16 py-2 rounded-2xl transition-all active:scale-95",
                 active
                   ? "bg-primary text-white shadow-[0_0_16px_#7f49c355]"
                   : "text-muted hover:text-white hover:bg-surface-2"
               )}
             >
-              <Icon size={20} />
+              <Icon size={19} />
+              <span className="text-[10px] font-medium leading-none">{t(key)}</span>
             </Link>
           );
         })}

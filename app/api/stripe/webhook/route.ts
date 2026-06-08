@@ -31,6 +31,10 @@ async function setPlanByCustomer(
       trialEndsAt: plan === "free" ? null : trialEndsAt ?? null,
     },
   });
+  // Going Pro restores full access: unlock every previously locked habit.
+  if (plan === "pro") {
+    await prisma.habit.updateMany({ where: { userId: user.id, locked: true }, data: { locked: false } });
+  }
 }
 
 async function setPlanByUserId(
@@ -50,6 +54,9 @@ async function setPlanByUserId(
       trialEndsAt: plan === "free" ? null : trialEndsAt ?? null,
     },
   });
+  if (plan === "pro") {
+    await prisma.habit.updateMany({ where: { userId, locked: true }, data: { locked: false } });
+  }
 }
 
 export async function POST(req: NextRequest) {

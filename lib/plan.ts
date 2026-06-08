@@ -10,6 +10,29 @@ export function isPro(user: { plan?: string | null } | null | undefined): boolea
   return user?.plan === "pro";
 }
 
+// ─── Habit visibility (free limit + Pro-locked habits) ────────────────────────
+//
+// A free user can keep up to `freeHabitLimit` active habits. If they end up over
+// the limit (e.g. created extras while on Pro, then Pro expired), the surplus is
+// "locked": kept on the account with full data, but hidden behind Pro. Pro users
+// see everything (locked is ignored while subscribed).
+export type LockableHabit = { archived: boolean; locked: boolean };
+
+export function partitionHabits<T extends LockableHabit>(habits: T[], pro: boolean) {
+  const visible = habits.filter((h) => !h.archived);
+  if (pro) return { active: visible, locked: [] as T[] };
+  return {
+    active: visible.filter((h) => !h.locked),
+    locked: visible.filter((h) => h.locked),
+  };
+}
+
+/** True when a free user has more active habits than the free limit allows. */
+export function isOverFreeLimit<T extends LockableHabit>(habits: T[], pro: boolean): boolean {
+  if (pro) return false;
+  return habits.filter((h) => !h.archived && !h.locked).length > PLAN_LIMITS.freeHabitLimit;
+}
+
 export const PLAN_LIMITS = {
   /** Max active habits a free user can create. Pro = unlimited. */
   freeHabitLimit: 4,

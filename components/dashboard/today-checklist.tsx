@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
 import { useLang } from "@/lib/i18n/context";
@@ -27,6 +27,7 @@ function GoalRow({ habit, today, onToggle }: {
   // (e.g. completed via the quick-toggle button or legacy data).
   const logVal = todayLog?.value ?? (todayLog?.completed ? goal : 0);
   const [val, setVal] = useState(logVal);
+  const [confirm, setConfirm] = useState<null | "all" | "reset">(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const done = val >= goal;
 
@@ -105,15 +106,55 @@ function GoalRow({ habit, today, onToggle }: {
           style={{ borderColor: `${habit.color}30`, color: habit.color }}
           className="w-7 h-7 rounded-lg border text-sm font-bold flex items-center justify-center hover:bg-surface-2 transition-all"
         >+</button>
+        {val > 0 && (
+          <button
+            onClick={() => setConfirm("reset")}
+            title={t("dash.reset")}
+            className="w-7 h-7 rounded-lg border border-border text-muted flex items-center justify-center hover:text-white hover:bg-surface-2 transition-all"
+          ><RotateCcw size={13} /></button>
+        )}
         {!done && (
           <button
-            onClick={() => commit(goal)}
+            onClick={() => setConfirm("all")}
             style={{ backgroundColor: `${habit.color}15`, color: habit.color, borderColor: `${habit.color}40` }}
             className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
           >{t("dash.all")}</button>
         )}
         {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">{t("dash.doneMark")}</span>}
       </div>
+
+      {/* Confirmation modal for All / Reset */}
+      {confirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={() => setConfirm(null)}>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+          <div className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold mb-1.5">
+              {confirm === "all" ? t("dash.confirmAllTitle") : t("dash.confirmResetTitle")}
+            </h3>
+            <p className="text-xs text-muted mb-1.5 leading-relaxed">
+              {confirm === "all" ? t("dash.confirmAllBody") : t("dash.confirmResetBody")}
+            </p>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span style={{ color: habit.color }}><HabitIcon size={14} /></span>
+              <span className="text-sm font-medium text-white">{habit.name}</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setConfirm(null)}
+                className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors"
+              >{t("common.cancel")}</button>
+              <button
+                onClick={() => { commit(confirm === "all" ? goal : 0); setConfirm(null); }}
+                style={{ backgroundColor: habit.color }}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-opacity"
+              >
+                {confirm === "all" ? <Check size={13} /> : <RotateCcw size={13} />}
+                {t("dash.confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

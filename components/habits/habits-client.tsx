@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Ghost, Sparkles } from "lucide-react";
+import { Plus, Search, Ghost, Sparkles, Lock } from "lucide-react";
 import { PLAN_LIMITS } from "@/lib/plan";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { AnimatePresence } from "framer-motion";
@@ -50,16 +50,16 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const filtered = habits.filter(
-    (h) =>
-      !h.archived &&
-      (h.name.toLowerCase().includes(search.toLowerCase()) ||
-        h.category?.toLowerCase().includes(search.toLowerCase()))
-  );
+  const matches = (h: HabitWithLogs) =>
+    h.name.toLowerCase().includes(search.toLowerCase()) ||
+    h.category?.toLowerCase().includes(search.toLowerCase());
 
+  const visible = habits.filter((h) => !h.archived);
+  const filtered = visible.filter((h) => (pro || !h.locked) && matches(h));
+  const lockedHabits = pro ? [] : visible.filter((h) => h.locked && matches(h));
   const archived = habits.filter((h) => h.archived);
 
-  const activeCount = habits.filter((h) => !h.archived).length;
+  const activeCount = visible.filter((h) => pro || !h.locked).length;
   const atLimit = !pro && activeCount >= PLAN_LIMITS.freeHabitLimit;
 
   function handleNew() {
@@ -271,6 +271,46 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
             </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Locked (over the free limit — kept safe, Pro unlocks) */}
+      {lockedHabits.length > 0 && (
+        <div>
+          <h2 className="text-xs text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Lock size={12} /> {t("habits.lockedTitle")}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {lockedHabits.map((habit) => {
+              const HabitIcon = getHabitIcon(habit.icon);
+              return (
+                <div key={habit.id} className="relative bg-surface border border-border rounded-xl p-4 overflow-hidden">
+                  <div className="blur-[3px] select-none pointer-events-none">
+                    <div className="flex items-center gap-2.5">
+                      <span style={{ color: habit.color }}><HabitIcon size={16} /></span>
+                      <div>
+                        <p className="text-sm font-medium text-white leading-tight">{habit.name}</p>
+                        {habit.category && <p className="text-xs text-muted">{habit.category}</p>}
+                      </div>
+                    </div>
+                    <div className="mt-3 h-1 rounded-full bg-surface-2" />
+                    <div className="mt-3 grid grid-cols-7 gap-[2px]">
+                      {Array.from({ length: 7 }).map((_, i) => (
+                        <div key={i} className="h-6 rounded border border-border" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-surface/55 backdrop-blur-[1px]">
+                    <Lock size={18} className="text-primary" />
+                    <p className="text-xs text-muted text-center px-4">{t("habits.lockedMsg")}</p>
+                    <Link href="/pricing" className="mt-1 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                      <Sparkles size={12} /> {t("habits.goPro")}
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

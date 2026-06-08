@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { Flame, Target, Zap, CheckCircle2, Plus, Ghost } from "lucide-react";
+import { Flame, Target, Zap, CheckCircle2, Plus, Ghost, Globe, ChevronRight } from "lucide-react";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, phantomScore } from "@/lib/utils";
 import { useMounted } from "@/lib/use-mounted";
@@ -163,6 +164,21 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
           highlight={score >= 80}
         />
       </div>
+
+      {/* Link to the profile world */}
+      <Link
+        href="/stats"
+        className="flex items-center gap-3 px-4 py-3 bg-surface border border-border rounded-xl hover:border-primary/40 transition-all group"
+      >
+        <span className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+          <Globe size={16} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-white leading-tight">{t("dash.yourWorld")}</p>
+          <p className="text-[11px] text-muted truncate">{t("dash.yourWorldSub")}</p>
+        </div>
+        <ChevronRight size={16} className="text-muted group-hover:text-primary transition-colors shrink-0" />
+      </Link>
 
       {/* Today's checklist */}
       {habits.length > 0 ? (
