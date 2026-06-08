@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Smartphone, ChevronRight, CalendarDays, Sparkles,
-  Settings, LogOut, X,
+  Settings, LogOut, X, Apple, Play,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -363,6 +363,27 @@ export function LandingPage() {
           <p className="text-muted mt-3 max-w-lg mx-auto">
             {t("lp.installSubtitle")}
           </p>
+
+          {/* Native apps — coming soon (disabled store buttons) */}
+          <p className="text-sm text-muted mt-6 max-w-lg mx-auto">{t("lp.storesComingSoon")}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+            {[
+              { icon: <Apple size={20} className="shrink-0" />, label: t("lp.appStore") },
+              { icon: <Play size={18} className="shrink-0" />, label: t("lp.googlePlay") },
+            ].map((s) => (
+              <div
+                key={s.label}
+                aria-disabled
+                className="relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-border bg-surface opacity-60 cursor-not-allowed select-none"
+              >
+                {s.icon}
+                <span className="text-left leading-tight">
+                  <span className="block text-[10px] text-muted">{t("lp.comingSoon")}</span>
+                  <span className="block text-sm font-semibold">{s.label}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-4">
