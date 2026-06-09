@@ -17,6 +17,8 @@ import { useLang } from "@/lib/i18n/context";
 import { dfLocale } from "@/lib/i18n/date";
 import confetti from "canvas-confetti";
 
+const STREAK_MILESTONES = [7, 14, 30, 60, 100, 180, 365];
+
 interface DashboardClientProps {
   habits: HabitWithLogs[];
   pro?: boolean;
@@ -31,6 +33,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
   // Undo toast: stores the PREVIOUS state to revert a just-made toggle.
   const [undo, setUndo] = useState<{ habitId: string; date: string; completed: boolean; value: number | null } | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [milestone, setMilestone] = useState<number | null>(null);
 
   // Keep local state in sync with fresh server data after navigation/refresh
   useEffect(() => {
@@ -104,6 +107,21 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
     );
     if (allDone && completed && habits.length > 0) {
       confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ["#7f49c3","#9b6bff","#ffffff"] });
+    }
+
+    // Streak milestone celebration for the habit just completed.
+    if (completed && !silent) {
+      const toggled = updated.find((h) => h.id === habitId);
+      if (toggled) {
+        const streak = calcStreak(toggled.logs).current;
+        if (STREAK_MILESTONES.includes(streak)) {
+          confetti({ particleCount: 160, spread: 100, startVelocity: 45, origin: { y: 0.6 }, colors: ["#f97316","#fbbf24","#7f49c3","#ffffff"] });
+          if (undoTimer.current) clearTimeout(undoTimer.current);
+          setUndo(null);
+          setMilestone(streak);
+          setTimeout(() => setMilestone(null), 4500);
+        }
+      }
     }
   }
 
@@ -232,8 +250,22 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
         />
       )}
 
+      {/* Streak milestone celebration */}
+      {milestone && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed left-1/2 -translate-x-1/2 z-[70] flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-surface border border-orange-500/40 shadow-2xl shadow-black/50"
+          style={{ bottom: "calc(max(1rem, env(safe-area-inset-bottom)) + 4.5rem)" }}
+        >
+          <span className="text-2xl">🔥</span>
+          <span className="text-sm font-semibold text-white">{t("dash.streakMilestone").replace("{n}", String(milestone))}</span>
+        </motion.div>
+      )}
+
       {/* Undo toast */}
-      {undo && (
+      {undo && !milestone && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

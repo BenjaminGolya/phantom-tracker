@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushToUser } from "@/lib/push";
+import { calcStreak } from "@/lib/utils";
 import { logError } from "@/lib/log";
+
+// Daily streak-protection nudge fires at this local hour if a habit has a
+// streak worth saving and today isn't done yet.
+const STREAK_NUDGE_HHMM = "19:00";
+const STREAK_NUDGE_MIN = 3; // first streak length that earns a daily nudge
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +33,61 @@ async function handle(req: NextRequest) {
   }
 
   try {
-    return await runReminders();
+    const reminders = await runReminders();
+    const nudges = await runStreakNudges();
+    return NextResponse.json({ ok: true, reminders, nudges });
   } catch (err) {
     // Critical background job — alert the admin if it breaks.
     logError("cron/reminders", err, { alert: true });
     return NextResponse.json({ error: "Reminder run failed" }, { status: 500 });
   }
+}
+
+// One daily push per user when they have a meaningful streak that isn't done
+// today. Available to everyone with notifications on (not a Pro-only reminder).
+async function runStreakNudges(): Promise<number> {
+  const now = new Date();
+  const users = await prisma.user.findMany({
+    where: { disabledAt: null, deletionRequestedAt: null, pushSubscriptions: { some: {} } },
+    select: {
+      id: true, timezone: true,
+      habits: {
+        where: { archived: false, locked: false },
+        select: { id: true, name: true, frequency: true, logs: { select: { date: true, completed: true } } },
+      },
+    },
+  });
+
+  let sent = 0;
+  for (const u of users) {
+    if (!u.timezone || !u.habits.length) continue;
+    let local;
+    try { local = inTz(now, u.timezone); } catch { continue; }
+    if (local.hhmm !== STREAK_NUDGE_HHMM) continue;
+
+    // Pick the habit with the longest current streak that's scheduled today and
+    // still undone — the one most worth protecting.
+    let best: { name: string; streak: number } | null = null;
+    for (const h of u.habits) {
+      if (h.frequency !== "daily") {
+        const days = h.frequency.split(",").map((d) => d.trim());
+        if (!days.includes(local.weekday)) continue;
+      }
+      if (h.logs.some((l) => l.date === local.date && l.completed)) continue; // already done
+      const streak = calcStreak(h.logs).current;
+      if (streak >= STREAK_NUDGE_MIN && (!best || streak > best.streak)) best = { name: h.name, streak };
+    }
+    if (!best) continue;
+
+    await sendPushToUser(u.id, {
+      title: `🔥 ${best.streak}-day streak`,
+      body: `Don't break it — complete "${best.name}" to keep your streak alive.`,
+      url: "/dashboard",
+      tag: "streak-nudge",
+    });
+    sent++;
+  }
+  return sent;
 }
 
 async function runReminders() {
@@ -82,7 +137,7 @@ async function runReminders() {
     sent++;
   }
 
-  return NextResponse.json({ ok: true, checked: habits.length, sent });
+  return sent;
 }
 
 export async function GET(req: NextRequest) {
