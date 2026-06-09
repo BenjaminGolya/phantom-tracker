@@ -260,6 +260,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                 onEdit={setEditingHabit}
                 onDelete={handleDelete}
                 onArchive={handleArchive}
+                onCategoryClick={(c) => setCatFilter((prev) => (prev === c ? null : c))}
               />
             ))}
           </AnimatePresence>
