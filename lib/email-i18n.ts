@@ -53,6 +53,13 @@ export type EmailStrings = {
   reactHi: Hi;
   reactLine: string;
   reactBtn: string;
+  // Feedback / support acknowledgement (sent to the user)
+  fbAckSubject: string;
+  fbAckHeading: string;
+  fbAckHi: Hi;
+  fbAckLine: string;
+  fbAckYour: string;
+  fbAckClosing: string;
 };
 
 const en: EmailStrings = {
@@ -103,6 +110,12 @@ const en: EmailStrings = {
   reactHi: (n) => (n ? `Welcome back, ${n}! 🎉` : "Welcome back! 🎉"),
   reactLine: "Your account has been reactivated and all your habits and history are intact. Any pending deletion has been cancelled.",
   reactBtn: "Open Phantom Tracker",
+  fbAckSubject: "We got your message — Phantom Tracker",
+  fbAckHeading: "Thanks for reaching out",
+  fbAckHi: (n) => (n ? `Hi ${n},` : "Hi there,"),
+  fbAckLine: "We've received your message and a human will get back to you with an answer as soon as we can. Here's a copy of what you sent:",
+  fbAckYour: "Your message",
+  fbAckClosing: "Thanks for helping make Phantom Tracker better. 👻",
 };
 
 const hu: EmailStrings = {
@@ -153,6 +166,12 @@ const hu: EmailStrings = {
   reactHi: (n) => (n ? `Üdv újra, ${n}! 🎉` : "Üdv újra! 🎉"),
   reactLine: "A fiókod újra aktiválva, és minden szokásod és előzményed érintetlen. A függőben lévő törlés visszavonva.",
   reactBtn: "Phantom Tracker megnyitása",
+  fbAckSubject: "Megkaptuk az üzeneted — Phantom Tracker",
+  fbAckHeading: "Köszönjük, hogy írtál",
+  fbAckHi: (n) => (n ? `Szia ${n},` : "Szia,"),
+  fbAckLine: "Megkaptuk az üzeneted, és egy valódi ember a lehető leghamarabb válaszol rá. Itt egy másolat arról, amit küldtél:",
+  fbAckYour: "Az üzeneted",
+  fbAckClosing: "Köszönjük, hogy segítesz jobbá tenni a Phantom Trackert. 👻",
 };
 
 const ro: EmailStrings = {
@@ -203,6 +222,12 @@ const ro: EmailStrings = {
   reactHi: (n) => (n ? `Bine ai revenit, ${n}! 🎉` : "Bine ai revenit! 🎉"),
   reactLine: "Contul tău a fost reactivat și toate obiceiurile și istoricul tău sunt intacte. Orice ștergere în așteptare a fost anulată.",
   reactBtn: "Deschide Phantom Tracker",
+  fbAckSubject: "Am primit mesajul tău — Phantom Tracker",
+  fbAckHeading: "Mulțumim că ne-ai scris",
+  fbAckHi: (n) => (n ? `Salut ${n},` : "Salut,"),
+  fbAckLine: "Am primit mesajul tău și un om îți va răspunde cât de curând posibil. Iată o copie a ceea ce ai trimis:",
+  fbAckYour: "Mesajul tău",
+  fbAckClosing: "Mulțumim că ne ajuți să facem Phantom Tracker mai bun. 👻",
 };
 
 const TABLE: Record<Locale, EmailStrings> = { en, hu, ro };

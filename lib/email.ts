@@ -336,27 +336,33 @@ export async function sendPasswordResetEmail(to: string, token: string, name?: s
   });
 }
 
-/** Send a user's bug report / question / feedback to the admin inbox. */
+/**
+ * Send a user's bug report / question / feedback to the support inbox, and send
+ * the user a localized acknowledgement with a copy of their message.
+ */
 export async function sendFeedbackEmail(opts: {
   fromEmail: string;
   fromName?: string | null;
   type: string;
   message: string;
   appVersion?: string;
+  lang?: string;
   attachments?: { filename: string; content: string; contentType: string }[]; // content = base64
 }): Promise<{ ok: boolean; reason?: string }> {
-  const to = process.env.ADMIN_NOTIFY_EMAIL;
-  if (!to) return { ok: false, reason: "no_admin" };
+  // Feedback goes to the support inbox. Override with SUPPORT_EMAIL if needed.
+  const to = process.env.SUPPORT_EMAIL || "support@phantomtracker.io";
 
   const when = new Date().toUTCString();
   const label = opts.type === "bug" ? "🐛 Bug report" : opts.type === "question" ? "❓ Question" : "💬 Feedback";
+  const safeMsg = opts.message.replace(/</g, "&lt;");
 
   if (!isSmtpConfigured()) {
-    console.log(`\n  📨 ${label} from ${opts.fromEmail}:\n  ${opts.message}\n  (SMTP not configured — logged only)\n`);
+    console.log(`\n  📨 ${label} from ${opts.fromEmail} → ${to}:\n  ${opts.message}\n  (SMTP not configured — logged only)\n`);
     return { ok: true };
   }
 
   try {
+    // 1) Notify support.
     await makeTransport().sendMail({
       from: emailFrom(),
       to,
@@ -371,7 +377,7 @@ export async function sendFeedbackEmail(opts: {
           <tr><td style="padding:4px 0;color:#a1a1aa;">Version</td><td style="padding:4px 0;text-align:right;color:#fff;">${opts.appVersion ?? "—"}</td></tr>
           <tr><td style="padding:4px 0;color:#a1a1aa;">When</td><td style="padding:4px 0;text-align:right;color:#fff;">${when}</td></tr>
         </table>
-        <div style="background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:14px;color:#e4e4e7;font-size:14px;line-height:1.6;white-space:pre-wrap;">${opts.message.replace(/</g, "&lt;")}</div>
+        <div style="background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:14px;color:#e4e4e7;font-size:14px;line-height:1.6;white-space:pre-wrap;">${safeMsg}</div>
         ${opts.attachments?.length ? `<p style="color:#a1a1aa;font-size:12px;margin:14px 0 0;">📎 ${opts.attachments.length} screenshot(s) attached.</p>` : ""}
         <p style="color:#71717a;font-size:11px;margin:14px 0 0;">Reply to this email to respond to the user directly.</p>`),
       attachments: opts.attachments?.map((a) => ({
@@ -381,6 +387,27 @@ export async function sendFeedbackEmail(opts: {
         contentType: a.contentType,
       })),
     });
+
+    // 2) Acknowledge to the user (best-effort — don't fail the request if this errors).
+    try {
+      const es = emailStrings(opts.lang);
+      await makeTransport().sendMail({
+        from: emailFrom(),
+        to: opts.fromEmail,
+        replyTo: to, // user replies land in support
+        subject: es.fbAckSubject,
+        text: `${es.fbAckHi(opts.fromName)}\n\n${es.fbAckLine}\n\n${es.fbAckYour}:\n${opts.message}\n\n${es.fbAckClosing}`,
+        html: shell(es.fbAckHeading, `
+          <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.fbAckHi(opts.fromName)}</p>
+          <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">${es.fbAckLine}</p>
+          <p style="color:#71717a;font-size:12px;margin:0 0 6px;">${es.fbAckYour}</p>
+          <div style="background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:14px;color:#e4e4e7;font-size:14px;line-height:1.6;white-space:pre-wrap;">${safeMsg}</div>
+          <p style="color:#a1a1aa;font-size:13px;margin:18px 0 0;">${es.fbAckClosing}</p>`),
+      });
+    } catch (ackErr) {
+      console.error("feedback acknowledgement email failed:", ackErr);
+    }
+
     return { ok: true };
   } catch (e) {
     console.error("sendFeedbackEmail failed:", e);
