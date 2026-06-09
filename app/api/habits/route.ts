@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     data: {
       userId: session.user.id,
       name: data.name,
+      description: data.description?.trim() || null,
       icon: data.icon ?? "✨",
       color: data.color ?? "#7f49c3",
       frequency: data.frequency ?? "daily",

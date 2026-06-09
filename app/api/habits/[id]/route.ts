@@ -39,6 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     where: { id: params.id, userId: session.user.id },
     data: {
       name: data.name,
+      description: data.description?.trim() || null,
       icon: data.icon,
       color: data.color,
       frequency: data.frequency,

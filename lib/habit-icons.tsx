@@ -1,7 +1,12 @@
 import {
   Droplets, Dumbbell, BookOpen, Brain, Heart, Moon, Sun, Zap,
   Music2, PenLine, Code2, Coffee, Apple, Bike, Footprints, Leaf,
-  Star, Target, Clock, Smile, type LucideIcon,
+  Star, Target, Clock, Smile,
+  // extended set
+  Flame, Trophy, Activity, Bed, Pill, Wallet, PiggyBank, Briefcase,
+  GraduationCap, Languages, Palette, Camera, Guitar, Gamepad2, Dog,
+  Sprout, Waves, Mountain, Phone, Sparkles,
+  type LucideIcon,
 } from "lucide-react";
 
 export const HABIT_ICONS: { name: string; Icon: LucideIcon; label: string }[] = [
@@ -25,6 +30,26 @@ export const HABIT_ICONS: { name: string; Icon: LucideIcon; label: string }[] = 
   { name: "Clock",     Icon: Clock,     label: "Routine"    },
   { name: "Smile",     Icon: Smile,     label: "Mood"       },
   { name: "Star",      Icon: Star,      label: "Goal"       },
+  { name: "Flame",         Icon: Flame,         label: "Streak"    },
+  { name: "Trophy",        Icon: Trophy,        label: "Win"       },
+  { name: "Activity",      Icon: Activity,      label: "Exercise"  },
+  { name: "Bed",           Icon: Bed,           label: "Rest"      },
+  { name: "Pill",          Icon: Pill,          label: "Meds"      },
+  { name: "Wallet",        Icon: Wallet,        label: "Budget"    },
+  { name: "PiggyBank",     Icon: PiggyBank,     label: "Savings"   },
+  { name: "Briefcase",     Icon: Briefcase,     label: "Work"      },
+  { name: "GraduationCap", Icon: GraduationCap, label: "Study"     },
+  { name: "Languages",     Icon: Languages,     label: "Language"  },
+  { name: "Palette",       Icon: Palette,       label: "Art"       },
+  { name: "Camera",        Icon: Camera,        label: "Photo"     },
+  { name: "Guitar",        Icon: Guitar,        label: "Practice"  },
+  { name: "Gamepad2",      Icon: Gamepad2,      label: "Gaming"    },
+  { name: "Dog",           Icon: Dog,           label: "Pets"      },
+  { name: "Sprout",        Icon: Sprout,        label: "Grow"      },
+  { name: "Waves",         Icon: Waves,         label: "Swim"      },
+  { name: "Mountain",      Icon: Mountain,      label: "Hike"      },
+  { name: "Phone",         Icon: Phone,         label: "Call"      },
+  { name: "Sparkles",      Icon: Sparkles,      label: "Self-care" },
 ];
 
 export function getHabitIcon(name: string): LucideIcon {

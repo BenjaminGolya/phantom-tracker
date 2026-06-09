@@ -11,6 +11,7 @@ import { HabitWithLogs, HabitFormData } from "@/types";
 import { HabitCard, ProgressRange } from "@/components/habits/habit-card";
 import { HabitGrid } from "@/components/habits/habit-grid";
 import { HabitForm } from "@/components/habits/habit-form";
+import { CategoryFilter, usedCategories } from "@/components/habits/category-filter";
 import { useMounted } from "@/lib/use-mounted";
 import { useT } from "@/lib/i18n/context";
 
@@ -27,6 +28,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState<HabitWithLogs | null>(null);
   const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState<string | null>(null);
   const [view, setView] = useState<"cards" | "grid">("cards");
   const [range, setRange] = useState<ProgressRange>("month");
 
@@ -55,7 +57,10 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
     h.category?.toLowerCase().includes(search.toLowerCase());
 
   const visible = habits.filter((h) => !h.archived);
-  const filtered = visible.filter((h) => (pro || !h.locked) && matches(h));
+  const categories = usedCategories(habits.filter((h) => pro || !h.locked));
+  const filtered = visible.filter(
+    (h) => (pro || !h.locked) && matches(h) && (!catFilter || h.category === catFilter)
+  );
   const lockedHabits = pro ? [] : visible.filter((h) => h.locked && matches(h));
   const archived = habits.filter((h) => h.archived);
 
@@ -216,6 +221,9 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
         />
       </div>
 
+      {/* Category filter */}
+      <CategoryFilter categories={categories} value={catFilter} onChange={setCatFilter} />
+
       {/* Free-plan usage / upgrade banner */}
       {!pro && (
         <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg border border-primary/25 bg-primary/8">
@@ -252,6 +260,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                 onEdit={setEditingHabit}
                 onDelete={handleDelete}
                 onArchive={handleArchive}
+                onCategoryClick={(c) => setCatFilter((prev) => (prev === c ? null : c))}
               />
             ))}
           </AnimatePresence>

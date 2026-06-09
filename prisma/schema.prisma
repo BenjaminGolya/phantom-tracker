@@ -91,6 +91,7 @@ model Habit {
   id        String     @id @default(cuid())
   userId    String
   name      String
+  description  String?
   icon      String     @default("✨")
   color     String     @default("#7f49c3")
   frequency String     @default("daily")

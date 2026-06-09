@@ -375,13 +375,14 @@ function ContribCalendar({ habit, completedSet, startDate }: {
 }
 
 // ─── Main card ────────────────────────────────────────────────────────────────
-export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelete, onArchive }: {
+export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelete, onArchive, onCategoryClick }: {
   habit: HabitWithLogs;
   range?: ProgressRange;
   onToggleDay?: (habitId: string, date: string, completed: boolean, value?: number) => void;
   onEdit?: (habit: HabitWithLogs) => void;
   onDelete?: (id: string) => void;
   onArchive?: (id: string) => void;
+  onCategoryClick?: (category: string) => void;
 }) {
   const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -457,9 +458,24 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
           >
             <HabitIcon size={16} />
           </button>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-sm font-medium text-white leading-tight">{habit.name}</h3>
-            {habit.category && <span className="text-xs text-muted">{categoryLabel(habit.category, lang)}</span>}
+            {habit.category && (
+              onCategoryClick ? (
+                <button
+                  type="button"
+                  onClick={() => onCategoryClick(habit.category!)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {categoryLabel(habit.category, lang)}
+                </button>
+              ) : (
+                <span className="text-xs text-primary">{categoryLabel(habit.category, lang)}</span>
+              )
+            )}
+            {habit.description && (
+              <p className="text-xs text-muted/80 mt-0.5 leading-snug line-clamp-2">{habit.description}</p>
+            )}
           </div>
         </div>
 

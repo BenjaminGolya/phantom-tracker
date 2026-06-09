@@ -1,6 +1,7 @@
 export interface HabitWithLogs {
   id: string;
   name: string;
+  description: string | null;
   icon: string;
   color: string;
   frequency: string;
@@ -23,6 +24,7 @@ export interface HabitLog {
 
 export interface HabitFormData {
   name: string;
+  description?: string | null;
   icon: string;
   color: string;
   frequency: string;

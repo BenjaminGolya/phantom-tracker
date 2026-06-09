@@ -8,6 +8,7 @@ import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
 import { useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
+import { CategoryFilter, usedCategories } from "@/components/habits/category-filter";
 
 interface TodayChecklistProps {
   habits: HabitWithLogs[];
@@ -163,12 +164,19 @@ function GoalRow({ habit, today, onToggle }: {
 export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
   const today = format(new Date(), "yyyy-MM-dd");
   const { t, lang } = useLang();
+  const [catFilter, setCatFilter] = useState<string | null>(null);
+
+  const categories = usedCategories(habits);
+  const shown = catFilter ? habits.filter((h) => h.category === catFilter) : habits;
 
   return (
     <div>
-      <h2 className="text-sm font-medium text-muted mb-3">{t("dash.todaysHabits")}</h2>
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <h2 className="text-sm font-medium text-muted">{t("dash.todaysHabits")}</h2>
+        <CategoryFilter categories={categories} value={catFilter} onChange={setCatFilter} />
+      </div>
       <div className="space-y-2">
-        {habits.map((habit, i) => {
+        {shown.map((habit, i) => {
           // Habits with a numeric goal get the counter UI
           if (habit.goal) {
             return (
