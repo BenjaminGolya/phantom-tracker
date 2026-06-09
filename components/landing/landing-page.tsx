@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { WorldExamples } from "@/components/profile/world-examples";
 import { useT } from "@/lib/i18n/context";
 import { PRICE_LABEL } from "@/lib/plan";
 
@@ -282,6 +283,15 @@ export function LandingPage() {
             </motion.div>
           ))}
         </div>
+      </section>
+
+      {/* Living world examples */}
+      <section className="max-w-5xl mx-auto px-5 py-16">
+        <motion.div {...fadeUp} className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("lp.worldEvolveTitle")}</h2>
+          <p className="text-muted mt-3 max-w-lg mx-auto">{t("lp.worldEvolveSub")}</p>
+        </motion.div>
+        <WorldExamples />
       </section>
 
       {/* Plans — Free vs Pro */}
