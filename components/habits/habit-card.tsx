@@ -459,7 +459,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
           </button>
           <div className="min-w-0">
             <h3 className="text-sm font-medium text-white leading-tight">{habit.name}</h3>
-            {habit.category && <span className="text-xs text-muted">{categoryLabel(habit.category, lang)}</span>}
+            {habit.category && <span className="text-xs text-primary">{categoryLabel(habit.category, lang)}</span>}
             {habit.description && (
               <p className="text-xs text-muted/80 mt-0.5 leading-snug line-clamp-2">{habit.description}</p>
             )}
