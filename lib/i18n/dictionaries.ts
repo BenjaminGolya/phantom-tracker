@@ -321,6 +321,10 @@ const en = {
   "stats.byWeekday": "Completions by weekday",
   "stats.byCategory": "Completions by category",
   "stats.noCategory": "Uncategorized",
+  "share.button": "Share my progress",
+  "share.title": "Your progress",
+  "share.share": "Share",
+  "share.download": "Download",
 
   // habits page
   "habits.new": "New",
@@ -747,6 +751,10 @@ const hu: Partial<Record<DictKey, string>> = {
   "stats.byWeekday": "Teljesítések a hét napjai szerint",
   "stats.byCategory": "Teljesítések kategória szerint",
   "stats.noCategory": "Kategória nélkül",
+  "share.button": "Haladásom megosztása",
+  "share.title": "A haladásod",
+  "share.share": "Megosztás",
+  "share.download": "Letöltés",
 
   "habits.new": "Új",
   "habits.search": "Szokások keresése… (/)",
@@ -1166,6 +1174,10 @@ const ro: Partial<Record<DictKey, string>> = {
   "stats.byWeekday": "Finalizări pe zile ale săptămânii",
   "stats.byCategory": "Finalizări pe categorii",
   "stats.noCategory": "Fără categorie",
+  "share.button": "Distribuie progresul",
+  "share.title": "Progresul tău",
+  "share.share": "Distribuie",
+  "share.download": "Descarcă",
 
   "habits.new": "Nou",
   "habits.search": "Caută obiceiuri… (/)",
