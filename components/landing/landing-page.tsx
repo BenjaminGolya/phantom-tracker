@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Smartphone, ChevronRight, CalendarDays, Sparkles,
-  Settings, LogOut, X, Apple, Play,
+  Settings, LogOut, X, Apple, Play, Globe,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -112,6 +112,8 @@ const FEATURES = [
   { icon: <Target size={18} />, titleKey: "lp.f4Title", descKey: "lp.f4Desc" },
   { icon: <Bell size={18} />, titleKey: "lp.f5Title", descKey: "lp.f5Desc" },
   { icon: <BarChart2 size={18} />, titleKey: "lp.f6Title", descKey: "lp.f6Desc" },
+  { icon: <Globe size={18} />, titleKey: "lp.f7Title", descKey: "lp.f7Desc" },
+  { icon: <Sparkles size={18} />, titleKey: "lp.f8Title", descKey: "lp.f8Desc" },
 ] as const;
 
 // Account control shown in the landing nav when the visitor is logged in.
