@@ -352,6 +352,7 @@ interface HabitFormProps {
 export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitFormProps) {
   const t = useT();
   const [name, setName] = useState(initial?.name ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
   const [icon, setIcon] = useState(initial?.icon ?? "Target");
   const [color, setColor] = useState(initial?.color ?? "#7f49c3");
   const [frequency, setFrequency] = useState(initial?.frequency ?? "daily");
@@ -378,6 +379,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
     const freq = frequency === "daily" ? "daily" : selectedDays.join(",");
     await onSubmit({
       name: name.trim(),
+      description: description.trim() || null,
       icon,
       color,
       frequency: freq,
@@ -432,6 +434,19 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
                 placeholder={t("form.namePlaceholder")}
                 required
                 className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.description")}</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("form.descriptionPlaceholder")}
+                rows={2}
+                maxLength={280}
+                className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
               />
             </div>
 
