@@ -31,9 +31,11 @@ async function setPlanByCustomer(
       trialEndsAt: plan === "free" ? null : trialEndsAt ?? null,
     },
   });
-  // Going Pro restores full access: unlock every previously locked habit.
+  // Going Pro restores full access: unlock every previously locked habit, and
+  // arm the trial-ending reminder for any (new) trial.
   if (plan === "pro") {
     await prisma.habit.updateMany({ where: { userId: user.id, locked: true }, data: { locked: false } });
+    await prisma.user.update({ where: { id: user.id }, data: { trialReminderSent: false } });
   }
 }
 
@@ -56,6 +58,7 @@ async function setPlanByUserId(
   });
   if (plan === "pro") {
     await prisma.habit.updateMany({ where: { userId, locked: true }, data: { locked: false } });
+    await prisma.user.update({ where: { id: userId }, data: { trialReminderSent: false } });
   }
 }
 

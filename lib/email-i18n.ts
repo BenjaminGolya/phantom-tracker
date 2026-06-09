@@ -60,6 +60,22 @@ export type EmailStrings = {
   fbAckLine: string;
   fbAckYour: string;
   fbAckClosing: string;
+  // Weekly summary
+  wsSubject: string;
+  wsHeading: string;
+  wsHi: Hi;
+  wsIntro: string;
+  wsCompletions: string;
+  wsBestStreak: string;
+  wsPerfectDays: string;
+  wsClosing: string;
+  wsBtn: string;
+  // Trial ending
+  trialSubject: (days: number) => string;
+  trialHeading: string;
+  trialHi: Hi;
+  trialLine: (days: number) => string;
+  trialBtn: string;
 };
 
 const en: EmailStrings = {
@@ -116,6 +132,20 @@ const en: EmailStrings = {
   fbAckLine: "We've received your message and a human will get back to you with an answer as soon as we can. Here's a copy of what you sent:",
   fbAckYour: "Your message",
   fbAckClosing: "Thanks for helping make Phantom Tracker better. 👻",
+  wsSubject: "Your week in review — Phantom Tracker",
+  wsHeading: "Your week in review",
+  wsHi: (n) => (n ? `Hi ${n},` : "Hi there,"),
+  wsIntro: "Here's how your last 7 days went:",
+  wsCompletions: "Completions",
+  wsBestStreak: "Best active streak",
+  wsPerfectDays: "Perfect days",
+  wsClosing: "Keep it going — every check-in counts. 👻",
+  wsBtn: "Open your dashboard",
+  trialSubject: (d) => `Your Pro trial ends in ${d} day${d === 1 ? "" : "s"}`,
+  trialHeading: "Your Pro trial is ending soon",
+  trialHi: (n) => (n ? `Hi ${n},` : "Hi there,"),
+  trialLine: (d) => `Your free Pro trial ends in ${d} day${d === 1 ? "" : "s"}. Keep your unlimited habits, reminders, and advanced stats by staying on Pro — or do nothing and you'll simply move to the free plan.`,
+  trialBtn: "Manage my plan",
 };
 
 const hu: EmailStrings = {
@@ -172,6 +202,20 @@ const hu: EmailStrings = {
   fbAckLine: "Megkaptuk az üzeneted, és egy valódi ember a lehető leghamarabb válaszol rá. Itt egy másolat arról, amit küldtél:",
   fbAckYour: "Az üzeneted",
   fbAckClosing: "Köszönjük, hogy segítesz jobbá tenni a Phantom Trackert. 👻",
+  wsSubject: "A heted összefoglalója — Phantom Tracker",
+  wsHeading: "A heted összefoglalója",
+  wsHi: (n) => (n ? `Szia ${n},` : "Szia,"),
+  wsIntro: "Így telt az elmúlt 7 napod:",
+  wsCompletions: "Teljesítések",
+  wsBestStreak: "Legjobb aktív streak",
+  wsPerfectDays: "Tökéletes napok",
+  wsClosing: "Csak így tovább — minden bejelölés számít. 👻",
+  wsBtn: "Irányítópult megnyitása",
+  trialSubject: (d) => `A Pro próbaidőszakod ${d} nap múlva lejár`,
+  trialHeading: "Hamarosan lejár a Pro próbaidőszakod",
+  trialHi: (n) => (n ? `Szia ${n},` : "Szia,"),
+  trialLine: (d) => `Az ingyenes Pro próbaidőszakod ${d} nap múlva lejár. Tartsd meg a korlátlan szokásokat, emlékeztetőket és haladó statisztikákat a Pro-val — vagy ne tegyél semmit, és egyszerűen átkerülsz az ingyenes csomagra.`,
+  trialBtn: "Csomag kezelése",
 };
 
 const ro: EmailStrings = {
@@ -228,6 +272,20 @@ const ro: EmailStrings = {
   fbAckLine: "Am primit mesajul tău și un om îți va răspunde cât de curând posibil. Iată o copie a ceea ce ai trimis:",
   fbAckYour: "Mesajul tău",
   fbAckClosing: "Mulțumim că ne ajuți să facem Phantom Tracker mai bun. 👻",
+  wsSubject: "Săptămâna ta pe scurt — Phantom Tracker",
+  wsHeading: "Săptămâna ta pe scurt",
+  wsHi: (n) => (n ? `Salut ${n},` : "Salut,"),
+  wsIntro: "Iată cum au decurs ultimele 7 zile:",
+  wsCompletions: "Finalizări",
+  wsBestStreak: "Cea mai bună serie activă",
+  wsPerfectDays: "Zile perfecte",
+  wsClosing: "Continuă tot așa — fiecare bifare contează. 👻",
+  wsBtn: "Deschide panoul",
+  trialSubject: (d) => `Perioada ta de probă Pro se încheie în ${d} ${d === 1 ? "zi" : "zile"}`,
+  trialHeading: "Perioada ta de probă Pro se încheie curând",
+  trialHi: (n) => (n ? `Salut ${n},` : "Salut,"),
+  trialLine: (d) => `Perioada ta gratuită de probă Pro se încheie în ${d} ${d === 1 ? "zi" : "zile"}. Păstrează obiceiurile nelimitate, mementourile și statisticile avansate rămânând pe Pro — sau nu face nimic și vei trece pur și simplu la planul gratuit.`,
+  trialBtn: "Gestionează planul",
 };
 
 const TABLE: Record<Locale, EmailStrings> = { en, hu, ro };

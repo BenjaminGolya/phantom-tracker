@@ -35,6 +35,9 @@ model User {
   twoFactorEnabled     Boolean           @default(false)
   twoFactorCode        String?
   twoFactorCodeExpires DateTime?
+  // Engagement emails
+  trialReminderSent    Boolean           @default(false)
+  lastWeeklySummary    DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   habits              Habit[]

@@ -210,6 +210,70 @@ function shell(title: string, bodyHtml: string) {
   </body></html>`;
 }
 
+function ctaButton(url: string, label: string) {
+  return `<div style="text-align:center;margin:8px 0 4px;"><a href="${url}" style="display:inline-block;background:#7f49c3;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;">${label}</a></div>`;
+}
+
+/** Weekly engagement summary of the user's last 7 days. */
+export async function sendWeeklySummaryEmail(opts: {
+  to: string;
+  name?: string | null;
+  lang?: string;
+  completions: number;
+  bestStreak: number;
+  perfectDays: number;
+}): Promise<void> {
+  const es = emailStrings(opts.lang);
+  if (!isSmtpConfigured()) {
+    console.log(`\n  📊 (weekly summary skipped — no SMTP) for ${opts.to}\n`);
+    return;
+  }
+  const stat = (label: string, value: string | number, color: string) =>
+    `<td style="padding:0 6px;width:33%;"><div style="background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:14px 8px;text-align:center;"><div style="color:${color};font-size:24px;font-weight:700;font-family:monospace;">${value}</div><div style="color:#a1a1aa;font-size:11px;margin-top:4px;">${label}</div></div></td>`;
+  const url = `${appUrl()}/dashboard`;
+  await makeTransport().sendMail({
+    from: emailFrom(),
+    to: opts.to,
+    subject: es.wsSubject,
+    text: `${es.wsHi(opts.name)}\n\n${es.wsIntro}\n- ${es.wsCompletions}: ${opts.completions}\n- ${es.wsBestStreak}: ${opts.bestStreak}\n- ${es.wsPerfectDays}: ${opts.perfectDays}\n\n${es.wsClosing}\n${url}`,
+    html: shell(es.wsHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 6px;">${es.wsHi(opts.name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">${es.wsIntro}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>
+        ${stat(es.wsCompletions, opts.completions, "#7f49c3")}
+        ${stat(es.wsBestStreak, `${opts.bestStreak}d`, "#f97316")}
+        ${stat(es.wsPerfectDays, opts.perfectDays, "#22c55e")}
+      </tr></table>
+      ${ctaButton(url, es.wsBtn)}
+      <p style="color:#71717a;font-size:12px;text-align:center;margin:14px 0 0;">${es.wsClosing}</p>`),
+  });
+}
+
+/** Remind a trialing user that their Pro trial ends soon. */
+export async function sendTrialEndingEmail(opts: {
+  to: string;
+  name?: string | null;
+  lang?: string;
+  daysLeft: number;
+}): Promise<void> {
+  const es = emailStrings(opts.lang);
+  if (!isSmtpConfigured()) {
+    console.log(`\n  ⏳ (trial-ending email skipped — no SMTP) for ${opts.to}\n`);
+    return;
+  }
+  const url = `${appUrl()}/settings`;
+  await makeTransport().sendMail({
+    from: emailFrom(),
+    to: opts.to,
+    subject: es.trialSubject(opts.daysLeft),
+    text: `${es.trialHi(opts.name)}\n\n${es.trialLine(opts.daysLeft)}\n\n${url}`,
+    html: shell(es.trialHeading, `
+      <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 16px;">${es.trialHi(opts.name)}</p>
+      <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 20px;">${es.trialLine(opts.daysLeft)}</p>
+      ${ctaButton(url, es.trialBtn)}`),
+  });
+}
+
 /** Confirm the account was disabled (deactivated). */
 export async function sendAccountDisabledEmail(to: string, name?: string | null, lang?: string) {
   const es = emailStrings(lang);
