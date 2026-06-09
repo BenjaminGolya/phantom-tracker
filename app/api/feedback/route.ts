@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { email: true, name: true },
+      select: { email: true, name: true, language: true },
     });
     if (!user) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
       type,
       message,
       appVersion: APP_VERSION,
+      lang: user.language ?? undefined,
       attachments,
     });
 
