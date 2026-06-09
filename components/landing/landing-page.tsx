@@ -476,7 +476,7 @@ export function LandingPage() {
             <GhostLogo size={16} />
             <span className="text-xs">{t("landing.footer")}</span>
           </div>
-          <div className="flex items-center gap-4 text-xs text-muted">
+          <div className="flex items-center gap-4 text-xs text-muted flex-wrap justify-center">
             {authed ? (
               <>
                 <Link href="/dashboard" className="hover:text-white transition-colors">{t("common.dashboard")}</Link>
@@ -488,6 +488,8 @@ export function LandingPage() {
                 <Link href="/signup" className="hover:text-white transition-colors">{t("common.getStarted")}</Link>
               </>
             )}
+            <Link href="/privacy" className="hover:text-white transition-colors">{t("common.privacy")}</Link>
+            <Link href="/tos" className="hover:text-white transition-colors">{t("common.terms")}</Link>
             <LanguageSwitcher openUp className="-my-1" />
           </div>
         </div>

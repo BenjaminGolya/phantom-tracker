@@ -175,13 +175,13 @@ export default function SignupPage() {
               />
               <span className="text-xs text-muted leading-snug">
                 I agree to the{" "}
-                <button type="button" onClick={() => setPolicy("terms")} className="text-primary hover:underline">
+                <Link href="/tos" target="_blank" className="text-primary hover:underline">
                   Terms of Service
-                </button>{" "}
+                </Link>{" "}
                 and{" "}
-                <button type="button" onClick={() => setPolicy("privacy")} className="text-primary hover:underline">
+                <Link href="/privacy" target="_blank" className="text-primary hover:underline">
                   Privacy Policy
-                </button>
+                </Link>
                 .
               </span>
             </label>
