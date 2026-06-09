@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { Flame, Target, Zap, CheckCircle2, Plus, Ghost, Globe, ChevronRight } from "lucide-react";
+import { Flame, Target, Zap, CheckCircle2, Plus, Globe, ChevronRight } from "lucide-react";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, phantomScore } from "@/lib/utils";
 import { useMounted } from "@/lib/use-mounted";
 import { HabitForm } from "@/components/habits/habit-form";
 import { TodayChecklist } from "@/components/dashboard/today-checklist";
+import { Onboarding, type Template } from "@/components/dashboard/onboarding";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { useT, useLang } from "@/lib/i18n/context";
+import { useLang } from "@/lib/i18n/context";
 import { dfLocale } from "@/lib/i18n/date";
 import confetti from "canvas-confetti";
 
@@ -27,6 +28,9 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
   const { t, lang } = useLang();
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
+  // Undo toast: stores the PREVIOUS state to revert a just-made toggle.
+  const [undo, setUndo] = useState<{ habitId: string; date: string; completed: boolean; value: number | null } | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep local state in sync with fresh server data after navigation/refresh
   useEffect(() => {
@@ -55,7 +59,11 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
   const todayTotal = habits.length;
   const todayPct = todayTotal > 0 ? Math.round((todayCompleted / todayTotal) * 100) : 0;
 
-  async function handleToggle(habitId: string, date: string, completed: boolean, value?: number) {
+  async function handleToggle(habitId: string, date: string, completed: boolean, value?: number, silent = false) {
+    // Capture the previous state for this habit/date so we can offer an undo.
+    const prevLog = habits.find((h) => h.id === habitId)?.logs.find((l) => l.date === date);
+    const prev = { completed: prevLog?.completed ?? false, value: prevLog?.value ?? null };
+
     const res = await fetch(`/api/habits/${habitId}/log`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -63,6 +71,12 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
     });
     if (!res.ok) return;
     const log = await res.json();
+
+    if (!silent) {
+      if (undoTimer.current) clearTimeout(undoTimer.current);
+      setUndo({ habitId, date, completed: prev.completed, value: prev.value });
+      undoTimer.current = setTimeout(() => setUndo(null), 5000);
+    }
 
     setHabits((prev) =>
       prev.map((h) => {
@@ -103,6 +117,29 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
     const habit = await res.json();
     setHabits((prev) => [...prev, habit]);
     setShowForm(false);
+    router.refresh();
+  }
+
+  // Create a batch of starter habits from the onboarding templates.
+  async function handleCreateTemplates(templates: Template[]) {
+    for (const tpl of templates) {
+      const res = await fetch("/api/habits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: t(tpl.key),
+          icon: tpl.icon,
+          color: tpl.color,
+          frequency: "daily",
+          category: tpl.category,
+          goal: tpl.goal,
+        }),
+      });
+      if (res.ok) {
+        const habit = await res.json();
+        setHabits((prev) => [...prev, habit]);
+      }
+    }
     router.refresh();
   }
 
@@ -184,7 +221,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
       {habits.length > 0 ? (
         <TodayChecklist habits={habits} onToggle={handleToggle} />
       ) : (
-        <EmptyState onNew={() => setShowForm(true)} />
+        <Onboarding pro={pro} onCreate={handleCreateTemplates} onCustom={() => setShowForm(true)} />
       )}
 
       {showForm && (
@@ -194,31 +231,29 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
           onClose={() => setShowForm(false)}
         />
       )}
+
+      {/* Undo toast */}
+      {undo && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-2 border border-border shadow-2xl shadow-black/50"
+          style={{ bottom: "calc(max(1rem, env(safe-area-inset-bottom)) + 4.5rem)" }}
+        >
+          <span className="text-sm text-muted">{t("dash.updated")}</span>
+          <button
+            onClick={() => {
+              if (undoTimer.current) clearTimeout(undoTimer.current);
+              handleToggle(undo.habitId, undo.date, undo.completed, undo.value ?? undefined, true);
+              setUndo(null);
+            }}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            {t("dash.undo")}
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }
 
-function EmptyState({ onNew }: { onNew: () => void }) {
-  const t = useT();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center py-20 text-center"
-    >
-      <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-        <Ghost size={32} className="text-primary opacity-60" />
-      </div>
-      <h2 className="text-lg font-medium mb-2">{t("dash.noHabits")}</h2>
-      <p className="text-sm text-muted mb-6 max-w-xs">
-        {t("dash.noHabitsSub")}
-      </p>
-      <button
-        onClick={onNew}
-        className="px-4 py-2 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg transition-all hover:shadow-glow"
-      >
-        {t("dash.createFirst")}
-      </button>
-    </motion.div>
-  );
-}
