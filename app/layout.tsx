@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import "./globals.css";
@@ -16,17 +16,53 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+const SITE_URL = "https://phantomtracker.io";
+
 export const metadata: Metadata = {
-  title: "Phantom Tracker",
-  description: "Track your habits in the dark.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Phantom Tracker — Habit Tracker with Streaks, Levels & a Living World",
+    template: "%s · Phantom Tracker",
+  },
+  description:
+    "A free, dark, minimalist habit tracker. Build daily streaks, earn XP and levels, grow a living world that reflects your consistency, and get reminders that keep you showing up. Works on every device.",
+  applicationName: "Phantom Tracker",
+  keywords: [
+    "habit tracker", "habit app", "daily habits", "streak tracker", "routine tracker",
+    "productivity app", "habit building", "free habit tracker", "habit tracker PWA",
+  ],
+  authors: [{ name: "Phantom Tracker" }],
+  creator: "Phantom Tracker",
   manifest: "/manifest.json",
-  themeColor: "#0a0a0a",
+  alternates: { canonical: "/" },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
+    shortcut: "/favicon.ico",
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "Phantom Tracker",
+    title: "Phantom Tracker — Habit Tracker with Streaks, Levels & a Living World",
+    description:
+      "Build daily streaks, earn XP and levels, and grow a living world that reflects your consistency. Free, on every device.",
+    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "Phantom Tracker" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Phantom Tracker — Habit Tracker with Streaks & Levels",
+    description: "A free, dark habit tracker. Streaks, XP, levels, and a living world that grows with you.",
+    images: ["/icon-512.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
   // Controls the name shown under the icon when added to an iOS Home Screen.
   appleWebApp: {
@@ -34,6 +70,12 @@ export const metadata: Metadata = {
     title: "Phantom Tracker",
     statusBarStyle: "black-translucent",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

@@ -142,9 +142,9 @@ function NavAccount() {
     <div className="flex items-center gap-2">
       <Link
         href="/dashboard"
-        className="flex items-center gap-1 text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow"
+        className="flex items-center gap-1 text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow whitespace-nowrap shrink-0"
       >
-        {t("common.openApp")} <ChevronRight size={14} />
+        {t("common.openApp")} <ChevronRight size={14} className="shrink-0" />
       </Link>
 
       <div className="relative" ref={ref}>
@@ -212,10 +212,10 @@ export function LandingPage() {
               <NavAccount />
             ) : (
               <>
-                <Link href="/login" className="text-sm text-muted hover:text-white transition-colors px-3 py-1.5">
+                <Link href="/login" className="text-sm text-muted hover:text-white transition-colors px-3 py-1.5 whitespace-nowrap shrink-0">
                   {t("common.signIn")}
                 </Link>
-                <Link href="/signup" className="text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow">
+                <Link href="/signup" className="text-sm font-medium bg-primary hover:bg-primary-dim text-white px-3.5 py-1.5 rounded-lg transition-all hover:shadow-glow whitespace-nowrap shrink-0">
                   {t("common.getStarted")}
                 </Link>
               </>
@@ -224,9 +224,10 @@ export function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* Hero — rendered without an entrance animation so it paints instantly
+          (no blank/black first paint while JS hydrates). */}
       <section className="relative max-w-5xl mx-auto px-5 pt-16 pb-12 text-center">
-        <motion.div {...fadeUp}>
+        <div>
           <div className="inline-flex items-center gap-1.5 text-xs text-muted bg-surface border border-border rounded-full px-3 py-1 mb-6">
             <Sparkles size={12} className="text-primary" /> {t("lp.heroBadge")}
           </div>
@@ -245,7 +246,7 @@ export function LandingPage() {
               {t("lp.howItWorks")}
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Hero mockups */}
         <motion.div
