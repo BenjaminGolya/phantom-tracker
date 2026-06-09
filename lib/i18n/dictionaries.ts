@@ -64,6 +64,9 @@ const en = {
   "common.email": "Email",
   "common.password": "Password",
   "common.loading": "Loading…",
+  "nf.title": "Lost in the dark",
+  "nf.desc": "This page drifted off into the void. It may have moved, or never existed.",
+  "nf.home": "Back home",
 
   // nav / landing
   "landing.tagline": "Build better habits, in the dark.",
@@ -477,6 +480,9 @@ const hu: Partial<Record<DictKey, string>> = {
   "common.email": "E-mail",
   "common.password": "Jelszó",
   "common.loading": "Betöltés…",
+  "nf.title": "Elveszve a sötétben",
+  "nf.desc": "Ez az oldal elsodródott a semmibe. Lehet, hogy áthelyeztük, vagy sosem létezett.",
+  "nf.home": "Vissza a főoldalra",
 
   "landing.tagline": "Építs jobb szokásokat, a sötétben.",
   "landing.heroTitle": "Kövesd a szokásaidat. Tartsd a lendületet. Lépj szintet.",
@@ -873,6 +879,9 @@ const ro: Partial<Record<DictKey, string>> = {
   "common.email": "E-mail",
   "common.password": "Parolă",
   "common.loading": "Se încarcă…",
+  "nf.title": "Pierdut în întuneric",
+  "nf.desc": "Această pagină s-a pierdut în neant. Poate a fost mutată sau nu a existat niciodată.",
+  "nf.home": "Înapoi acasă",
 
   "landing.tagline": "Construiește obiceiuri mai bune, în întuneric.",
   "landing.heroTitle": "Urmărește obiceiuri. Construiește serii. Avansează.",
