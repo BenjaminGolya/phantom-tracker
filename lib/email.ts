@@ -349,7 +349,8 @@ export async function sendFeedbackEmail(opts: {
   lang?: string;
   attachments?: { filename: string; content: string; contentType: string }[]; // content = base64
 }): Promise<{ ok: boolean; reason?: string }> {
-  const to = process.env.SUPPORT_EMAIL || process.env.ADMIN_NOTIFY_EMAIL || "support@phantomtracker.io";
+  // Feedback goes to the support inbox. Override with SUPPORT_EMAIL if needed.
+  const to = process.env.SUPPORT_EMAIL || "support@phantomtracker.io";
 
   const when = new Date().toUTCString();
   const label = opts.type === "bug" ? "🐛 Bug report" : opts.type === "question" ? "❓ Question" : "💬 Feedback";
