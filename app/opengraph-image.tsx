@@ -1,10 +1,15 @@
 import { ImageResponse } from "next/og";
 
 // Dynamically generated 1200×630 social/Google share image for the whole site.
+// Edge runtime: @vercel/og loads fonts via fetch (avoids a Windows path bug),
+// and fetches the logo from its public URL.
 export const runtime = "edge";
 export const alt = "Phantom Tracker — habit tracker with streaks, levels and a living world";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+// next/og fetches the logo from the public asset URL.
+const logoSrc = "https://phantomtracker.io/ghost-logo-128.png";
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -38,20 +43,8 @@ export default function OpengraphImage() {
         />
 
         <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 36 }}>
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 18,
-              background: "#7f49c3",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 38,
-            }}
-          >
-            👻
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoSrc} width={72} height={72} alt="" style={{ borderRadius: 18 }} />
           <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: -0.5, display: "flex" }}>
             Phantom Tracker
           </div>
