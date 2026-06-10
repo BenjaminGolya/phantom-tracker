@@ -38,6 +38,8 @@ model User {
   // Engagement emails
   trialReminderSent    Boolean           @default(false)
   lastWeeklySummary    DateTime?
+  // One-time Lifetime purchase → permanent Pro (no subscription).
+  lifetime             Boolean           @default(false)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   habits              Habit[]
