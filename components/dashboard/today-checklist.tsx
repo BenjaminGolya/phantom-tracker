@@ -234,50 +234,73 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.04 }}
-              className="w-full flex items-center gap-2 p-3 bg-surface border border-border rounded-xl hover:border-primary/30 transition-all group"
+              className="w-full flex items-center gap-2 p-3 bg-surface border border-border rounded-xl transition-all"
+              style={{ borderColor: done ? `${habit.color}50` : frozenToday ? "#38bdf850" : undefined }}
             >
-              <button
-                onClick={() => onToggle(habit.id, today, !done)}
-                className="flex-1 min-w-0 flex items-center gap-3 text-left"
+              {/* Status icon (display only) */}
+              <div
+                style={{
+                  background: done ? habit.color : frozenToday ? "#38bdf820" : `${habit.color}12`,
+                  borderColor: done ? habit.color : frozenToday ? "#38bdf870" : `${habit.color}40`,
+                  boxShadow: done ? `0 0 10px ${habit.color}50` : undefined,
+                }}
+                className="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
               >
-                <div
-                  style={{
-                    background: done ? habit.color : frozenToday ? "#38bdf820" : `${habit.color}12`,
-                    borderColor: done ? habit.color : frozenToday ? "#38bdf870" : `${habit.color}40`,
-                    boxShadow: done ? `0 0 10px ${habit.color}50` : undefined,
-                  }}
-                  className="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
-                >
-                  {done ? (
-                    <Check size={14} className="text-white" />
-                  ) : frozenToday ? (
-                    <Snowflake size={14} className="text-sky-400" />
-                  ) : (
-                    <HabitIcon size={14} style={{ color: habit.color }} />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
-                    {habit.name}
-                  </p>
-                  {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
-                </div>
-              </button>
+                {done ? (
+                  <Check size={14} className="text-white" />
+                ) : frozenToday ? (
+                  <Snowflake size={14} className="text-sky-400" />
+                ) : (
+                  <HabitIcon size={14} style={{ color: habit.color }} />
+                )}
+              </div>
+
+              {/* Name + category (display only — completing happens via the button) */}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
+                  {habit.name}
+                </p>
+                {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
+              </div>
+
+              {/* Actions */}
               {done ? (
-                <span className="text-xs text-primary font-medium shrink-0">{t("dash.doneMark")}</span>
-              ) : frozenToday ? (
-                <span className="text-[11px] text-sky-400 font-medium shrink-0">{t("dash.restDay")}</span>
-              ) : null}
-              {!done && (
+                // Completed → allow undo (redo by completing again afterwards)
                 <button
-                  onClick={() => onFreeze(habit.id, today, !frozenToday)}
-                  title={t("dash.freeze")}
-                  className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
-                    frozenToday ? "border-sky-400/50 text-sky-400 bg-sky-400/10" : "border-border text-muted hover:text-sky-400 hover:border-sky-400/40"
-                  }`}
+                  onClick={() => onToggle(habit.id, today, false)}
+                  title={t("dash.undo")}
+                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
                 >
-                  <Snowflake size={13} />
+                  <RotateCcw size={13} /> {t("dash.undo")}
                 </button>
+              ) : frozenToday ? (
+                // Resting → allow undo of the rest day
+                <button
+                  onClick={() => onFreeze(habit.id, today, false)}
+                  title={t("dash.undo")}
+                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-sky-400/40 text-xs font-medium text-sky-400 hover:bg-sky-400/10 shrink-0 transition-all"
+                >
+                  <RotateCcw size={13} /> {t("dash.undo")}
+                </button>
+              ) : (
+                <>
+                  {/* Rest day — clearly labeled, protects the streak */}
+                  <button
+                    onClick={() => onFreeze(habit.id, today, true)}
+                    title={t("dash.freeze")}
+                    className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-sky-400 hover:border-sky-400/40 shrink-0 transition-all"
+                  >
+                    <Snowflake size={13} /> {t("dash.rest")}
+                  </button>
+                  {/* Complete */}
+                  <button
+                    onClick={() => onToggle(habit.id, today, true)}
+                    style={{ backgroundColor: habit.color }}
+                    className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
+                  >
+                    <Check size={14} /> {t("dash.complete")}
+                  </button>
+                </>
               )}
             </motion.div>
           );
