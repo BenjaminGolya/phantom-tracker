@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Flame, Target, Zap, CheckCircle2, Plus, Globe, ChevronRight } from "lucide-react";
 import { HabitWithLogs } from "@/types";
-import { calcStreak, phantomScore } from "@/lib/utils";
+import { calcStreak, phantomScore, isScheduledOn } from "@/lib/utils";
 import { useMounted } from "@/lib/use-mounted";
 import { HabitForm } from "@/components/habits/habit-form";
 import { TodayChecklist } from "@/components/dashboard/today-checklist";
@@ -59,10 +59,12 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
   const score = phantomScore(habits.map((h) => ({ logs: h.logs })));
   const planet = planetState(habits, { isPro: pro });
 
-  const todayCompleted = habits.filter((h) =>
+  // Progress counts only habits actually scheduled for today.
+  const dueToday = habits.filter((h) => isScheduledOn(h.frequency, new Date()));
+  const todayCompleted = dueToday.filter((h) =>
     h.logs.some((l) => l.date === today && l.completed)
   ).length;
-  const todayTotal = habits.length;
+  const todayTotal = dueToday.length;
   const todayPct = todayTotal > 0 ? Math.round((todayCompleted / todayTotal) * 100) : 0;
 
   async function handleToggle(habitId: string, date: string, completed: boolean, value?: number, silent = false) {
@@ -105,9 +107,9 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
         : [...h.logs, { id: "tmp", habitId, date, completed, value: null }];
       return { ...h, logs };
     });
-    const allDone = updated.every((h) =>
-      h.logs.some((l) => l.date === today && l.completed)
-    );
+    const allDone = updated
+      .filter((h) => isScheduledOn(h.frequency, new Date()))
+      .every((h) => h.logs.some((l) => l.date === today && l.completed));
     if (allDone && completed && habits.length > 0) {
       confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ["#7f49c3","#9b6bff","#ffffff"] });
     }

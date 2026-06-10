@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { Check, RotateCcw, Snowflake } from "lucide-react";
+import { Check, RotateCcw, Snowflake, CalendarClock } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
+import { isScheduledOn, nextDueDates } from "@/lib/utils";
 import { useLang } from "@/lib/i18n/context";
+import { dfLocale } from "@/lib/i18n/date";
 import { categoryLabel } from "@/lib/i18n/category";
 import { CategoryFilter, usedCategories } from "@/components/habits/category-filter";
 
@@ -175,12 +177,23 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
 
 // ─── Main checklist ───────────────────────────────────────────────────────────
 export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistProps) {
-  const today = format(new Date(), "yyyy-MM-dd");
+  const now = new Date();
+  const today = format(now, "yyyy-MM-dd");
   const { t, lang } = useLang();
   const [catFilter, setCatFilter] = useState<string | null>(null);
 
   const categories = usedCategories(habits);
-  const shown = catFilter ? habits.filter((h) => h.category === catFilter) : habits;
+  const filtered = catFilter ? habits.filter((h) => h.category === catFilter) : habits;
+
+  // Only habits actually scheduled for today belong in the checklist. Weekly /
+  // monthly habits that aren't due today move to a muted "Coming up" list so
+  // it's clear when they next need doing — without cluttering today.
+  const shown = filtered.filter((h) => isScheduledOn(h.frequency, now));
+  const upcoming = filtered
+    .filter((h) => !isScheduledOn(h.frequency, now))
+    .map((h) => ({ habit: h, dues: nextDueDates(h.frequency, now, 3) }))
+    .filter((u) => u.dues.length > 0)
+    .sort((a, b) => a.dues[0].getTime() - b.dues[0].getTime());
 
   return (
     <div>
@@ -188,6 +201,12 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
         <h2 className="text-sm font-medium text-muted">{t("dash.todaysHabits")}</h2>
         <CategoryFilter categories={categories} value={catFilter} onChange={setCatFilter} />
       </div>
+      {shown.length === 0 && (
+        <div className="flex items-center gap-2.5 p-4 bg-surface border border-border rounded-xl text-sm text-muted">
+          <Check size={15} className="text-green-400 shrink-0" />
+          {t("dash.noneToday")}
+        </div>
+      )}
       <div className="space-y-2">
         {shown.map((habit, i) => {
           // Habits with a numeric goal get the counter UI
@@ -215,55 +234,153 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.04 }}
-              className="w-full flex items-center gap-2 p-3 bg-surface border border-border rounded-xl hover:border-primary/30 transition-all group"
+              className="w-full flex items-center gap-2 p-3 bg-surface border border-border rounded-xl transition-all"
+              style={{ borderColor: done ? `${habit.color}50` : frozenToday ? "#38bdf850" : undefined }}
             >
-              <button
-                onClick={() => onToggle(habit.id, today, !done)}
-                className="flex-1 min-w-0 flex items-center gap-3 text-left"
+              {/* Status icon (display only) */}
+              <div
+                style={{
+                  background: done ? habit.color : frozenToday ? "#38bdf820" : `${habit.color}12`,
+                  borderColor: done ? habit.color : frozenToday ? "#38bdf870" : `${habit.color}40`,
+                  boxShadow: done ? `0 0 10px ${habit.color}50` : undefined,
+                }}
+                className="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
               >
-                <div
-                  style={{
-                    background: done ? habit.color : frozenToday ? "#38bdf820" : `${habit.color}12`,
-                    borderColor: done ? habit.color : frozenToday ? "#38bdf870" : `${habit.color}40`,
-                    boxShadow: done ? `0 0 10px ${habit.color}50` : undefined,
-                  }}
-                  className="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
-                >
-                  {done ? (
-                    <Check size={14} className="text-white" />
-                  ) : frozenToday ? (
-                    <Snowflake size={14} className="text-sky-400" />
-                  ) : (
-                    <HabitIcon size={14} style={{ color: habit.color }} />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
-                    {habit.name}
-                  </p>
-                  {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
-                </div>
-              </button>
+                {done ? (
+                  <Check size={14} className="text-white" />
+                ) : frozenToday ? (
+                  <Snowflake size={14} className="text-sky-400" />
+                ) : (
+                  <HabitIcon size={14} style={{ color: habit.color }} />
+                )}
+              </div>
+
+              {/* Name + category (display only — completing happens via the button) */}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
+                  {habit.name}
+                </p>
+                {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
+              </div>
+
+              {/* Actions */}
               {done ? (
-                <span className="text-xs text-primary font-medium shrink-0">{t("dash.doneMark")}</span>
-              ) : frozenToday ? (
-                <span className="text-[11px] text-sky-400 font-medium shrink-0">{t("dash.restDay")}</span>
-              ) : null}
-              {!done && (
+                // Completed → allow undo (redo by completing again afterwards)
                 <button
-                  onClick={() => onFreeze(habit.id, today, !frozenToday)}
-                  title={t("dash.freeze")}
-                  className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
-                    frozenToday ? "border-sky-400/50 text-sky-400 bg-sky-400/10" : "border-border text-muted hover:text-sky-400 hover:border-sky-400/40"
-                  }`}
+                  onClick={() => onToggle(habit.id, today, false)}
+                  title={t("dash.undo")}
+                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
                 >
-                  <Snowflake size={13} />
+                  <RotateCcw size={13} /> {t("dash.undo")}
                 </button>
+              ) : frozenToday ? (
+                // Resting → allow undo of the rest day
+                <button
+                  onClick={() => onFreeze(habit.id, today, false)}
+                  title={t("dash.undo")}
+                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-sky-400/40 text-xs font-medium text-sky-400 hover:bg-sky-400/10 shrink-0 transition-all"
+                >
+                  <RotateCcw size={13} /> {t("dash.undo")}
+                </button>
+              ) : (
+                <>
+                  {/* Rest day — clearly labeled, protects the streak */}
+                  <button
+                    onClick={() => onFreeze(habit.id, today, true)}
+                    title={t("dash.freeze")}
+                    className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-sky-400 hover:border-sky-400/40 shrink-0 transition-all"
+                  >
+                    <Snowflake size={13} /> {t("dash.rest")}
+                  </button>
+                  {/* Complete */}
+                  <button
+                    onClick={() => onToggle(habit.id, today, true)}
+                    style={{ backgroundColor: habit.color }}
+                    className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
+                  >
+                    <Check size={14} /> {t("dash.complete")}
+                  </button>
+                </>
               )}
             </motion.div>
           );
         })}
       </div>
+
+      {/* Coming up — weekly/monthly habits not due today, with their next date */}
+      {upcoming.length > 0 && (
+        <div className="mt-5">
+          <h3 className="flex items-center gap-1.5 text-xs font-medium text-muted mb-2">
+            <CalendarClock size={13} /> {t("dash.comingUp")}
+          </h3>
+          <div className="space-y-1.5">
+            {upcoming.map(({ habit, dues }) => {
+              const HabitIcon = getHabitIcon(habit.icon);
+              const tomorrowKey = format(new Date(now.getTime() + 86400000), "yyyy-MM-dd");
+              const doneToday = habit.logs.some((l) => l.date === today && l.completed);
+              const fmtDue = (d: Date) =>
+                format(d, "yyyy-MM-dd") === tomorrowKey ? t("dash.tomorrow") : format(d, "EEE, MMM d", { locale: dfLocale(lang) });
+              return (
+                <div
+                  key={habit.id}
+                  className="flex items-center gap-3 px-3 py-2 bg-surface/60 border border-border rounded-xl"
+                >
+                  {/* Status icon (display only) */}
+                  <div
+                    style={{
+                      background: doneToday ? habit.color : `${habit.color}12`,
+                      borderColor: doneToday ? habit.color : `${habit.color}40`,
+                      boxShadow: doneToday ? `0 0 8px ${habit.color}50` : undefined,
+                    }}
+                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all"
+                  >
+                    {doneToday ? <Check size={14} className="text-white" /> : <HabitIcon size={14} style={{ color: habit.color }} />}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm truncate ${doneToday ? "line-through text-muted" : "text-white/90"}`}>{habit.name}</p>
+                    {/* Upcoming due dates — only the next (selected) date is highlighted */}
+                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                      {dues.map((d, idx) => (
+                        <span
+                          key={idx}
+                          className={`text-[10px] px-1.5 py-0.5 rounded-md ${
+                            idx === 0
+                              ? "bg-primary text-white font-medium"
+                              : "bg-surface-2 text-muted"
+                          }`}
+                        >
+                          {fmtDue(d)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Complete today (or undo), even though it's not due today */}
+                  {doneToday ? (
+                    <button
+                      onClick={() => onToggle(habit.id, today, false, habit.goal ? 0 : undefined)}
+                      title={t("dash.undo")}
+                      className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                    >
+                      <RotateCcw size={13} /> {t("dash.undo")}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onToggle(habit.id, today, true, habit.goal ? habit.goal : undefined)}
+                      title={t("dash.completeToday")}
+                      style={{ backgroundColor: habit.color }}
+                      className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
+                    >
+                      <Check size={14} /> {t("dash.complete")}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
