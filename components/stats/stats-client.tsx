@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import { format, subDays, parseISO } from "date-fns";
+import { format, subDays, parseISO, differenceInCalendarDays } from "date-fns";
 import { motion } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 
@@ -416,7 +416,16 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
   const last30 = completedDates.filter((d) => inWindow(d, 30, 0)).length;
   const prev30 = completedDates.filter((d) => inWindow(d, 60, 30)).length;
   const trendPct = prev30 > 0 ? Math.round(((last30 - prev30) / prev30) * 100) : last30 > 0 ? 100 : 0;
-  const avgPerDay = (last30 / 30).toFixed(1);
+  // Average over the days actually tracked (since the oldest habit was created),
+  // capped at 30 — so a brand-new account isn't divided by a full month.
+  const oldestCreatedAt = habits.reduce<Date | null>((min, h) => {
+    const c = new Date(h.createdAt);
+    return !min || c < min ? c : min;
+  }, null);
+  const daysTracked = oldestCreatedAt
+    ? Math.min(30, Math.max(1, differenceInCalendarDays(new Date(), oldestCreatedAt) + 1))
+    : 1;
+  const avgPerDay = (last30 / daysTracked).toFixed(1);
 
   // Day-of-week distribution (0 = Sunday) across all completions.
   const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
