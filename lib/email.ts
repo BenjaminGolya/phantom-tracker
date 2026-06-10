@@ -224,8 +224,8 @@ export async function sendWeeklySummaryEmail(opts: {
     console.log(`\n  📊 (weekly summary skipped — no SMTP) for ${opts.to}\n`);
     return;
   }
-  const stat = (label: string, value: string | number, color: string) =>
-    `<td style="padding:0 6px;width:33%;"><div style="background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:14px 8px;text-align:center;"><div style="color:${color};font-size:24px;font-weight:700;font-family:monospace;">${value}</div><div style="color:#a1a1aa;font-size:11px;margin-top:4px;">${label}</div></div></td>`;
+  const stat = (icon: string, label: string, value: string | number, color: string) =>
+    `<td style="padding:0 6px;width:33%;"><div style="background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:14px 8px;text-align:center;"><div style="font-size:20px;line-height:1;margin-bottom:6px;">${icon}</div><div style="color:${color};font-size:24px;font-weight:700;font-family:monospace;">${value}</div><div style="color:#a1a1aa;font-size:11px;margin-top:4px;">${label}</div></div></td>`;
   const url = `${appUrl()}/dashboard`;
   await makeTransport().sendMail({
     from: emailFrom(),
@@ -236,9 +236,9 @@ export async function sendWeeklySummaryEmail(opts: {
       <p style="color:#d4d4d8;font-size:15px;line-height:1.6;margin:0 0 6px;">${es.wsHi(opts.name)}</p>
       <p style="color:#a1a1aa;font-size:14px;line-height:1.6;margin:0 0 16px;">${es.wsIntro}</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>
-        ${stat(es.wsCompletions, opts.completions, "#7f49c3")}
-        ${stat(es.wsBestStreak, `${opts.bestStreak}d`, "#f97316")}
-        ${stat(es.wsPerfectDays, opts.perfectDays, "#22c55e")}
+        ${stat("📊", es.wsCompletions, opts.completions, "#7f49c3")}
+        ${stat("🔥", es.wsBestStreak, `${opts.bestStreak}d`, "#f97316")}
+        ${stat("⭐", es.wsPerfectDays, opts.perfectDays, "#22c55e")}
       </tr></table>
       ${ctaButton(url, es.wsBtn)}
       <p style="color:#71717a;font-size:12px;text-align:center;margin:14px 0 0;">${es.wsClosing}</p>`),
