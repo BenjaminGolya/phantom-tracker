@@ -11,7 +11,7 @@ export async function GET() {
   const habits = await prisma.habit.findMany({
     where: { userId: session.user.id },
     include: { logs: true },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
   return NextResponse.json(habits);

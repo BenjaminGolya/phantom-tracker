@@ -9,6 +9,6 @@ export const getActiveHabitsWithLogs = cache((userId: string) =>
   prisma.habit.findMany({
     where: { userId, archived: false },
     include: { logs: true },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   })
 );

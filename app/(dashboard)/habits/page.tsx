@@ -12,7 +12,7 @@ export default async function HabitsPage() {
     prisma.habit.findMany({
       where: { userId: session!.user!.id },
       include: { logs: true },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
     getCurrentPlan(),
   ]);

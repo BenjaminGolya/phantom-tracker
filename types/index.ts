@@ -10,6 +10,7 @@ export interface HabitWithLogs {
   reminderTime: string | null;
   archived: boolean;
   locked: boolean;
+  sortOrder: number;
   createdAt: Date;
   logs: HabitLog[];
 }

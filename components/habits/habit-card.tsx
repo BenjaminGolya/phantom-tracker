@@ -6,7 +6,7 @@ import {
   eachDayOfInterval, startOfYear, isSameMonth, isToday, isFuture,
   startOfISOWeek, endOfISOWeek, startOfDay, subDays,
 } from "date-fns";
-import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw } from "lucide-react";
+import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, ArrowUp, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel } from "@/lib/utils";
@@ -375,7 +375,7 @@ function ContribCalendar({ habit, completedSet, startDate }: {
 }
 
 // ─── Main card ────────────────────────────────────────────────────────────────
-export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelete, onArchive, onCategoryClick }: {
+export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelete, onArchive, onCategoryClick, onMoveUp, onMoveDown }: {
   habit: HabitWithLogs;
   range?: ProgressRange;
   onToggleDay?: (habitId: string, date: string, completed: boolean, value?: number) => void;
@@ -383,6 +383,8 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   onDelete?: (id: string) => void;
   onArchive?: (id: string) => void;
   onCategoryClick?: (category: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
 }) {
   const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -504,6 +506,18 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
                     <Pencil size={12} /> {t("form.edit")}
                   </button>
+                  {onMoveUp && (
+                    <button onClick={() => { onMoveUp(habit.id); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
+                      <ArrowUp size={12} /> {t("form.moveUp")}
+                    </button>
+                  )}
+                  {onMoveDown && (
+                    <button onClick={() => { onMoveDown(habit.id); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
+                      <ArrowDown size={12} /> {t("form.moveDown")}
+                    </button>
+                  )}
                   <button onClick={() => { onArchive?.(habit.id); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted hover:text-white hover:bg-surface transition-colors">
                     <Archive size={12} /> {habit.archived ? t("form.unarchive") : t("form.archive")}
