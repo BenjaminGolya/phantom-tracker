@@ -134,6 +134,32 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
     router.refresh();
   }
 
+  // Move a habit up/down among the active (non-archived, non-locked) list and
+  // persist the new order.
+  async function handleMove(id: string, dir: "up" | "down") {
+    const active = habits.filter((h) => !h.archived && (pro || !h.locked));
+    const idx = active.findIndex((h) => h.id === id);
+    const swapWith = dir === "up" ? idx - 1 : idx + 1;
+    if (idx < 0 || swapWith < 0 || swapWith >= active.length) return;
+
+    const reordered = [...active];
+    [reordered[idx], reordered[swapWith]] = [reordered[swapWith], reordered[idx]];
+    const orderIds = reordered.map((h) => h.id);
+    const orderIndex = new Map(orderIds.map((hid, i) => [hid, i]));
+
+    // Optimistic: re-sort local state to match.
+    setHabits((prev) =>
+      [...prev].sort((a, b) => (orderIndex.get(a.id) ?? 999) - (orderIndex.get(b.id) ?? 999))
+    );
+
+    await fetch("/api/habits/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: orderIds }),
+    });
+    router.refresh();
+  }
+
   async function handleArchive(id: string) {
     const habit = habits.find((h) => h.id === id);
     if (!habit) return;
@@ -261,6 +287,9 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                 onDelete={handleDelete}
                 onArchive={handleArchive}
                 onCategoryClick={(c) => setCatFilter((prev) => (prev === c ? null : c))}
+                {...(!search && !catFilter
+                  ? { onMoveUp: (id) => handleMove(id, "up"), onMoveDown: (id) => handleMove(id, "down") }
+                  : {})}
               />
             ))}
           </AnimatePresence>
