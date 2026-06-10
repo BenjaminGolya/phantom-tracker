@@ -6,7 +6,7 @@ import {
   eachDayOfInterval, startOfYear, isSameMonth, isToday, isFuture,
   startOfISOWeek, endOfISOWeek, startOfDay, subDays,
 } from "date-fns";
-import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, ArrowUp, ArrowDown } from "lucide-react";
+import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, ArrowUp, ArrowDown, Snowflake } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel } from "@/lib/utils";
@@ -206,7 +206,7 @@ function LevelUpFlash({ info, onDone }: { info: ReturnType<typeof getHabitLevel>
 }
 
 // ─── Calendar views ───────────────────────────────────────────────────────────
-function WeekCalendar({ habit, completedSet }: { habit: HabitWithLogs; completedSet: Set<string> }) {
+function WeekCalendar({ habit, completedSet, frozenSet }: { habit: HabitWithLogs; completedSet: Set<string>; frozenSet: Set<string> }) {
   const { lang } = useLang();
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 0 });
@@ -220,22 +220,23 @@ function WeekCalendar({ habit, completedSet }: { habit: HabitWithLogs; completed
       {days.map((day) => {
         const key = format(day, "yyyy-MM-dd");
         const done = completedSet.has(key);
+        const frozen = !done && frozenSet.has(key);
         const future = isFuture(day) && !isToday(day);
         const todayCell = isToday(day);
         return (
           <div
             key={key}
-            title={key}
+            title={frozen ? `${key} · rest` : key}
             style={{
-              backgroundColor: done ? habit.color : "transparent",
-              borderColor: todayCell ? habit.color : "#2a2a2a",
+              backgroundColor: done ? habit.color : frozen ? "#38bdf833" : "transparent",
+              borderColor: todayCell ? habit.color : frozen ? "#38bdf870" : "#2a2a2a",
               boxShadow: done && todayCell ? `0 0 6px ${habit.color}80` : undefined,
               opacity: future ? 0.25 : 1,
               height: 28,
             }}
             className="rounded border flex items-center justify-center text-[9px] font-medium transition-all"
           >
-            <span className={done ? "text-white" : "text-muted"}>{format(day, "d")}</span>
+            {frozen ? <Snowflake size={10} className="text-sky-400" /> : <span className={done ? "text-white" : "text-muted"}>{format(day, "d")}</span>}
           </div>
         );
       })}
@@ -243,7 +244,7 @@ function WeekCalendar({ habit, completedSet }: { habit: HabitWithLogs; completed
   );
 }
 
-function MonthCalendar({ habit, completedSet }: { habit: HabitWithLogs; completedSet: Set<string> }) {
+function MonthCalendar({ habit, completedSet, frozenSet }: { habit: HabitWithLogs; completedSet: Set<string>; frozenSet: Set<string> }) {
   const { lang } = useLang();
   const today = new Date();
   const monthStart = startOfMonth(today);
@@ -265,22 +266,23 @@ function MonthCalendar({ habit, completedSet }: { habit: HabitWithLogs; complete
           const key = format(day, "yyyy-MM-dd");
           const done = completedSet.has(key);
           const outside = !isSameMonth(day, today);
+          const frozen = !done && !outside && frozenSet.has(key);
           const future = isFuture(day) && !isToday(day);
           const todayCell = isToday(day);
           return (
             <div
               key={key}
-              title={key}
+              title={frozen ? `${key} · rest` : key}
               style={{
-                backgroundColor: done && !outside ? habit.color : "transparent",
-                borderColor: todayCell ? habit.color : "#1f1f1f",
+                backgroundColor: done && !outside ? habit.color : frozen ? "#38bdf833" : "transparent",
+                borderColor: todayCell ? habit.color : frozen ? "#38bdf870" : "#1f1f1f",
                 opacity: outside ? 0.12 : future ? 0.25 : 1,
                 boxShadow: done && todayCell ? `0 0 5px ${habit.color}70` : undefined,
                 height: 22,
               }}
               className="rounded border flex items-center justify-center text-[9px] font-medium transition-all"
             >
-              <span className={done && !outside ? "text-white" : "text-muted"}>{format(day, "d")}</span>
+              {frozen ? <Snowflake size={9} className="text-sky-400" /> : <span className={done && !outside ? "text-white" : "text-muted"}>{format(day, "d")}</span>}
             </div>
           );
         })}
@@ -289,8 +291,8 @@ function MonthCalendar({ habit, completedSet }: { habit: HabitWithLogs; complete
   );
 }
 
-function ContribCalendar({ habit, completedSet, startDate }: {
-  habit: HabitWithLogs; completedSet: Set<string>; startDate: Date;
+function ContribCalendar({ habit, completedSet, frozenSet, startDate }: {
+  habit: HabitWithLogs; completedSet: Set<string>; frozenSet: Set<string>; startDate: Date;
 }) {
   const { lang } = useLang();
   const today = new Date();
@@ -343,25 +345,28 @@ function ContribCalendar({ habit, completedSet, startDate }: {
             {week.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const done = completedSet.has(key);
+              const frozen = !done && frozenSet.has(key);
               const future = isFuture(day) && !isToday(day);
               const todayCell = isToday(day);
               const beforeStart = day < startDate;
               return (
                 <div
                   key={key}
-                  title={!future && !beforeStart ? `${key}${done ? " ✓" : ""}` : undefined}
+                  title={!future && !beforeStart ? `${key}${done ? " ✓" : frozen ? " · rest" : ""}` : undefined}
                   style={{
                     width: 10, height: 10,
                     backgroundColor: beforeStart
                       ? "transparent"
                       : done
                       ? habit.color
+                      : frozen
+                      ? "#38bdf8"
                       : future
                       ? "#161616"
                       : "#1f1f1f",
                     outline: todayCell ? `1px solid ${habit.color}` : undefined,
                     outlineOffset: "1px",
-                    opacity: beforeStart ? 0 : done ? 1 : future ? 0.5 : 0.6,
+                    opacity: beforeStart ? 0 : done ? 1 : frozen ? 0.7 : future ? 0.5 : 0.6,
                   }}
                   className="rounded-[2px] transition-colors"
                 />
@@ -395,6 +400,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   const HabitIcon = getHabitIcon(habit.icon);
   const { current } = calcStreak(habit.logs);
   const completedSet = new Set(habit.logs.filter((l) => l.completed).map((l) => l.date));
+  const frozenSet = new Set(habit.logs.filter((l) => l.frozen && !l.completed).map((l) => l.date));
   const today = format(new Date(), "yyyy-MM-dd");
   const doneToday = completedSet.has(today);
 
@@ -587,10 +593,10 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
       )}
 
       {/* Calendar */}
-      {range === "week" && <WeekCalendar habit={habit} completedSet={completedSet} />}
-      {range === "month" && <MonthCalendar habit={habit} completedSet={completedSet} />}
+      {range === "week" && <WeekCalendar habit={habit} completedSet={completedSet} frozenSet={frozenSet} />}
+      {range === "month" && <MonthCalendar habit={habit} completedSet={completedSet} frozenSet={frozenSet} />}
       {(range === "year" || range === "all") && (
-        <ContribCalendar habit={habit} completedSet={completedSet} startDate={contribStart} />
+        <ContribCalendar habit={habit} completedSet={completedSet} frozenSet={frozenSet} startDate={contribStart} />
       )}
     </motion.div>
   );

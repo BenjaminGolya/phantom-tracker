@@ -20,6 +20,7 @@ export interface HabitLog {
   habitId: string;
   date: string;
   completed: boolean;
+  frozen: boolean;
   value: number | null;
 }
 

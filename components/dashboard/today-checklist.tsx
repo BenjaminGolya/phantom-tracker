@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw, Snowflake } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
 import { useLang } from "@/lib/i18n/context";
@@ -13,13 +13,15 @@ import { CategoryFilter, usedCategories } from "@/components/habits/category-fil
 interface TodayChecklistProps {
   habits: HabitWithLogs[];
   onToggle: (habitId: string, date: string, completed: boolean, value?: number) => void;
+  onFreeze: (habitId: string, date: string, frozen: boolean) => void;
 }
 
 // ─── Goal row (for habits with a numeric goal) ────────────────────────────────
-function GoalRow({ habit, today, onToggle }: {
+function GoalRow({ habit, today, onToggle, onFreeze }: {
   habit: HabitWithLogs;
   today: string;
   onToggle: TodayChecklistProps["onToggle"];
+  onFreeze: TodayChecklistProps["onFreeze"];
 }) {
   const { t, lang } = useLang();
   const goal = habit.goal!;
@@ -31,6 +33,7 @@ function GoalRow({ habit, today, onToggle }: {
   const [confirm, setConfirm] = useState<null | "all" | "reset">(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const done = val >= goal;
+  const frozenToday = !!todayLog?.frozen && !done;
 
   useEffect(() => { setVal(logVal); }, [logVal]);
 
@@ -121,7 +124,17 @@ function GoalRow({ habit, today, onToggle }: {
             className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
           >{t("dash.all")}</button>
         )}
+        {!done && val === 0 && (
+          <button
+            onClick={() => onFreeze(habit.id, today, !frozenToday)}
+            title={t("dash.freeze")}
+            className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
+              frozenToday ? "border-sky-400/50 text-sky-400 bg-sky-400/10" : "border-border text-muted hover:text-sky-400 hover:border-sky-400/40"
+            }`}
+          ><Snowflake size={13} /></button>
+        )}
         {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">{t("dash.doneMark")}</span>}
+        {frozenToday && <span className="text-[11px] text-sky-400 font-medium pl-1">{t("dash.restDay")}</span>}
       </div>
 
       {/* Confirmation modal for All / Reset */}
@@ -161,7 +174,7 @@ function GoalRow({ habit, today, onToggle }: {
 }
 
 // ─── Main checklist ───────────────────────────────────────────────────────────
-export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
+export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistProps) {
   const today = format(new Date(), "yyyy-MM-dd");
   const { t, lang } = useLang();
   const [catFilter, setCatFilter] = useState<string | null>(null);
@@ -186,44 +199,68 @@ export function TodayChecklist({ habits, onToggle }: TodayChecklistProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.04 }}
               >
-                <GoalRow habit={habit} today={today} onToggle={onToggle} />
+                <GoalRow habit={habit} today={today} onToggle={onToggle} onFreeze={onFreeze} />
               </motion.div>
             );
           }
 
           // Regular habits — simple toggle
-          const done = habit.logs.some((l) => l.date === today && l.completed);
+          const todayLog = habit.logs.find((l) => l.date === today);
+          const done = !!todayLog?.completed;
+          const frozenToday = !!todayLog?.frozen && !done;
           const HabitIcon = getHabitIcon(habit.icon);
           return (
-            <motion.button
+            <motion.div
               key={habit.id}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.04 }}
-              onClick={() => onToggle(habit.id, today, !done)}
-              className="w-full flex items-center gap-3 p-3 bg-surface border border-border rounded-xl hover:border-primary/30 transition-all text-left group"
+              className="w-full flex items-center gap-2 p-3 bg-surface border border-border rounded-xl hover:border-primary/30 transition-all group"
             >
-              <div
-                style={{
-                  background: done ? habit.color : `${habit.color}12`,
-                  borderColor: done ? habit.color : `${habit.color}40`,
-                  boxShadow: done ? `0 0 10px ${habit.color}50` : undefined,
-                }}
-                className="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
+              <button
+                onClick={() => onToggle(habit.id, today, !done)}
+                className="flex-1 min-w-0 flex items-center gap-3 text-left"
               >
-                {done
-                  ? <Check size={14} className="text-white" />
-                  : <HabitIcon size={14} style={{ color: habit.color }} />
-                }
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium transition-colors ${done ? "line-through text-muted" : "text-white"}`}>
-                  {habit.name}
-                </p>
-                {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
-              </div>
-              {done && <span className="text-xs text-primary font-medium shrink-0">{t("dash.doneMark")}</span>}
-            </motion.button>
+                <div
+                  style={{
+                    background: done ? habit.color : frozenToday ? "#38bdf820" : `${habit.color}12`,
+                    borderColor: done ? habit.color : frozenToday ? "#38bdf870" : `${habit.color}40`,
+                    boxShadow: done ? `0 0 10px ${habit.color}50` : undefined,
+                  }}
+                  className="w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
+                >
+                  {done ? (
+                    <Check size={14} className="text-white" />
+                  ) : frozenToday ? (
+                    <Snowflake size={14} className="text-sky-400" />
+                  ) : (
+                    <HabitIcon size={14} style={{ color: habit.color }} />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
+                    {habit.name}
+                  </p>
+                  {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
+                </div>
+              </button>
+              {done ? (
+                <span className="text-xs text-primary font-medium shrink-0">{t("dash.doneMark")}</span>
+              ) : frozenToday ? (
+                <span className="text-[11px] text-sky-400 font-medium shrink-0">{t("dash.restDay")}</span>
+              ) : null}
+              {!done && (
+                <button
+                  onClick={() => onFreeze(habit.id, today, !frozenToday)}
+                  title={t("dash.freeze")}
+                  className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
+                    frozenToday ? "border-sky-400/50 text-sky-400 bg-sky-400/10" : "border-border text-muted hover:text-sky-400 hover:border-sky-400/40"
+                  }`}
+                >
+                  <Snowflake size={13} />
+                </button>
+              )}
+            </motion.div>
           );
         })}
       </div>

@@ -7,7 +7,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { date, completed, value } = await req.json();
+  const { date, completed, value, frozen } = await req.json();
+  const isFrozen = frozen === true;
 
   // Backfill window: only today and yesterday can be logged/edited. A 1-day
   // buffer on each side absorbs timezone skew between the client's local date
@@ -33,10 +34,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   });
   if (!habit) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // A frozen (rest) day can't also be completed.
   const log = await prisma.habitLog.upsert({
     where: { habitId_date: { habitId: params.id, date } },
-    create: { habitId: params.id, date, completed, value: value ?? null },
-    update: { completed, value: value ?? null },
+    create: { habitId: params.id, date, completed: isFrozen ? false : completed, value: isFrozen ? null : value ?? null, frozen: isFrozen },
+    update: { completed: isFrozen ? false : completed, value: isFrozen ? null : value ?? null, frozen: isFrozen },
   });
 
   return NextResponse.json(log);

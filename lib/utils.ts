@@ -18,44 +18,45 @@ export function getYearDays(year: number): string[] {
   return eachDayOfInterval({ start, end }).map((d) => format(d, "yyyy-MM-dd"));
 }
 
-export function calcStreak(logs: { date: string; completed: boolean }[]): {
+// Frozen ("rest") days don't count as completed but bridge a streak — they
+// neither add to it nor break it.
+export function calcStreak(logs: { date: string; completed: boolean; frozen?: boolean }[]): {
   current: number;
   longest: number;
 } {
-  const completed = new Set(
-    logs.filter((l) => l.completed).map((l) => l.date)
-  );
+  const completed = new Set(logs.filter((l) => l.completed).map((l) => l.date));
+  const frozen = new Set(logs.filter((l) => l.frozen && !l.completed).map((l) => l.date));
 
   const today = format(new Date(), "yyyy-MM-dd");
+
+  // Current streak: walk back from today; skip frozen days, skip an un-done
+  // today, break on a real miss.
   let current = 0;
   let offset = 0;
-
   while (true) {
     const cursor = new Date();
     cursor.setDate(cursor.getDate() - offset);
     const key = format(cursor, "yyyy-MM-dd");
-    if (!completed.has(key)) {
-      if (key === today) { offset++; continue; }
-      break;
-    }
-    current++;
-    offset++;
+    if (completed.has(key)) { current++; offset++; continue; }
+    if (frozen.has(key)) { offset++; continue; }
+    if (key === today) { offset++; continue; }
+    break;
   }
 
-  const sorted = Array.from(completed).sort();
+  // Longest streak: walk day-by-day from the first completion to today; frozen
+  // days keep the run alive without incrementing it.
   let longest = 0;
-  let run = 0;
-  let prev: Date | null = null;
-  for (const s of sorted) {
-    const cur = parseISO(s);
-    if (prev) {
-      const diff = (cur.getTime() - prev.getTime()) / 86400000;
-      if (diff === 1) { run++; }
-      else { longest = Math.max(longest, run); run = 1; }
-    } else { run = 1; }
-    prev = cur;
+  if (completed.size) {
+    const start = parseISO(Array.from(completed).sort()[0]);
+    const end = new Date();
+    let run = 0;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = format(d, "yyyy-MM-dd");
+      if (completed.has(key)) { run++; longest = Math.max(longest, run); }
+      else if (!frozen.has(key)) { run = 0; }
+    }
   }
-  longest = Math.max(longest, run);
+
   return { current, longest };
 }
 
