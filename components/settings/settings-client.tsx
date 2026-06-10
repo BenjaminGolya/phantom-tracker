@@ -61,8 +61,6 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
   const router = useRouter();
   const push = usePush();
   const [justUpgraded, setJustUpgraded] = useState(false);
-  const [portalLoading, setPortalLoading] = useState(false);
-  const [portalErr, setPortalErr] = useState("");
   const [confirm, setConfirm] = useState<null | "disable" | "delete">(null);
   const [acting, setActing] = useState(false);
   const [actErr, setActErr] = useState("");
@@ -215,27 +213,6 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
     }
   }, [router]);
 
-  async function openPortal() {
-    setPortalLoading(true);
-    setPortalErr("");
-    try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      setPortalErr(
-        data?.error === "no_customer"
-          ? "No billing account is linked, so there's nothing to manage."
-          : "Billing portal is unavailable right now. Please try again later."
-      );
-    } catch {
-      setPortalErr("Network error. Please try again.");
-    } finally {
-      setPortalLoading(false);
-    }
-  }
   const [name, setName] = useState(user?.name ?? "");
   const [image, setImage] = useState<string | null>(user?.image ?? null);
   const [saving, setSaving] = useState(false);
@@ -376,21 +353,18 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 </p>
               </div>
               {hasBilling ? (
-                <button
-                  onClick={openPortal}
-                  disabled={portalLoading}
-                  className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+                <Link
+                  href="/pricing"
+                  className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"
                 >
-                  {portalLoading && <Loader2 size={13} className="animate-spin" />}
-                  Manage
-                </button>
+                  {t("set.manage")}
+                </Link>
               ) : (
                 <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
                   {t("set.complimentary")}
                 </span>
               )}
             </div>
-            {portalErr && <p className="text-xs text-red-400 mt-2">{portalErr}</p>}
           </>
         ) : (
           <div className="flex items-center justify-between gap-3 mt-3">
