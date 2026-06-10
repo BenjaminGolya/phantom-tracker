@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Check, RotateCcw, Snowflake, CalendarClock } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
-import { isScheduledOn, nextDueDate } from "@/lib/utils";
+import { isScheduledOn, nextDueDates } from "@/lib/utils";
 import { useLang } from "@/lib/i18n/context";
 import { dfLocale } from "@/lib/i18n/date";
 import { categoryLabel } from "@/lib/i18n/category";
@@ -191,9 +191,9 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
   const shown = filtered.filter((h) => isScheduledOn(h.frequency, now));
   const upcoming = filtered
     .filter((h) => !isScheduledOn(h.frequency, now))
-    .map((h) => ({ habit: h, due: nextDueDate(h.frequency, now) }))
-    .filter((u) => u.due)
-    .sort((a, b) => a.due!.getTime() - b.due!.getTime());
+    .map((h) => ({ habit: h, dues: nextDueDates(h.frequency, now, 3) }))
+    .filter((u) => u.dues.length > 0)
+    .sort((a, b) => a.dues[0].getTime() - b.dues[0].getTime());
 
   return (
     <div>
@@ -291,24 +291,39 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
             <CalendarClock size={13} /> {t("dash.comingUp")}
           </h3>
           <div className="space-y-1.5">
-            {upcoming.map(({ habit, due }) => {
+            {upcoming.map(({ habit, dues }) => {
               const HabitIcon = getHabitIcon(habit.icon);
-              const isTomorrow = format(due!, "yyyy-MM-dd") === format(new Date(now.getTime() + 86400000), "yyyy-MM-dd");
+              const tomorrowKey = format(new Date(now.getTime() + 86400000), "yyyy-MM-dd");
+              const doneToday = habit.logs.some((l) => l.date === today && l.completed);
+              const fmtDue = (d: Date) =>
+                format(d, "yyyy-MM-dd") === tomorrowKey ? t("dash.tomorrow") : format(d, "EEE, MMM d", { locale: dfLocale(lang) });
               return (
                 <div
                   key={habit.id}
                   className="flex items-center gap-3 px-3 py-2 bg-surface/60 border border-border rounded-xl"
                 >
-                  <div
-                    style={{ background: `${habit.color}12`, borderColor: `${habit.color}40` }}
-                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0"
+                  {/* Complete today, even though it's not scheduled for today */}
+                  <button
+                    onClick={() =>
+                      onToggle(habit.id, today, !doneToday, habit.goal ? (doneToday ? 0 : habit.goal) : undefined)
+                    }
+                    title={doneToday ? t("dash.doneMark") : t("dash.completeToday")}
+                    style={{
+                      background: doneToday ? habit.color : `${habit.color}12`,
+                      borderColor: doneToday ? habit.color : `${habit.color}40`,
+                      boxShadow: doneToday ? `0 0 8px ${habit.color}50` : undefined,
+                    }}
+                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95"
                   >
-                    <HabitIcon size={14} style={{ color: habit.color }} />
+                    {doneToday ? <Check size={14} className="text-white" /> : <HabitIcon size={14} style={{ color: habit.color }} />}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm truncate ${doneToday ? "line-through text-muted" : "text-white/90"}`}>{habit.name}</p>
+                    <p className="text-[11px] text-muted truncate">
+                      {dues.map(fmtDue).join(" · ")}
+                    </p>
                   </div>
-                  <p className="flex-1 min-w-0 text-sm text-muted truncate">{habit.name}</p>
-                  <span className="text-xs text-muted shrink-0">
-                    {isTomorrow ? t("dash.tomorrow") : format(due!, "EEE, MMM d", { locale: dfLocale(lang) })}
-                  </span>
+                  {doneToday && <span className="text-[11px] text-primary font-medium shrink-0">{t("dash.doneMark")}</span>}
                 </div>
               );
             })}

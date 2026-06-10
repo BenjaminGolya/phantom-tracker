@@ -55,6 +55,18 @@ export function nextDueDate(frequency: string | null | undefined, from: Date): D
   return null;
 }
 
+/** The next `count` calendar days (after `from`) the habit is scheduled on. */
+export function nextDueDates(frequency: string | null | undefined, from: Date, count: number): Date[] {
+  if (!frequency || frequency === "daily") return [];
+  const out: Date[] = [];
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  for (let i = 0; i < 732 && out.length < count; i++) {
+    d.setDate(d.getDate() + 1);
+    if (isScheduledOn(frequency, d)) out.push(new Date(d));
+  }
+  return out;
+}
+
 // Frozen ("rest") days don't count as completed but bridge a streak — they
 // neither add to it nor break it.
 export function calcStreak(logs: { date: string; completed: boolean; frozen?: boolean }[]): {
