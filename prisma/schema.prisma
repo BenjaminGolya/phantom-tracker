@@ -120,6 +120,8 @@ model HabitLog {
   habitId   String
   date      String
   completed Boolean  @default(false)
+  // A frozen/rest day: doesn't count as done, but doesn't break the streak.
+  frozen    Boolean  @default(false)
   value     Float?
   createdAt DateTime @default(now())
   habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)

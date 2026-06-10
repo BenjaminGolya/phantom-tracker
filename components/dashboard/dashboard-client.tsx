@@ -125,6 +125,26 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
     }
   }
 
+  // Mark today as a frozen "rest day" (or unfreeze) — keeps the streak alive.
+  async function handleFreeze(habitId: string, date: string, frozen: boolean) {
+    const res = await fetch(`/api/habits/${habitId}/log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, completed: false, value: null, frozen }),
+    });
+    if (!res.ok) return;
+    const log = await res.json();
+    setHabits((prev) =>
+      prev.map((h) => {
+        if (h.id !== habitId) return h;
+        const idx = h.logs.findIndex((l) => l.date === date);
+        const logs = idx >= 0 ? h.logs.map((l, i) => (i === idx ? log : l)) : [...h.logs, log];
+        return { ...h, logs };
+      })
+    );
+    router.refresh();
+  }
+
   async function handleCreateHabit(data: { name: string; icon: string; color: string; frequency: string; goal?: number; category?: string }) {
     const res = await fetch("/api/habits", {
       method: "POST",
@@ -237,7 +257,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
 
       {/* Today's checklist */}
       {habits.length > 0 ? (
-        <TodayChecklist habits={habits} onToggle={handleToggle} />
+        <TodayChecklist habits={habits} onToggle={handleToggle} onFreeze={handleFreeze} />
       ) : (
         <Onboarding pro={pro} onCreate={handleCreateTemplates} onCustom={() => setShowForm(true)} />
       )}
