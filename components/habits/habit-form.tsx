@@ -294,9 +294,8 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
               <div className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-primary border-r border-border">{t("form.hour")}</div>
               <div className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-primary">{t("form.minute")}</div>
             </div>
-            {/* Wheels with a center selection band */}
-            <div className="relative flex">
-              <div className="pointer-events-none absolute left-2 right-2 top-1/2 -translate-y-1/2 h-9 rounded-lg border border-primary/40 bg-primary/5" />
+            {/* Wheels — selected value is marked by the purple pill */}
+            <div className="flex">
               <div ref={hourCol} className="flex-1 max-h-48 overflow-y-auto py-1 px-1 border-r border-border">
                 {hours.map((h) => {
                   const sel = h === hh;
