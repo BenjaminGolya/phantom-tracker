@@ -23,6 +23,72 @@ type ImportHabit = {
 const str = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
+// Split one CSV line, honoring quoted fields with embedded commas / quotes.
+function splitCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else q = false;
+      } else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { out.push(cur); cur = ""; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+// Parse a CSV export (Phantom Tracker format, but header-flexible) into the same
+// shape as the JSON import: one habit per name, with its logs.
+function parseCsv(text: string): ImportHabit[] {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length);
+  if (lines.length < 2) return [];
+  const header = splitCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+  const find = (names: string[]) => {
+    for (const n of names) { const i = header.indexOf(n); if (i >= 0) return i; }
+    return -1;
+  };
+  const ni = find(["habit_name", "habit", "name"]);
+  const di = find(["date"]);
+  const ci = find(["completed", "done"]);
+  const vi = find(["value", "count"]);
+  const cati = find(["category"]);
+  const ici = find(["icon"]);
+  if (ni < 0 || di < 0) return []; // need at least a name + date column
+
+  const map = new Map<string, ImportHabit & { logs: ImportLog[] }>();
+  for (let r = 1; r < lines.length; r++) {
+    const cols = splitCsvLine(lines[r]);
+    const name = (cols[ni] ?? "").trim();
+    if (!name) continue;
+    const key = name.toLowerCase();
+    let h = map.get(key);
+    if (!h) {
+      h = {
+        name,
+        icon: ici >= 0 ? (cols[ici] || undefined) : undefined,
+        category: cati >= 0 ? (cols[cati] || undefined) : undefined,
+        logs: [],
+      };
+      map.set(key, h);
+    }
+    const date = (cols[di] ?? "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const completedRaw = (ci >= 0 ? cols[ci] : "true").trim().toLowerCase();
+      const completed = ["true", "1", "yes", "y"].includes(completedRaw);
+      const valueRaw = (vi >= 0 ? cols[vi] : "").trim();
+      const valueNum = valueRaw === "" ? null : Number(valueRaw);
+      h.logs.push({ date, completed, value: Number.isFinite(valueNum as number) ? valueNum : null });
+    }
+  }
+  return Array.from(map.values());
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,17 +105,28 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { habits?: unknown };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  // Accept either a JSON backup or a CSV export.
+  const raw = (await req.text()).trim();
+  if (!raw) {
+    return NextResponse.json({ error: "empty", message: "The file was empty." }, { status: 400 });
   }
 
-  const habits = Array.isArray(body?.habits) ? (body.habits as ImportHabit[]) : null;
-  if (!habits) {
+  let habits: ImportHabit[] | null = null;
+  if (raw.startsWith("{") || raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) habits = parsed as ImportHabit[];
+      else if (Array.isArray((parsed as { habits?: unknown })?.habits)) habits = (parsed as { habits: ImportHabit[] }).habits;
+    } catch {
+      return NextResponse.json({ error: "invalid_json", message: "That JSON file couldn't be read." }, { status: 400 });
+    }
+  } else {
+    habits = parseCsv(raw);
+  }
+
+  if (!habits || !habits.length) {
     return NextResponse.json(
-      { error: "invalid_format", message: "Expected a Phantom Tracker backup file with a 'habits' array." },
+      { error: "invalid_format", message: "Expected a Phantom Tracker JSON backup or a CSV export (with habit name and date columns)." },
       { status: 400 }
     );
   }
