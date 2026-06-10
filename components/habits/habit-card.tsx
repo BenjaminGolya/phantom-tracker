@@ -9,7 +9,7 @@ import {
 import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, ArrowUp, ArrowDown, Snowflake } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
-import { calcStreak, getHabitLevel } from "@/lib/utils";
+import { calcStreak, getHabitLevel, isScheduledOn } from "@/lib/utils";
 import { useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
 import { levelLabel } from "@/lib/i18n/levels";
@@ -408,9 +408,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   // isn't logged yet, and falls on/after the habit's creation date.
   const yDate = subDays(new Date(), 1);
   const yesterday = format(yDate, "yyyy-MM-dd");
-  const yDow = format(yDate, "EEE").toLowerCase(); // mon, tue, ...
-  const scheduledYesterday =
-    habit.frequency === "daily" || habit.frequency.split(",").map((d) => d.trim()).includes(yDow);
+  const scheduledYesterday = isScheduledOn(habit.frequency, yDate);
   const yAfterStart = startOfDay(yDate) >= startOfDay(habit.createdAt ? new Date(habit.createdAt) : yDate);
   const showLogYesterday =
     !!onToggleDay && !habit.archived && scheduledYesterday && yAfterStart && !completedSet.has(yesterday);

@@ -18,6 +18,28 @@ export function getYearDays(year: number): string[] {
   return eachDayOfInterval({ start, end }).map((d) => format(d, "yyyy-MM-dd"));
 }
 
+// ─── Frequency / scheduling ───────────────────────────────────────────────────
+// Stored frequency formats:
+//   "daily"            — every day
+//   "mon,wed,fri"      — specific weekdays (Weekly)
+//   "monthly:1,15"     — specific days of the month (Monthly)
+const WEEKDAY_CODES = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+/** Is a habit with `frequency` scheduled on a given weekday/day-of-month? */
+export function isScheduledOnParts(frequency: string, weekday: string, dayOfMonth: number): boolean {
+  if (!frequency || frequency === "daily") return true;
+  if (frequency.startsWith("monthly:")) {
+    const days = frequency.slice(8).split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => n >= 1 && n <= 31);
+    return days.length ? days.includes(dayOfMonth) : true;
+  }
+  return frequency.split(",").map((d) => d.trim()).includes(weekday);
+}
+
+/** Convenience: is the habit scheduled on the given (local) Date? */
+export function isScheduledOn(frequency: string, date: Date): boolean {
+  return isScheduledOnParts(frequency, WEEKDAY_CODES[date.getDay()], date.getDate());
+}
+
 // Frozen ("rest") days don't count as completed but bridge a streak — they
 // neither add to it nor break it.
 export function calcStreak(logs: { date: string; completed: boolean; frozen?: boolean }[]): {
