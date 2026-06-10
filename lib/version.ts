@@ -3,7 +3,7 @@
 // users actually notice. Skip pure copy tweaks and tiny i18n fixes — keep this
 // list to features, fixes, and meaningful improvements.
 
-export const APP_VERSION = "1.12.0";
+export const APP_VERSION = "1.13.0";
 
 // What kind of change it is, so the UI can tag and prioritize it.
 //   feature      — new capability users can do something with
@@ -20,6 +20,24 @@ export type ChangelogEntry = {
 
 // Most recent first. Curated: only entries worth a user's attention.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.13.0",
+    date: "2026-06-11",
+    kind: "feature",
+    summary: "Weekly & monthly habits — schedule habits for specific weekdays or days of the month. The dashboard now shows only what's due today, with a 'Coming up' list and scheduled days marked on every calendar.",
+  },
+  {
+    version: "1.12.2",
+    date: "2026-06-11",
+    kind: "improvement",
+    summary: "Clearer habit actions: dedicated Complete, Rest day, and Undo buttons, a confirmation before deleting, a tidier icon picker, and an easier reminder time selector.",
+  },
+  {
+    version: "1.12.1",
+    date: "2026-06-10",
+    kind: "feature",
+    summary: "Import your data from CSV or JSON, and manage or cancel your plan from a redesigned pricing page that highlights your current plan.",
+  },
   {
     version: "1.12.0",
     date: "2026-06-10",
