@@ -24,6 +24,7 @@ import { dfLocale } from "@/lib/i18n/date";
 import { categoryLabel } from "@/lib/i18n/category";
 import { PersonalityConstellation } from "@/components/profile/personality-constellation";
 import { GrowingPlanet } from "@/components/profile/growing-planet";
+import { ShareProgress } from "@/components/profile/share-progress";
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
@@ -389,6 +390,7 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
     : 0;
   const allStreaks = habits.map((h) => calcStreak(h.logs));
   const topLongest = Math.max(0, ...allStreaks.map((s) => s.longest));
+  const bestCurrent = Math.max(0, ...allStreaks.map((s) => s.current));
 
   // ── Advanced (Pro) metrics ──
   const profileInfo = getProfileLevel(
@@ -492,6 +494,14 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
               </motion.div>
             ))}
           </div>
+
+          {/* Share progress */}
+          <ShareProgress
+            streak={bestCurrent}
+            completions={totalCompletions}
+            rate={overallRate}
+            level={profileInfo.label}
+          />
 
           {/* Weekly bar chart */}
           <div className="bg-surface border border-border rounded-xl p-4">
