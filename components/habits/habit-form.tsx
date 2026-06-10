@@ -286,11 +286,17 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 bottom-full mb-1 z-50 bg-surface-2 border border-border rounded-xl shadow-2xl overflow-hidden"
+            className="absolute left-0 right-0 bottom-full mb-1 z-50 border border-primary/30 rounded-xl shadow-2xl shadow-black/60 overflow-hidden"
+            style={{ backgroundColor: "#16151c" }}
           >
+            {/* Header */}
+            <div className="grid grid-cols-2 border-b border-border" style={{ backgroundColor: "#1d1b26" }}>
+              <div className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-primary border-r border-border">{t("form.hour")}</div>
+              <div className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-primary">{t("form.minute")}</div>
+            </div>
+            {/* Wheels — selected value is marked by the purple pill */}
             <div className="flex">
-              <div ref={hourCol} className="flex-1 max-h-44 overflow-y-auto py-1 border-r border-border">
-                <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Hour</p>
+              <div ref={hourCol} className="flex-1 max-h-48 overflow-y-auto py-1 px-1 border-r border-border">
                 {hours.map((h) => {
                   const sel = h === hh;
                   return (
@@ -299,15 +305,14 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
                       type="button"
                       data-selected={sel}
                       onClick={() => pickHour(h)}
-                      className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
+                      className={`relative w-full py-2 rounded-lg text-base font-mono transition-all ${sel ? "bg-primary text-white font-bold shadow-[0_0_10px_#7f49c355]" : "text-muted hover:text-white"}`}
                     >
                       {h}
                     </button>
                   );
                 })}
               </div>
-              <div ref={minCol} className="flex-1 max-h-44 overflow-y-auto py-1">
-                <p className="text-[10px] text-muted text-center sticky top-0 bg-surface-2 py-1">Min</p>
+              <div ref={minCol} className="flex-1 max-h-48 overflow-y-auto py-1 px-1">
                 {minutes.map((m) => {
                   const sel = m === mm;
                   return (
@@ -316,7 +321,7 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
                       type="button"
                       data-selected={sel}
                       onClick={() => pickMin(m)}
-                      className={`w-full py-1.5 text-sm font-mono transition-colors ${sel ? "bg-primary/15 text-primary font-semibold" : "text-muted hover:text-white hover:bg-surface"}`}
+                      className={`relative w-full py-2 rounded-lg text-base font-mono transition-all ${sel ? "bg-primary text-white font-bold shadow-[0_0_10px_#7f49c355]" : "text-muted hover:text-white"}`}
                     >
                       {m}
                     </button>
@@ -355,11 +360,18 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
   const [description, setDescription] = useState(initial?.description ?? "");
   const [icon, setIcon] = useState(initial?.icon ?? "Target");
   const [color, setColor] = useState(initial?.color ?? "#7f49c3");
-  const [frequency, setFrequency] = useState(initial?.frequency ?? "daily");
+  const initFreq = initial?.frequency ?? "daily";
+  const todayCode = DAYS_VALS[(new Date().getDay() + 6) % 7]; // mon-first index
+  const [freqType, setFreqType] = useState<"daily" | "weekly" | "monthly">(
+    initFreq === "daily" ? "daily" : initFreq.startsWith("monthly:") ? "monthly" : "weekly"
+  );
   const [selectedDays, setSelectedDays] = useState<string[]>(
-    initial?.frequency === "daily" || !initial?.frequency
-      ? DAYS_VALS
-      : initial.frequency.split(",")
+    initFreq !== "daily" && !initFreq.startsWith("monthly:") ? initFreq.split(",") : [todayCode]
+  );
+  const [monthDays, setMonthDays] = useState<number[]>(
+    initFreq.startsWith("monthly:")
+      ? initFreq.slice(8).split(",").map((s) => parseInt(s, 10)).filter((n) => n >= 1 && n <= 31)
+      : [new Date().getDate()]
   );
   const [goal, setGoal] = useState(initial?.goal?.toString() ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
@@ -371,12 +383,23 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
       prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]
     );
   }
+  function toggleMonthDay(n: number) {
+    setMonthDays((prev) =>
+      prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
-    const freq = frequency === "daily" ? "daily" : selectedDays.join(",");
+    let freq = "daily";
+    if (freqType === "weekly") {
+      freq = (selectedDays.length ? selectedDays : [todayCode]).join(",");
+    } else if (freqType === "monthly") {
+      const days = (monthDays.length ? monthDays : [new Date().getDate()]).slice().sort((a, b) => a - b);
+      freq = "monthly:" + days.join(",");
+    }
     await onSubmit({
       name: name.trim(),
       description: description.trim() || null,
@@ -427,7 +450,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
             <div className="overflow-y-auto px-5 py-4 space-y-4 flex-1">
             {/* Name */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">{t("form.name")}</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.name")} <span className="text-red-400" aria-hidden="true">*</span></label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -450,30 +473,32 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
               />
             </div>
 
-            {/* Icon */}
+            {/* Icon — scrollable palette so the long list stays compact */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">{t("form.icon")}</label>
-              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
-                {HABIT_ICONS.map(({ name, Icon, label }) => {
-                  const selected = icon === name;
-                  return (
-                    <button
-                      key={name}
-                      type="button"
-                      title={label}
-                      onClick={() => setIcon(name)}
-                      style={{
-                        color: selected ? "white" : color,
-                        borderColor: selected ? color : "#222",
-                        backgroundColor: selected ? color : `${color}12`,
-                        boxShadow: selected ? `0 0 10px ${color}50` : undefined,
-                      }}
-                      className="w-full aspect-square rounded-xl border flex items-center justify-center transition-all hover:border-primary/60"
-                    >
-                      <Icon size={18} />
-                    </button>
-                  );
-                })}
+              <div className="rounded-xl border border-border bg-surface-2/40 p-1.5 max-h-44 overflow-y-auto">
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+                  {HABIT_ICONS.map(({ name, Icon, label }) => {
+                    const selected = icon === name;
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        title={label}
+                        onClick={() => setIcon(name)}
+                        style={{
+                          color: selected ? "white" : color,
+                          borderColor: selected ? color : "#222",
+                          backgroundColor: selected ? color : `${color}12`,
+                          boxShadow: selected ? `0 0 10px ${color}50` : undefined,
+                        }}
+                        className="w-full aspect-square rounded-xl border flex items-center justify-center transition-all hover:border-primary/60"
+                      >
+                        <Icon size={17} />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -498,39 +523,65 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
             {/* Frequency */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">{t("form.frequency")}</label>
-              <div className="flex gap-2 mb-2">
-                {["daily", "custom"].map((f) => (
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {(["daily", "weekly", "monthly"] as const).map((f) => (
                   <button
                     key={f}
                     type="button"
-                    onClick={() => setFrequency(f)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
-                      frequency === f
+                    onClick={() => setFreqType(f)}
+                    className={`py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      freqType === f
                         ? "bg-primary text-white"
                         : "bg-surface-2 text-muted hover:text-white border border-border"
                     }`}
                   >
-                    {f === "daily" ? t("form.daily") : t("form.custom")}
+                    {f === "daily" ? t("form.daily") : f === "weekly" ? t("form.weekly") : t("form.monthly")}
                   </button>
                 ))}
               </div>
-              {frequency === "custom" && (
-                <div className="flex gap-1.5">
-                  {DAYS.map((d, i) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => toggleDay(DAYS_VALS[i])}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        selectedDays.includes(DAYS_VALS[i])
-                          ? "bg-primary text-white"
-                          : "bg-surface-2 text-muted border border-border"
-                      }`}
-                    >
-                      {d[0]}
-                    </button>
-                  ))}
-                </div>
+
+              {freqType === "weekly" && (
+                <>
+                  <p className="text-[11px] text-muted mb-1.5">{t("form.pickWeekdays")}</p>
+                  <div className="flex gap-1.5">
+                    {DAYS.map((d, i) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => toggleDay(DAYS_VALS[i])}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          selectedDays.includes(DAYS_VALS[i])
+                            ? "bg-primary text-white"
+                            : "bg-surface-2 text-muted border border-border"
+                        }`}
+                      >
+                        {d[0]}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {freqType === "monthly" && (
+                <>
+                  <p className="text-[11px] text-muted mb-1.5">{t("form.pickMonthDays")}</p>
+                  <div className="grid grid-cols-7 gap-1">
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => toggleMonthDay(n)}
+                        className={`py-1.5 rounded-md text-[11px] font-medium transition-all ${
+                          monthDays.includes(n)
+                            ? "bg-primary text-white"
+                            : "bg-surface-2 text-muted border border-border hover:text-white"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 

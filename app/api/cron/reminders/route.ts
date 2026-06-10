@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushToUser } from "@/lib/push";
-import { calcStreak } from "@/lib/utils";
+import { calcStreak, isScheduledOnParts } from "@/lib/utils";
 import { logError } from "@/lib/log";
 
 // Daily streak-protection nudge fires at this local hour if a habit has a
@@ -68,11 +68,9 @@ async function runStreakNudges(): Promise<number> {
     // Pick the habit with the longest current streak that's scheduled today and
     // still undone — the one most worth protecting.
     let best: { name: string; streak: number } | null = null;
+    const dayOfMonth = parseInt(local.date.slice(8, 10), 10);
     for (const h of u.habits) {
-      if (h.frequency !== "daily") {
-        const days = h.frequency.split(",").map((d) => d.trim());
-        if (!days.includes(local.weekday)) continue;
-      }
+      if (!isScheduledOnParts(h.frequency, local.weekday, dayOfMonth)) continue;
       if (h.logs.some((l) => l.date === local.date && l.completed)) continue; // already done
       const streak = calcStreak(h.logs).current;
       if (streak >= STREAK_NUDGE_MIN && (!best || streak > best.streak)) best = { name: h.name, streak };
@@ -118,11 +116,8 @@ async function runReminders() {
     // Only fire on the exact minute the reminder is set for
     if (habit.reminderTime !== local.hhmm) continue;
 
-    // Respect custom-day frequency (e.g. "mon,wed,fri")
-    if (habit.frequency !== "daily") {
-      const days = habit.frequency.split(",").map((d) => d.trim());
-      if (!days.includes(local.weekday)) continue;
-    }
+    // Respect the habit's schedule (daily / weekly weekdays / monthly days).
+    if (!isScheduledOnParts(habit.frequency, local.weekday, parseInt(local.date.slice(8, 10), 10))) continue;
 
     // Don't nag if it's already done today
     const doneToday = habit.logs.some((l) => l.date === local.date && l.completed);

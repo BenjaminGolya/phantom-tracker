@@ -13,6 +13,8 @@ import { HabitForm } from "@/components/habits/habit-form";
 import { TodayChecklist } from "@/components/dashboard/today-checklist";
 import { Onboarding, type Template } from "@/components/dashboard/onboarding";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { PlanetVisual } from "@/components/profile/growing-planet";
+import { planetState } from "@/lib/profile-traits";
 import { useLang } from "@/lib/i18n/context";
 import { dfLocale } from "@/lib/i18n/date";
 import confetti from "canvas-confetti";
@@ -55,6 +57,7 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
 
   const bestStreak = Math.max(0, ...habits.map((h) => calcStreak(h.logs).current));
   const score = phantomScore(habits.map((h) => ({ logs: h.logs })));
+  const planet = planetState(habits, { isPro: pro });
 
   const todayCompleted = habits.filter((h) =>
     h.logs.some((l) => l.date === today && l.completed)
@@ -213,6 +216,31 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
         </button>
       </div>
 
+      {/* Today's checklist */}
+      {habits.length > 0 ? (
+        <TodayChecklist habits={habits} onToggle={handleToggle} onFreeze={handleFreeze} />
+      ) : (
+        <Onboarding pro={pro} onCreate={handleCreateTemplates} onCustom={() => setShowForm(true)} />
+      )}
+
+      {/* Link to the profile world — distinct hero card with a live planet preview */}
+      <Link
+        href="/stats"
+        className="relative overflow-hidden flex items-center gap-3 pl-5 pr-3 py-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-primary/5 to-surface hover:border-primary/50 transition-all group shadow-[0_0_28px_#7f49c31f]"
+      >
+        <div className="pointer-events-none absolute -left-10 -top-12 w-40 h-40 rounded-full bg-primary/15 blur-3xl" />
+        <div className="relative min-w-0 flex-1">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-primary mb-1">
+            <Globe size={11} /> {t("dash.yourWorld")}
+          </span>
+          <p className="text-sm text-muted leading-snug">{t("dash.yourWorldSub")}</p>
+        </div>
+        <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
+          <PlanetVisual state={planet} />
+        </div>
+        <ChevronRight size={18} className="relative text-muted group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+      </Link>
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
@@ -239,28 +267,6 @@ export function DashboardClient({ habits: initialHabits, pro = false }: Dashboar
           highlight={score >= 80}
         />
       </div>
-
-      {/* Link to the profile world */}
-      <Link
-        href="/stats"
-        className="flex items-center gap-3 px-4 py-3 bg-surface border border-border rounded-xl hover:border-primary/40 transition-all group"
-      >
-        <span className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
-          <Globe size={16} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-white leading-tight">{t("dash.yourWorld")}</p>
-          <p className="text-[11px] text-muted truncate">{t("dash.yourWorldSub")}</p>
-        </div>
-        <ChevronRight size={16} className="text-muted group-hover:text-primary transition-colors shrink-0" />
-      </Link>
-
-      {/* Today's checklist */}
-      {habits.length > 0 ? (
-        <TodayChecklist habits={habits} onToggle={handleToggle} onFreeze={handleFreeze} />
-      ) : (
-        <Onboarding pro={pro} onCreate={handleCreateTemplates} onCustom={() => setShowForm(true)} />
-      )}
 
       {showForm && (
         <HabitForm

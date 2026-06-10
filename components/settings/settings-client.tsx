@@ -299,10 +299,10 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
     setImportMsg("Importing…");
     try {
       const text = await file.text();
-      JSON.parse(text); // fail fast on bad files
+      // Server detects JSON vs CSV from the content.
       const res = await fetch("/api/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain" },
         body: text,
       });
       const data = await res.json();
@@ -310,10 +310,10 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
         setImportMsg(`Imported ${data.habitsCreated} habit(s) and ${data.logsImported} log(s).`);
         router.refresh();
       } else {
-        setImportMsg(data?.message ?? "Import failed. Make sure it's a Phantom Tracker backup file.");
+        setImportMsg(data?.message ?? "Import failed. Use a Phantom Tracker JSON or CSV export.");
       }
     } catch {
-      setImportMsg("Couldn't read that file. It must be a valid .json backup.");
+      setImportMsg("Couldn't read that file.");
     } finally {
       setTimeout(() => setImportMsg(""), 8000);
     }
@@ -625,7 +625,7 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                 <p className="text-sm font-medium">{t("set.import")}</p>
                 <p className="text-xs text-muted">{t("set.importDesc")}</p>
               </div>
-              <input ref={importRef} type="file" accept="application/json,.json" onChange={handleImport} className="hidden" />
+              <input ref={importRef} type="file" accept=".json,.csv,application/json,text/csv" onChange={handleImport} className="hidden" />
               <button
                 onClick={() => importRef.current?.click()}
                 className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"

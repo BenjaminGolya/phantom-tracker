@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Ghost, Sparkles, Lock } from "lucide-react";
+import { Plus, Search, Ghost, Sparkles, Lock, Trash2 } from "lucide-react";
 import { PLAN_LIMITS } from "@/lib/plan";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { AnimatePresence } from "framer-motion";
@@ -27,6 +27,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
   const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits);
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState<HabitWithLogs | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<HabitWithLogs | null>(null);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState<string | null>(null);
   const [view, setView] = useState<"cards" | "grid">("cards");
@@ -127,8 +128,16 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
     router.refresh();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this habit and all its history?")) return;
+  // Open the themed confirmation modal instead of deleting immediately.
+  function handleDelete(id: string) {
+    const habit = habits.find((h) => h.id === id);
+    if (habit) setDeleteTarget(habit);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleteTarget(null);
     await fetch(`/api/habits/${id}`, { method: "DELETE" });
     setHabits((prev) => prev.filter((h) => h.id !== id));
     router.refresh();
@@ -377,6 +386,38 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
           onSubmit={editingHabit ? handleEdit : handleCreate}
           onClose={() => { setShowForm(false); setEditingHabit(null); }}
         />
+      )}
+
+      {/* Delete confirmation */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={() => setDeleteTarget(null)}>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+          <div className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-2">
+              <Trash2 size={16} className="text-red-400" />
+              <h3 className="text-sm font-semibold">{t("habits.deleteTitle")}</h3>
+            </div>
+            <p className="text-xs text-muted mb-1.5 leading-relaxed">{t("habits.deleteBody")}</p>
+            <div className="flex items-center gap-2.5 my-3">
+              {(() => { const Icon = getHabitIcon(deleteTarget.icon); return <span style={{ color: deleteTarget.color }}><Icon size={14} /></span>; })()}
+              <span className="text-sm font-medium text-white">{deleteTarget.name}</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg bg-red-500/90 hover:bg-red-500 transition-colors"
+              >
+                <Trash2 size={13} /> {t("form.delete")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
