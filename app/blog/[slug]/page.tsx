@@ -75,6 +75,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           </div>
           <h1 className="text-3xl font-bold tracking-tight leading-tight">{post.title}</h1>
           <p className="text-base text-muted mt-3 leading-relaxed">{post.description}</p>
+          <div className="mt-6 rounded-2xl overflow-hidden border border-border">{post.hero}</div>
           <div className="mt-8 border-t border-border/60 pt-6">{post.content}</div>
         </article>
 
