@@ -325,28 +325,56 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                   key={habit.id}
                   className="flex items-center gap-3 px-3 py-2 bg-surface/60 border border-border rounded-xl"
                 >
-                  {/* Complete today, even though it's not scheduled for today */}
-                  <button
-                    onClick={() =>
-                      onToggle(habit.id, today, !doneToday, habit.goal ? (doneToday ? 0 : habit.goal) : undefined)
-                    }
-                    title={doneToday ? t("dash.doneMark") : t("dash.completeToday")}
+                  {/* Status icon (display only) */}
+                  <div
                     style={{
                       background: doneToday ? habit.color : `${habit.color}12`,
                       borderColor: doneToday ? habit.color : `${habit.color}40`,
                       boxShadow: doneToday ? `0 0 8px ${habit.color}50` : undefined,
                     }}
-                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95"
+                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all"
                   >
                     {doneToday ? <Check size={14} className="text-white" /> : <HabitIcon size={14} style={{ color: habit.color }} />}
-                  </button>
+                  </div>
+
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm truncate ${doneToday ? "line-through text-muted" : "text-white/90"}`}>{habit.name}</p>
-                    <p className="text-[11px] text-muted truncate">
-                      {dues.map(fmtDue).join(" · ")}
-                    </p>
+                    {/* Upcoming due dates — only the next (selected) date is highlighted */}
+                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                      {dues.map((d, idx) => (
+                        <span
+                          key={idx}
+                          className={`text-[10px] px-1.5 py-0.5 rounded-md ${
+                            idx === 0
+                              ? "bg-primary text-white font-medium"
+                              : "bg-surface-2 text-muted"
+                          }`}
+                        >
+                          {fmtDue(d)}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  {doneToday && <span className="text-[11px] text-primary font-medium shrink-0">{t("dash.doneMark")}</span>}
+
+                  {/* Complete today (or undo), even though it's not due today */}
+                  {doneToday ? (
+                    <button
+                      onClick={() => onToggle(habit.id, today, false, habit.goal ? 0 : undefined)}
+                      title={t("dash.undo")}
+                      className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                    >
+                      <RotateCcw size={13} /> {t("dash.undo")}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onToggle(habit.id, today, true, habit.goal ? habit.goal : undefined)}
+                      title={t("dash.completeToday")}
+                      style={{ backgroundColor: habit.color }}
+                      className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
+                    >
+                      <Check size={14} /> {t("dash.complete")}
+                    </button>
+                  )}
                 </div>
               );
             })}
