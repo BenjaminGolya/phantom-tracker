@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { HabitGridHero, TrackerCardHero, StreakHero } from "@/components/blog/heroes";
 
 // Lightweight prose elements so each article stays readable without a markdown
 // dependency or global CSS.
@@ -22,6 +23,7 @@ export type Post = {
   date: string; // YYYY-MM-DD
   readingMins: number;
   keywords: string[];
+  hero: ReactNode;
   content: ReactNode;
 };
 
@@ -34,6 +36,7 @@ export const POSTS: Post[] = [
     date: "2026-06-10",
     readingMins: 6,
     keywords: ["how to build a habit", "build habits", "habit formation", "habit tracker"],
+    hero: <HabitGridHero />,
     content: (
       <>
         <P>
@@ -102,6 +105,7 @@ export const POSTS: Post[] = [
     date: "2026-06-10",
     readingMins: 5,
     keywords: ["best free habit tracker", "free habit tracker", "habit tracker app", "habit app"],
+    hero: <TrackerCardHero />,
     content: (
       <>
         <P>
@@ -151,6 +155,7 @@ export const POSTS: Post[] = [
     date: "2026-06-10",
     readingMins: 5,
     keywords: ["habit streaks", "why streaks work", "streak motivation", "habit tracker streaks"],
+    hero: <StreakHero />,
     content: (
       <>
         <P>

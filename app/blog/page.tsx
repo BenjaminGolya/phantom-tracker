@@ -46,8 +46,10 @@ export default function BlogIndex() {
             <Link
               key={p.slug}
               href={`/blog/${p.slug}`}
-              className="block bg-surface border border-border rounded-2xl p-5 hover:border-primary/40 transition-colors group"
+              className="block bg-surface border border-border rounded-2xl overflow-hidden hover:border-primary/40 transition-colors group"
             >
+              <div className="border-b border-border/60">{p.hero}</div>
+              <div className="p-5">
               <div className="flex items-center gap-2 text-[11px] text-muted mb-1.5">
                 <time>{new Date(p.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</time>
                 <span>·</span>
@@ -58,6 +60,7 @@ export default function BlogIndex() {
               <span className="inline-flex items-center gap-1 text-xs font-medium text-primary mt-3">
                 Read more <ArrowRight size={13} />
               </span>
+              </div>
             </Link>
           ))}
         </div>
