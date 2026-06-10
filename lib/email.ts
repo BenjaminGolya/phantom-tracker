@@ -44,9 +44,7 @@ export async function sendVerificationEmail(to: string, code: string, lang?: str
                 <!-- Header -->
                 <tr>
                   <td style="padding:32px 32px 24px;text-align:center;border-bottom:1px solid #1a1a1a;">
-                    <div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;background:#7f49c3;border-radius:12px;margin-bottom:16px;">
-                      <span style="font-size:22px;">👻</span>
-                    </div>
+                    <img src="https://phantomtracker.io/ghost-logo-128.png" width="44" height="44" alt="Phantom Tracker" style="display:inline-block;border-radius:12px;margin-bottom:16px;" />
                     <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:600;letter-spacing:-0.3px;">Phantom Tracker</h1>
                     <p style="margin:8px 0 0;color:#a1a1aa;font-size:13px;">${es.verifyHeading}</p>
                   </td>
@@ -109,9 +107,7 @@ export async function sendWelcomeEmail(to: string, name?: string | null, lang?: 
               <table width="440" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222222;border-radius:16px;overflow:hidden;">
                 <tr>
                   <td style="padding:32px 32px 8px;text-align:center;">
-                    <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#7f49c3;border-radius:14px;margin-bottom:16px;">
-                      <span style="font-size:24px;">👻</span>
-                    </div>
+                    <img src="https://phantomtracker.io/ghost-logo-128.png" width="48" height="48" alt="Phantom Tracker" style="display:inline-block;border-radius:14px;margin-bottom:16px;" />
                     <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">${es.welcomeHeading}</h1>
                   </td>
                 </tr>
@@ -201,7 +197,7 @@ function shell(title: string, bodyHtml: string) {
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 16px;"><tr><td align="center">
       <table width="440" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222222;border-radius:16px;overflow:hidden;">
         <tr><td style="padding:32px 32px 8px;text-align:center;">
-          <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#7f49c3;border-radius:14px;margin-bottom:16px;"><span style="font-size:24px;">👻</span></div>
+          <img src="https://phantomtracker.io/ghost-logo-128.png" width="48" height="48" alt="Phantom Tracker" style="display:inline-block;border-radius:14px;margin-bottom:16px;" />
           <h1 style="margin:0;color:#ffffff;font-size:21px;font-weight:700;letter-spacing:-0.3px;">${title}</h1>
         </td></tr>
         <tr><td style="padding:12px 32px 28px;">${bodyHtml}</td></tr>
