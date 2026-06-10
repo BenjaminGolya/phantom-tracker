@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, Sparkles, Loader2, X } from "lucide-react";
 import { GhostLogo } from "@/components/brand/ghost-mark";
-import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, PRICE_LABEL_LIFETIME, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
+import { PLAN_LIMITS, PRICE_LABEL, PRICE_LABEL_YEARLY, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
 
 type Interval = "monthly" | "yearly" | "lifetime";
 
@@ -121,7 +121,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
             >
               Lifetime
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">
-                LAUNCH OFFER
+                SOON
               </span>
             </button>
           </div>
@@ -170,7 +170,7 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
                 <p className="text-3xl font-bold">
                   €29<span className="text-sm text-muted font-normal"> once</span>
                 </p>
-                <p className="text-[11px] text-orange-400 mt-0.5">Pay once, yours forever · launch offer</p>
+                <p className="text-[11px] text-orange-400 mt-0.5">Pay once, yours forever · coming soon</p>
               </>
             ) : interval === "yearly" ? (
               <>
@@ -201,6 +201,10 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
             <div className="mt-5 text-center text-xs text-primary py-2.5 border border-primary/40 bg-primary/10 rounded-lg font-medium">
               ✦ You&apos;re on Pro. Thank you!
             </div>
+          ) : interval === "lifetime" ? (
+            <div className="mt-5 w-full py-2.5 text-center text-sm font-semibold text-muted border border-border bg-surface-2 rounded-lg cursor-not-allowed">
+              Coming soon
+            </div>
           ) : (
             <button
               onClick={upgrade}
@@ -208,16 +212,14 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
               className="mt-5 w-full py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-semibold rounded-lg transition-all hover:shadow-glow disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-              {interval === "lifetime"
-                ? `Get Lifetime · ${PRICE_LABEL_LIFETIME}`
-                : trialEligible
+              {trialEligible
                 ? `Start ${TRIAL_DAYS}-day free trial`
                 : `Upgrade · ${interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL}`}
             </button>
           )}
           <p className="text-[10px] text-muted text-center mt-2">
             {interval === "lifetime"
-              ? "One-time payment · yours forever · secure checkout via Stripe"
+              ? "A one-time Lifetime option is coming soon."
               : trialEligible
               ? `Free for ${TRIAL_DAYS} days, then ${interval === "yearly" ? PRICE_LABEL_YEARLY : PRICE_LABEL} · cancel anytime`
               : "Cancel anytime · secure checkout via Stripe"}
