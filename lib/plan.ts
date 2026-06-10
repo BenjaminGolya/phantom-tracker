@@ -6,8 +6,8 @@
 export type Plan = "free" | "pro";
 
 /** Normalize whatever we have on a user into a Plan. */
-export function isPro(user: { plan?: string | null } | null | undefined): boolean {
-  return user?.plan === "pro";
+export function isPro(user: { plan?: string | null; lifetime?: boolean | null } | null | undefined): boolean {
+  return user?.plan === "pro" || user?.lifetime === true;
 }
 
 // ─── Habit visibility (free limit + Pro-locked habits) ────────────────────────
@@ -59,5 +59,6 @@ export const TRIAL_DAYS = 14;
 
 export const PRICE_LABEL = "€2/mo";
 export const PRICE_LABEL_YEARLY = "€15/yr";
+export const PRICE_LABEL_LIFETIME = "€29";
 /** Effective monthly cost when paying yearly (€15 / 12 ≈ €1.25), for "save X%" copy. */
 export const YEARLY_SAVINGS_PCT = Math.round((1 - 15 / (2 * 12)) * 100); // ~38%

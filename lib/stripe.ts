@@ -19,6 +19,7 @@ export const stripeConfigured = () => !!process.env.STRIPE_SECRET_KEY;
 /** Recurring prices for the Pro plan. Created in the Stripe dashboard. */
 export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID ?? ""; // $2 / month
 export const PRO_PRICE_ID_YEARLY = process.env.STRIPE_PRO_PRICE_ID_YEARLY ?? ""; // $15 / year
+export const LIFETIME_PRICE_ID = process.env.STRIPE_LIFETIME_PRICE_ID ?? ""; // €29 one-time
 
 export type BillingInterval = "monthly" | "yearly";
 

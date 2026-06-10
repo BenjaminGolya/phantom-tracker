@@ -21,6 +21,8 @@ async function setPlanByCustomer(
 ) {
   const user = await prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
   if (!user) return;
+  // Lifetime buyers keep Pro forever regardless of subscription changes.
+  if (plan === "free" && user.lifetime) return;
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -86,6 +88,25 @@ export async function POST(req: NextRequest) {
         const s = event.data.object as Stripe.Checkout.Session;
         const userId = s.metadata?.userId;
         const customerId = typeof s.customer === "string" ? s.customer : s.customer?.id;
+
+        // One-time Lifetime purchase → permanent Pro, no subscription.
+        if (s.metadata?.lifetime === "1" || s.mode === "payment") {
+          if (userId) {
+            await prisma.user.update({
+              where: { id: userId },
+              data: { lifetime: true, plan: "pro", proSince: new Date(), ...(customerId ? { stripeCustomerId: customerId } : {}) },
+            });
+            await prisma.habit.updateMany({ where: { userId, locked: true }, data: { locked: false } });
+          } else if (customerId) {
+            const u = await prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
+            if (u) {
+              await prisma.user.update({ where: { id: u.id }, data: { lifetime: true, plan: "pro", proSince: u.proSince ?? new Date() } });
+              await prisma.habit.updateMany({ where: { userId: u.id, locked: true }, data: { locked: false } });
+            }
+          }
+          break;
+        }
+
         const subId = typeof s.subscription === "string" ? s.subscription : s.subscription?.id ?? null;
         // Pull the subscription to learn whether it's on a trial and when it ends.
         let trialEndsAt: Date | null = null;
