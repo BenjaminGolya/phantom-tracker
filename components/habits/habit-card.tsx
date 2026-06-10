@@ -211,6 +211,7 @@ function WeekCalendar({ habit, completedSet, frozenSet }: { habit: HabitWithLogs
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 0 });
   const days = eachDayOfInterval({ start: weekStart, end: endOfWeek(today, { weekStartsOn: 0 }) });
+  const isDaily = !habit.frequency || habit.frequency === "daily";
 
   return (
     <div className="mt-3 grid grid-cols-7 gap-[2px]">
@@ -223,20 +224,24 @@ function WeekCalendar({ habit, completedSet, frozenSet }: { habit: HabitWithLogs
         const frozen = !done && frozenSet.has(key);
         const future = isFuture(day) && !isToday(day);
         const todayCell = isToday(day);
+        // For weekly/monthly habits, mark the days the habit is due.
+        const scheduled = !isDaily && !done && !frozen && isScheduledOn(habit.frequency, day);
         return (
           <div
             key={key}
-            title={frozen ? `${key} · rest` : key}
+            title={frozen ? `${key} · rest` : scheduled ? `${key} · due` : key}
             style={{
-              backgroundColor: done ? habit.color : frozen ? "#38bdf833" : "transparent",
-              borderColor: todayCell ? habit.color : frozen ? "#38bdf870" : "#2a2a2a",
+              backgroundColor: done ? habit.color : frozen ? "#38bdf833" : scheduled ? `${habit.color}1f` : "transparent",
+              borderColor: todayCell ? habit.color : frozen ? "#38bdf870" : scheduled ? `${habit.color}66` : "#2a2a2a",
               boxShadow: done && todayCell ? `0 0 6px ${habit.color}80` : undefined,
-              opacity: future ? 0.25 : 1,
+              opacity: future && !scheduled ? 0.25 : 1,
               height: 28,
             }}
             className="rounded border flex items-center justify-center text-[9px] font-medium transition-all"
           >
-            {frozen ? <Snowflake size={10} className="text-sky-400" /> : <span className={done ? "text-white" : "text-muted"}>{format(day, "d")}</span>}
+            {frozen
+              ? <Snowflake size={10} className="text-sky-400" />
+              : <span className={done ? "text-white" : ""} style={!done && scheduled ? { color: habit.color } : undefined}>{format(day, "d")}</span>}
           </div>
         );
       })}
@@ -252,6 +257,7 @@ function MonthCalendar({ habit, completedSet, frozenSet }: { habit: HabitWithLog
   const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
   const calEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
+  const isDaily = !habit.frequency || habit.frequency === "daily";
 
   return (
     <div className="mt-3">
@@ -269,20 +275,24 @@ function MonthCalendar({ habit, completedSet, frozenSet }: { habit: HabitWithLog
           const frozen = !done && !outside && frozenSet.has(key);
           const future = isFuture(day) && !isToday(day);
           const todayCell = isToday(day);
+          // For weekly/monthly habits, mark the days the habit is due.
+          const scheduled = !isDaily && !outside && !done && !frozen && isScheduledOn(habit.frequency, day);
           return (
             <div
               key={key}
-              title={frozen ? `${key} · rest` : key}
+              title={frozen ? `${key} · rest` : scheduled ? `${key} · due` : key}
               style={{
-                backgroundColor: done && !outside ? habit.color : frozen ? "#38bdf833" : "transparent",
-                borderColor: todayCell ? habit.color : frozen ? "#38bdf870" : "#1f1f1f",
-                opacity: outside ? 0.12 : future ? 0.25 : 1,
+                backgroundColor: done && !outside ? habit.color : frozen ? "#38bdf833" : scheduled ? `${habit.color}1f` : "transparent",
+                borderColor: todayCell ? habit.color : frozen ? "#38bdf870" : scheduled ? `${habit.color}66` : "#1f1f1f",
+                opacity: outside ? 0.12 : future && !scheduled ? 0.25 : 1,
                 boxShadow: done && todayCell ? `0 0 5px ${habit.color}70` : undefined,
                 height: 22,
               }}
               className="rounded border flex items-center justify-center text-[9px] font-medium transition-all"
             >
-              {frozen ? <Snowflake size={9} className="text-sky-400" /> : <span className={done && !outside ? "text-white" : "text-muted"}>{format(day, "d")}</span>}
+              {frozen
+                ? <Snowflake size={9} className="text-sky-400" />
+                : <span className={done && !outside ? "text-white" : "text-muted"} style={!done && scheduled ? { color: habit.color } : undefined}>{format(day, "d")}</span>}
             </div>
           );
         })}
