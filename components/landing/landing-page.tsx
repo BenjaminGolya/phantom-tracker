@@ -488,6 +488,7 @@ export function LandingPage() {
                 <Link href="/signup" className="hover:text-white transition-colors">{t("common.getStarted")}</Link>
               </>
             )}
+            <Link href="/blog" className="hover:text-white transition-colors">{t("common.blog")}</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">{t("common.privacy")}</Link>
             <Link href="/tos" className="hover:text-white transition-colors">{t("common.terms")}</Link>
             <LanguageSwitcher openUp className="-my-1" />
