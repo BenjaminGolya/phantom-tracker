@@ -30,12 +30,31 @@ const PRO_FEATURES: string[] = [
   "Priority support",
 ];
 
-export function PricingClient({ pro, trialEligible = false }: { pro: boolean; trialEligible?: boolean }) {
+export function PricingClient({ pro, trialEligible = false, hasBilling = false }: { pro: boolean; trialEligible?: boolean; hasBilling?: boolean }) {
   const params = useSearchParams();
   const canceled = params.get("canceled") === "1";
   const [loading, setLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [interval, setInterval] = useState<Interval>("yearly");
+
+  async function openPortal() {
+    setPortalLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(data?.message ?? "Couldn't open the billing portal. Please try again.");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   async function upgrade() {
     setLoading(true);
@@ -198,8 +217,25 @@ export function PricingClient({ pro, trialEligible = false }: { pro: boolean; tr
           </ul>
 
           {pro ? (
-            <div className="mt-5 text-center text-xs text-primary py-2.5 border border-primary/40 bg-primary/10 rounded-lg font-medium">
-              ✦ You&apos;re on Pro. Thank you!
+            <div className="mt-5 space-y-2">
+              <div className="text-center text-xs text-primary py-2.5 border border-primary/40 bg-primary/10 rounded-lg font-medium">
+                ✦ Your current plan
+              </div>
+              {hasBilling ? (
+                <button
+                  onClick={openPortal}
+                  disabled={portalLoading}
+                  className="w-full py-2.5 border border-border hover:border-primary/40 text-sm font-medium text-muted hover:text-white rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {portalLoading && <Loader2 size={15} className="animate-spin" />}
+                  Manage or cancel subscription
+                </button>
+              ) : (
+                <p className="text-[11px] text-muted text-center">Complimentary Pro — nothing to manage.</p>
+              )}
+              <p className="text-[10px] text-muted text-center">
+                If you cancel, Pro stays active until the end of your billing period, then you move to Free.
+              </p>
             </div>
           ) : interval === "lifetime" ? (
             <div className="mt-5 w-full py-2.5 text-center text-sm font-semibold text-muted border border-border bg-surface-2 rounded-lg cursor-not-allowed">
