@@ -450,7 +450,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
             <div className="overflow-y-auto px-5 py-4 space-y-4 flex-1">
             {/* Name */}
             <div>
-              <label className="text-xs text-muted mb-1.5 block">{t("form.name")}</label>
+              <label className="text-xs text-muted mb-1.5 block">{t("form.name")} <span className="text-red-400" aria-hidden="true">*</span></label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
