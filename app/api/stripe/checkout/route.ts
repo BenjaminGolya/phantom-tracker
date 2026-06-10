@@ -29,6 +29,14 @@ export async function POST(req: NextRequest) {
   } catch {
     /* no body → default monthly */
   }
+  // Lifetime is not available for purchase yet.
+  if (lifetime) {
+    return NextResponse.json(
+      { error: "coming_soon", message: "The Lifetime plan is coming soon." },
+      { status: 503 }
+    );
+  }
+
   const priceId = lifetime ? LIFETIME_PRICE_ID : priceForInterval(interval);
 
   if (!stripeConfigured() || !priceId) {
