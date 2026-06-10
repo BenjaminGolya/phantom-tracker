@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { Check, RotateCcw, Snowflake } from "lucide-react";
+import { Check, RotateCcw, Snowflake, CalendarClock } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { HabitWithLogs } from "@/types";
+import { isScheduledOn, nextDueDate } from "@/lib/utils";
 import { useLang } from "@/lib/i18n/context";
+import { dfLocale } from "@/lib/i18n/date";
 import { categoryLabel } from "@/lib/i18n/category";
 import { CategoryFilter, usedCategories } from "@/components/habits/category-filter";
 
@@ -175,12 +177,23 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
 
 // ─── Main checklist ───────────────────────────────────────────────────────────
 export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistProps) {
-  const today = format(new Date(), "yyyy-MM-dd");
+  const now = new Date();
+  const today = format(now, "yyyy-MM-dd");
   const { t, lang } = useLang();
   const [catFilter, setCatFilter] = useState<string | null>(null);
 
   const categories = usedCategories(habits);
-  const shown = catFilter ? habits.filter((h) => h.category === catFilter) : habits;
+  const filtered = catFilter ? habits.filter((h) => h.category === catFilter) : habits;
+
+  // Only habits actually scheduled for today belong in the checklist. Weekly /
+  // monthly habits that aren't due today move to a muted "Coming up" list so
+  // it's clear when they next need doing — without cluttering today.
+  const shown = filtered.filter((h) => isScheduledOn(h.frequency, now));
+  const upcoming = filtered
+    .filter((h) => !isScheduledOn(h.frequency, now))
+    .map((h) => ({ habit: h, due: nextDueDate(h.frequency, now) }))
+    .filter((u) => u.due)
+    .sort((a, b) => a.due!.getTime() - b.due!.getTime());
 
   return (
     <div>
@@ -188,6 +201,12 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
         <h2 className="text-sm font-medium text-muted">{t("dash.todaysHabits")}</h2>
         <CategoryFilter categories={categories} value={catFilter} onChange={setCatFilter} />
       </div>
+      {shown.length === 0 && (
+        <div className="flex items-center gap-2.5 p-4 bg-surface border border-border rounded-xl text-sm text-muted">
+          <Check size={15} className="text-green-400 shrink-0" />
+          {t("dash.noneToday")}
+        </div>
+      )}
       <div className="space-y-2">
         {shown.map((habit, i) => {
           // Habits with a numeric goal get the counter UI
@@ -264,6 +283,38 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
           );
         })}
       </div>
+
+      {/* Coming up — weekly/monthly habits not due today, with their next date */}
+      {upcoming.length > 0 && (
+        <div className="mt-5">
+          <h3 className="flex items-center gap-1.5 text-xs font-medium text-muted mb-2">
+            <CalendarClock size={13} /> {t("dash.comingUp")}
+          </h3>
+          <div className="space-y-1.5">
+            {upcoming.map(({ habit, due }) => {
+              const HabitIcon = getHabitIcon(habit.icon);
+              const isTomorrow = format(due!, "yyyy-MM-dd") === format(new Date(now.getTime() + 86400000), "yyyy-MM-dd");
+              return (
+                <div
+                  key={habit.id}
+                  className="flex items-center gap-3 px-3 py-2 bg-surface/60 border border-border rounded-xl"
+                >
+                  <div
+                    style={{ background: `${habit.color}12`, borderColor: `${habit.color}40` }}
+                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0"
+                  >
+                    <HabitIcon size={14} style={{ color: habit.color }} />
+                  </div>
+                  <p className="flex-1 min-w-0 text-sm text-muted truncate">{habit.name}</p>
+                  <span className="text-xs text-muted shrink-0">
+                    {isTomorrow ? t("dash.tomorrow") : format(due!, "EEE, MMM d", { locale: dfLocale(lang) })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -40,6 +40,21 @@ export function isScheduledOn(frequency: string, date: Date): boolean {
   return isScheduledOnParts(frequency, WEEKDAY_CODES[date.getDay()], date.getDate());
 }
 
+/**
+ * Next calendar day (after `from`) the habit is scheduled on.
+ * Returns null for daily habits (they're due every day, so there's no
+ * meaningful "next" date) or if nothing matches within a year.
+ */
+export function nextDueDate(frequency: string | null | undefined, from: Date): Date | null {
+  if (!frequency || frequency === "daily") return null;
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  for (let i = 0; i < 366; i++) {
+    d.setDate(d.getDate() + 1);
+    if (isScheduledOn(frequency, d)) return new Date(d);
+  }
+  return null;
+}
+
 // Frozen ("rest") days don't count as completed but bridge a streak — they
 // neither add to it nor break it.
 export function calcStreak(logs: { date: string; completed: boolean; frozen?: boolean }[]): {
