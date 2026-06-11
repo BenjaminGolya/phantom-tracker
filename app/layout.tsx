@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { AppSplash } from "@/components/app-splash";
 import { LANG_COOKIE, DEFAULT_LOCALE, isLocale } from "@/lib/i18n/config";
 
 const geistSans = localFont({
@@ -89,6 +90,7 @@ export default function RootLayout({
     <html lang={lang} className="dark" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-white`}>
         <Providers lang={lang}>{children}</Providers>
+        <AppSplash />
       </body>
     </html>
   );
