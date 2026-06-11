@@ -119,13 +119,6 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
             className="w-7 h-7 rounded-lg border border-border text-muted flex items-center justify-center hover:text-white hover:bg-surface-2 transition-all"
           ><RotateCcw size={13} /></button>
         )}
-        {!done && (
-          <button
-            onClick={() => setConfirm("all")}
-            style={{ backgroundColor: `${habit.color}15`, color: habit.color, borderColor: `${habit.color}40` }}
-            className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
-          >{t("dash.all")}</button>
-        )}
         {!done && val === 0 && (
           <button
             onClick={() => onFreeze(habit.id, today, !frozenToday)}
@@ -134,6 +127,13 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
               frozenToday ? "border-sky-400/50 text-sky-400 bg-sky-400/10" : "border-border text-muted hover:text-sky-400 hover:border-sky-400/40"
             }`}
           ><Snowflake size={13} /></button>
+        )}
+        {!done && (
+          <button
+            onClick={() => setConfirm("all")}
+            style={{ backgroundColor: `${habit.color}15`, color: habit.color, borderColor: `${habit.color}40` }}
+            className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
+          >{t("dash.all")}</button>
         )}
         {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">{t("dash.doneMark")}</span>}
         {frozenToday && <span className="text-[11px] text-sky-400 font-medium pl-1">{t("dash.restDay")}</span>}
