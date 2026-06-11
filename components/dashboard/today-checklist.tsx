@@ -265,23 +265,31 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
               {/* Actions */}
               {done ? (
-                // Completed → allow undo (redo by completing again afterwards)
-                <button
-                  onClick={() => onToggle(habit.id, today, false)}
-                  title={t("dash.undo")}
-                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
-                >
-                  <RotateCcw size={13} /> {t("dash.undo")}
-                </button>
+                // Completed → "Done ✓" mark + icon-only undo
+                <>
+                  <span className="text-xs font-medium pl-1 shrink-0" style={{ color: habit.color }}>{t("dash.doneMark")}</span>
+                  <button
+                    onClick={() => onToggle(habit.id, today, false)}
+                    title={t("dash.undo")}
+                    aria-label={t("dash.undo")}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                </>
               ) : frozenToday ? (
-                // Resting → allow undo of the rest day
-                <button
-                  onClick={() => onFreeze(habit.id, today, false)}
-                  title={t("dash.undo")}
-                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-sky-400/40 text-xs font-medium text-sky-400 hover:bg-sky-400/10 shrink-0 transition-all"
-                >
-                  <RotateCcw size={13} /> {t("dash.undo")}
-                </button>
+                // Resting → "Rest day" mark + icon-only undo
+                <>
+                  <span className="text-[11px] text-sky-400 font-medium shrink-0">{t("dash.restDay")}</span>
+                  <button
+                    onClick={() => onFreeze(habit.id, today, false)}
+                    title={t("dash.undo")}
+                    aria-label={t("dash.undo")}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-sky-400/40 text-sky-400 hover:bg-sky-400/10 shrink-0 transition-all"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                </>
               ) : (
                 <>
                   {/* Rest day (snowflake) — protects the streak */}
@@ -361,13 +369,17 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
                   {/* Complete today (or undo), even though it's not due today */}
                   {doneToday ? (
-                    <button
-                      onClick={() => onToggle(habit.id, today, false, habit.goal ? 0 : undefined)}
-                      title={t("dash.undo")}
-                      className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
-                    >
-                      <RotateCcw size={13} /> {t("dash.undo")}
-                    </button>
+                    <>
+                      <span className="text-xs font-medium pl-1 shrink-0" style={{ color: habit.color }}>{t("dash.doneMark")}</span>
+                      <button
+                        onClick={() => onToggle(habit.id, today, false, habit.goal ? 0 : undefined)}
+                        title={t("dash.undo")}
+                        aria-label={t("dash.undo")}
+                        className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                      >
+                        <RotateCcw size={14} />
+                      </button>
+                    </>
                   ) : (
                     <button
                       onClick={() => onToggle(habit.id, today, true, habit.goal ? habit.goal : undefined)}
