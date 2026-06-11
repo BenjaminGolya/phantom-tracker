@@ -20,9 +20,9 @@ export function getYearDays(year: number): string[] {
 
 // ─── Frequency / scheduling ───────────────────────────────────────────────────
 // Stored frequency formats:
-//   "daily"            — every day
-//   "mon,wed,fri"      — specific weekdays (Weekly)
-//   "monthly:1,15"     — specific days of the month (Monthly)
+//   "daily"            - every day
+//   "mon,wed,fri"      - specific weekdays (Weekly)
+//   "monthly:1,15"     - specific days of the month (Monthly)
 const WEEKDAY_CODES = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 /** Is a habit with `frequency` scheduled on a given weekday/day-of-month? */
@@ -67,7 +67,7 @@ export function nextDueDates(frequency: string | null | undefined, from: Date, c
   return out;
 }
 
-// Frozen ("rest") days don't count as completed but bridge a streak — they
+// Frozen ("rest") days don't count as completed but bridge a streak - they
 // neither add to it nor break it.
 export function calcStreak(logs: { date: string; completed: boolean; frozen?: boolean }[]): {
   current: number;
@@ -184,14 +184,14 @@ export function getHabitLevel(logs: { completed: boolean }[]): LevelInfo {
 // ─── Profile level system ─────────────────────────────────────────────────────
 //
 // XP sources (shown transparently in stats):
-//   • Base XP       — 1 XP per completion
-//   • Streak bonus  — +1 XP/completion at 7d streak, +2 at 14d, +3 at 30d
-//   • Perfect day   — +5 XP for every day ALL habits were completed
-//   • Diversity     — +10 XP per unique category tracked (up to 5)
-//   • Habit mastery — +20 XP each time a habit reaches a new level
+//   • Base XP       - 1 XP per completion
+//   • Streak bonus  - +1 XP/completion at 7d streak, +2 at 14d, +3 at 30d
+//   • Perfect day   - +5 XP for every day ALL habits were completed
+//   • Diversity     - +10 XP per unique category tracked (up to 5)
+//   • Habit mastery - +20 XP each time a habit reaches a new level
 
-// `pro: true` tiers are exclusive — only Pro users can ever reach/display them.
-// Profile levels — a cosmic ascension from faint dust to the eternal. The
+// `pro: true` tiers are exclusive - only Pro users can ever reach/display them.
+// Profile levels - a cosmic ascension from faint dust to the eternal. The
 // `icon` names map to lucide icons in the UI (modern look); `emoji` is a
 // compact fallback for tight spots like the sidebar.
 export const PROFILE_LEVELS = [

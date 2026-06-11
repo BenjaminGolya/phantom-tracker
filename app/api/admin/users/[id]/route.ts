@@ -14,7 +14,7 @@ async function requireAdmin() {
   return session;
 }
 
-// PATCH /api/admin/users/:id — { action, data? }
+// PATCH /api/admin/users/:id - { action, data? }
 //   action: "disable" | "enable" | "grantPro" | "revokePro" | "update"
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await requireAdmin();
@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-// DELETE /api/admin/users/:id — permanent (cascades to all user data)
+// DELETE /api/admin/users/:id - permanent (cascades to all user data)
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });

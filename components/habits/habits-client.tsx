@@ -204,7 +204,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h1 className="text-lg font-semibold">{t("nav.habits")}</h1>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          {/* Range toggle — only shown in cards view */}
+          {/* Range toggle - only shown in cards view */}
           {view === "cards" && (
             <div className="flex items-center bg-surface border border-border rounded-lg p-0.5">
               {(["week", "month", "year", "all"] as const).map((r) => (
@@ -321,7 +321,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
         </div>
       )}
 
-      {/* Locked (over the free limit — kept safe, Pro unlocks) */}
+      {/* Locked (over the free limit - kept safe, Pro unlocks) */}
       {lockedHabits.length > 0 && (
         <div>
           <h2 className="text-xs text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">

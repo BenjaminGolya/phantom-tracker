@@ -224,7 +224,7 @@ export function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero — rendered without an entrance animation so it paints instantly
+      {/* Hero - rendered without an entrance animation so it paints instantly
           (no blank/black first paint while JS hydrates). */}
       <section className="relative max-w-5xl mx-auto px-5 pt-16 pb-12 text-center">
         <div>
@@ -295,7 +295,7 @@ export function LandingPage() {
         <WorldExamples />
       </section>
 
-      {/* Plans — Free vs Pro */}
+      {/* Plans - Free vs Pro */}
       <section id="plans" className="max-w-5xl mx-auto px-5 py-16">
         <motion.div {...fadeUp} className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("landing.plansTitle")}</h2>
@@ -377,7 +377,7 @@ export function LandingPage() {
             {t("lp.installSubtitle")}
           </p>
 
-          {/* Native apps — coming soon (disabled store buttons) */}
+          {/* Native apps - coming soon (disabled store buttons) */}
           <p className="text-sm text-muted mt-6 max-w-lg mx-auto">{t("lp.storesComingSoon")}</p>
           <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
             {[
@@ -400,7 +400,7 @@ export function LandingPage() {
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-4">
-          {/* Step 1 — iPhone */}
+          {/* Step 1 - iPhone */}
           <motion.div {...fadeUp} className="bg-surface border border-border rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
@@ -415,7 +415,7 @@ export function LandingPage() {
             </ol>
           </motion.div>
 
-          {/* Step 2 — Android */}
+          {/* Step 2 - Android */}
           <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }} className="bg-surface border border-border rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
@@ -430,7 +430,7 @@ export function LandingPage() {
             </ol>
           </motion.div>
 
-          {/* Step 3 — Notifications */}
+          {/* Step 3 - Notifications */}
           <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="bg-surface border border-border rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>

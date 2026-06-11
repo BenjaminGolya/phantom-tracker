@@ -1,24 +1,24 @@
 // Single source of truth for the app version + a short changelog.
 // Bump APP_VERSION and prepend a CHANGELOG entry whenever you ship something
-// users actually notice. Skip pure copy tweaks and tiny i18n fixes — keep this
+// users actually notice. Skip pure copy tweaks and tiny i18n fixes - keep this
 // list to features, fixes, and meaningful improvements.
 
 export const APP_VERSION = "1.15.0";
 
 // What kind of change it is, so the UI can tag and prioritize it.
-//   feature      — new capability users can do something with
-//   fix          — a bug that was making something not work
-//   improvement  — polish to something that already worked
+//   feature      - new capability users can do something with
+//   fix          - a bug that was making something not work
+//   improvement  - polish to something that already worked
 export type ChangeKind = "feature" | "fix" | "improvement";
 
 export type ChangelogEntry = {
   version: string;
   date: string; // YYYY-MM-DD
   kind: ChangeKind;
-  summary: string; // one short line — what shipped
+  summary: string; // one short line - what shipped
   /** Highlight in the "What's new" modal and sort ahead of minor entries. */
   major?: boolean;
-  /** Admin-only change — hidden from the user-facing "What's new" + changelog. */
+  /** Admin-only change - hidden from the user-facing "What's new" + changelog. */
   admin?: boolean;
 };
 
@@ -29,7 +29,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-06-12",
     kind: "feature",
     major: true,
-    summary: "Your living world is bigger and unique to you — a larger planet with a one-of-a-kind landmass, plus 10 health states (Dormant → Radiant) that mirror your recent consistency.",
+    summary: "Your living world is bigger and unique to you - a larger planet with a one-of-a-kind landmass, plus 10 health states (Dormant → Radiant) that mirror your recent consistency.",
   },
   {
     version: "1.14.2",
@@ -42,7 +42,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-06-12",
     kind: "feature",
     major: true,
-    summary: "Diamond is coming — a lifetime tier with an icy cyan theme you can switch on, an exclusive aurora over your world, and a secret summit level.",
+    summary: "Diamond is coming - a lifetime tier with an icy cyan theme you can switch on, an exclusive aurora over your world, and a secret summit level.",
   },
   {
     version: "1.14.0",
@@ -55,20 +55,20 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.13.3",
     date: "2026-06-11",
     kind: "improvement",
-    summary: "Clearer dashboard actions — dedicated Complete and Rest buttons with one-tap undo, and tidier completed rows.",
+    summary: "Clearer dashboard actions - dedicated Complete and Rest buttons with one-tap undo, and tidier completed rows.",
   },
   {
     version: "1.13.2",
     date: "2026-06-11",
     kind: "feature",
-    summary: "What's new: a quick summary of updates the first time you sign in after a release — view anytime in Settings.",
+    summary: "What's new: a quick summary of updates the first time you sign in after a release - view anytime in Settings.",
   },
   {
     version: "1.13.0",
     date: "2026-06-11",
     kind: "feature",
     major: true,
-    summary: "Weekly & monthly habits — schedule habits for specific weekdays or days of the month. The dashboard now shows only what's due today, with a 'Coming up' list and scheduled days marked on every calendar.",
+    summary: "Weekly & monthly habits - schedule habits for specific weekdays or days of the month. The dashboard now shows only what's due today, with a 'Coming up' list and scheduled days marked on every calendar.",
   },
   {
     version: "1.12.2",
@@ -110,7 +110,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.9.5",
     date: "2026-06-08",
     kind: "feature",
-    summary: "The whole app and all emails now speak English, Magyar, and Română — switch any time from the language menu.",
+    summary: "The whole app and all emails now speak English, Magyar, and Română - switch any time from the language menu.",
   },
   {
     version: "1.7.0",
@@ -134,7 +134,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.3.0",
     date: "2026-06-07",
     kind: "feature",
-    summary: "Help & feedback — report bugs or ask questions right from Settings, with screenshots.",
+    summary: "Help & feedback - report bugs or ask questions right from Settings, with screenshots.",
   },
   {
     version: "1.2.0",

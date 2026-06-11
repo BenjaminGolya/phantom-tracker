@@ -9,7 +9,7 @@
     --primary: 127 73 195;     /* #7f49c3 */
     --primary-dim: 92 52 145;  /* #5c3491 */
   }
-  /* Diamond tier — icy cyan accent. */
+  /* Diamond tier - icy cyan accent. */
   .theme-diamond {
     --primary: 103 232 249;    /* #67e8f9 */
     --primary-dim: 34 211 238; /* #22d3ee */
@@ -84,7 +84,7 @@
   .phantom-bounce, .phantom-shadow { animation: none; }
 }
 
-/* ── Diamond theme — ambient cues beyond the accent colour ───────────────────
+/* ── Diamond theme - ambient cues beyond the accent colour ───────────────────
    Unlayered (after @tailwind utilities) so these win over utility classes. */
 html.theme-diamond body {
   background:

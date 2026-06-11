@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     select: { plan: true },
   });
   if (isPro(user)) {
-    // Pro users have no limit — nothing to lock.
+    // Pro users have no limit - nothing to lock.
     return NextResponse.json({ ok: true });
   }
 

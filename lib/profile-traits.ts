@@ -48,21 +48,21 @@ export function computeTraits(habits: TraitHabit[], opts: { isPro?: boolean } = 
     };
   }
 
-  // Consistency — average 30-day completion rate.
+  // Consistency - average 30-day completion rate.
   const consistency = clamp01(avg(habits.map((h) => calcCompletionRate(h.logs, 30))) / 100);
 
-  // Momentum — average 7-day completion rate (recent activity).
+  // Momentum - average 7-day completion rate (recent activity).
   const momentum = clamp01(avg(habits.map((h) => calcCompletionRate(h.logs, 7))) / 100);
 
-  // Discipline — best current streak across habits, ~3 weeks = full bar.
+  // Discipline - best current streak across habits, ~3 weeks = full bar.
   const bestCurrent = Math.max(0, ...habits.map((h) => calcStreak(h.logs).current));
   const discipline = clamp01(bestCurrent / 21);
 
-  // Variety — unique tracked categories, capped at 5.
+  // Variety - unique tracked categories, capped at 5.
   const cats = new Set(habits.map((h) => h.category).filter(Boolean));
   const variety = clamp01(cats.size / 5);
 
-  // Dedication — total completions across all habits, ~200 = full bar.
+  // Dedication - total completions across all habits, ~200 = full bar.
   const totalDone = habits.reduce((n, h) => n + h.logs.filter((l) => l.completed).length, 0);
   const dedication = clamp01(totalDone / 200);
 
@@ -82,7 +82,7 @@ export function computeTraits(habits: TraitHabit[], opts: { isPro?: boolean } = 
 // ── Planet state (growth + living vitality) ───────────────────────────────────
 //
 // Structure (size, rings, moons, tree *capacity*) comes from your profile level
-// and XP — it only ever goes up, so the world can never be lost. Vitality is the
+// and XP - it only ever goes up, so the world can never be lost. Vitality is the
 // *living* layer: it rises with recent consistency, streaks and perfect days, and
 // wilts when you miss days or stay away. Low vitality just makes the world look
 // overgrown and faded; staying consistent again regrows everything.
@@ -96,12 +96,12 @@ export type PlanetStatus =
 export type PlanetState = {
   level: number;
   xp: number;
-  radius: number;       // structural size (from level) — never shrinks
+  radius: number;       // structural size (from level) - never shrinks
   hasRing: boolean;
   moons: number;
   totalTrees: number;   // tree capacity earned via XP (the max your world can hold)
   healthyTrees: number; // how many are currently green (capacity × vitality)
-  vitality: number;     // 0.12..1 — the living layer
+  vitality: number;     // 0.12..1 - the living layer
   neglectDays: number;  // days since your last check-in
   messy: number;        // 0..1 overgrowth / fog when you've been away
   lush: number;         // 0..1 greenery + colour intensity
@@ -159,7 +159,7 @@ export function planetState(habits: TraitHabit[], opts: { isPro?: boolean; isDia
   let vitality = 0.5 * recentRate + 0.3 * streakFactor + 0.2 * perfectFactor;
   // … minus a penalty for being away (kicks in after a 2-day grace window)
   if (neglectDays > 2) vitality -= Math.min(0.55, (neglectDays - 2) * 0.07);
-  vitality = Math.max(0.12, clamp01(vitality)); // floored — the world never dies
+  vitality = Math.max(0.12, clamp01(vitality)); // floored - the world never dies
 
   const messy = clamp01((neglectDays - 3) / 14); // overgrown/foggy the longer you're away
   const lush = clamp01(stage / 5) * (0.4 + 0.6 * vitality);

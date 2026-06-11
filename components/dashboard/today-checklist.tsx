@@ -187,7 +187,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
   // Only habits actually scheduled for today belong in the checklist. Weekly /
   // monthly habits that aren't due today move to a muted "Coming up" list so
-  // it's clear when they next need doing — without cluttering today.
+  // it's clear when they next need doing - without cluttering today.
   const shown = filtered.filter((h) => isScheduledOn(h.frequency, now));
   const upcoming = filtered
     .filter((h) => !isScheduledOn(h.frequency, now))
@@ -223,7 +223,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
             );
           }
 
-          // Regular habits — simple toggle
+          // Regular habits - simple toggle
           const todayLog = habit.logs.find((l) => l.date === today);
           const done = !!todayLog?.completed;
           const frozenToday = !!todayLog?.frozen && !done;
@@ -255,7 +255,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                 )}
               </div>
 
-              {/* Name + category (display only — completing happens via the button) */}
+              {/* Name + category (display only - completing happens via the button) */}
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
                   {habit.name}
@@ -289,7 +289,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                 </>
               ) : (
                 <>
-                  {/* Rest day (snowflake) — protects the streak */}
+                  {/* Rest day (snowflake) - protects the streak */}
                   <button
                     onClick={() => onFreeze(habit.id, today, true)}
                     title={t("dash.freeze")}
@@ -315,7 +315,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
         })}
       </div>
 
-      {/* Coming up — weekly/monthly habits not due today, with their next date */}
+      {/* Coming up - weekly/monthly habits not due today, with their next date */}
       {upcoming.length > 0 && (
         <div className="mt-5">
           <h3 className="flex items-center gap-1.5 text-xs font-medium text-muted mb-2">
@@ -347,7 +347,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm truncate ${doneToday ? "line-through text-muted" : "text-white/90"}`}>{habit.name}</p>
-                    {/* Upcoming due dates — only the next (selected) date is highlighted */}
+                    {/* Upcoming due dates - only the next (selected) date is highlighted */}
                     <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                       {dues.map((d, idx) => (
                         <span

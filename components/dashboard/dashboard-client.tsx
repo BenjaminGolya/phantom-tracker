@@ -132,7 +132,7 @@ export function DashboardClient({ habits: initialHabits, pro = false, diamond = 
     }
   }
 
-  // Mark today as a frozen "rest day" (or unfreeze) — keeps the streak alive.
+  // Mark today as a frozen "rest day" (or unfreeze) - keeps the streak alive.
   async function handleFreeze(habitId: string, date: string, frozen: boolean) {
     const res = await fetch(`/api/habits/${habitId}/log`, {
       method: "POST",
@@ -227,7 +227,7 @@ export function DashboardClient({ habits: initialHabits, pro = false, diamond = 
         <Onboarding pro={pro} onCreate={handleCreateTemplates} onCustom={() => setShowForm(true)} />
       )}
 
-      {/* Link to the profile world — distinct hero card with a live planet preview */}
+      {/* Link to the profile world - distinct hero card with a live planet preview */}
       <Link
         href="/stats"
         className="relative overflow-hidden flex items-center gap-3 pl-5 pr-3 py-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-primary/5 to-surface hover:border-primary/50 transition-all group shadow-[0_0_28px_#7f49c31f]"

@@ -82,7 +82,7 @@ function treePositions(count: number, radius: number, seed = 1) {
   return out;
 }
 
-// Presentational planet — renders any PlanetState. Reused by the profile and by
+// Presentational planet - renders any PlanetState. Reused by the profile and by
 // the landing-page examples. Unique SVG ids per instance so multiple planets can
 // coexist on one page without clipPath/gradient collisions.
 export function PlanetVisual({ state: p }: { state: PlanetState }) {
@@ -185,7 +185,7 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("shade")})`} />
 
-      {/* Diamond-exclusive aurora — shimmering bands arcing over the world */}
+      {/* Diamond-exclusive aurora - shimmering bands arcing over the world */}
       {p.diamond && (
         <g filter={`url(#${id("auroraBlur")})`}>
           {[0, 1, 2].map((k) => {

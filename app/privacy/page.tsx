@@ -21,7 +21,7 @@ export default function PrivacyPage() {
 
       <Section title="1. Data we collect">
         <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Account:</strong> your email address, an optional display name, and — if you sign in with Google — your Google profile picture.</li>
+          <li><strong>Account:</strong> your email address, an optional display name, and - if you sign in with Google - your Google profile picture.</li>
           <li><strong>Authentication:</strong> a securely hashed password (for email sign-up), and short-lived email codes if you enable two-factor authentication.</li>
           <li><strong>Your content:</strong> the habits, goals, categories, check-ins, streaks and notes you create.</li>
           <li><strong>Preferences:</strong> your language and plan/subscription status.</li>
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li>To provide the core service: storing and showing your habits, streaks, levels and stats.</li>
           <li>To send essential account email (verification, password reset, sign-in codes, billing and account notices).</li>
-          <li>To send optional product updates — only if you explicitly opt in. You can unsubscribe at any time.</li>
+          <li>To send optional product updates - only if you explicitly opt in. You can unsubscribe at any time.</li>
           <li>To deliver reminder push notifications you&apos;ve set up.</li>
           <li>To keep the service secure and prevent abuse.</li>
         </ul>
@@ -43,11 +43,11 @@ export default function PrivacyPage() {
       <Section title="3. Service providers we share data with">
         <p>We use a small number of trusted processors, only as needed to run the service:</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Stripe</strong> — payment processing for Pro subscriptions.</li>
-          <li><strong>Google</strong> — optional &ldquo;Sign in with Google&rdquo; authentication.</li>
-          <li><strong>Supabase</strong> — secure database hosting for your account and content.</li>
-          <li><strong>Hostinger</strong> — application hosting and outgoing email delivery.</li>
-          <li><strong>Web Push services</strong> (your browser/OS vendor, e.g. Apple, Google, Mozilla) — to deliver reminder notifications.</li>
+          <li><strong>Stripe</strong> - payment processing for Pro subscriptions.</li>
+          <li><strong>Google</strong> - optional &ldquo;Sign in with Google&rdquo; authentication.</li>
+          <li><strong>Supabase</strong> - secure database hosting for your account and content.</li>
+          <li><strong>Hostinger</strong> - application hosting and outgoing email delivery.</li>
+          <li><strong>Web Push services</strong> (your browser/OS vendor, e.g. Apple, Google, Mozilla) - to deliver reminder notifications.</li>
         </ul>
         <p>We do not share your data with advertisers and we do not sell it.</p>
       </Section>

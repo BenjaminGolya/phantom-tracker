@@ -647,7 +647,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
         )}
       </div>
 
-      {/* Data — Pro */}
+      {/* Data - Pro */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
           {t("settings.data")}

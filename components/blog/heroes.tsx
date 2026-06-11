@@ -24,7 +24,7 @@ function Frame({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Build a habit — a contribution grid filling up into a check.
+// Build a habit - a contribution grid filling up into a check.
 export function HabitGridHero() {
   const cols = 16, rows = 7, cell = 26, gap = 8;
   const ox = 80, oy = 70;
@@ -55,7 +55,7 @@ export function HabitGridHero() {
   );
 }
 
-// Best free tracker — a stylized app card with checked rows.
+// Best free tracker - a stylized app card with checked rows.
 export function TrackerCardHero() {
   const rows = [0, 1, 2, 3];
   return (
@@ -86,7 +86,7 @@ export function TrackerCardHero() {
   );
 }
 
-// Why streaks work — a flame over rising bars.
+// Why streaks work - a flame over rising bars.
 export function StreakHero() {
   const bars = [60, 95, 130, 175, 215];
   return (

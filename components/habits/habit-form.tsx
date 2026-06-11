@@ -159,7 +159,7 @@ function CategoryPicker({
                     </div>
                     <div className="flex items-center gap-1.5">
                       {active && <Check size={12} className="text-primary" />}
-                      {/* Remove — only show for custom (non-default) cats */}
+                      {/* Remove - only show for custom (non-default) cats */}
                       {!DEFAULT_CATEGORIES.find((d) => d.label === cat.label) && (
                         <button
                           onClick={(e) => removeCategory(cat.label, e)}
@@ -294,7 +294,7 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
               <div className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-primary border-r border-border">{t("form.hour")}</div>
               <div className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-primary">{t("form.minute")}</div>
             </div>
-            {/* Wheels — selected value is marked by the purple pill */}
+            {/* Wheels - selected value is marked by the purple pill */}
             <div className="flex">
               <div ref={hourCol} className="flex-1 max-h-48 overflow-y-auto py-1 px-1 border-r border-border">
                 {hours.map((h) => {
@@ -329,7 +329,7 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
                 })}
               </div>
             </div>
-            {/* Confirm — closes the dropdown */}
+            {/* Confirm - closes the dropdown */}
             <div className="border-t border-border p-2">
               <button
                 type="button"
@@ -473,7 +473,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
               />
             </div>
 
-            {/* Icon — scrollable palette so the long list stays compact */}
+            {/* Icon - scrollable palette so the long list stays compact */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">{t("form.icon")}</label>
               <div className="rounded-xl border border-border bg-surface-2/40 p-1.5 max-h-44 overflow-y-auto">
@@ -610,7 +610,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
               <p className="text-[11px] text-muted mt-1.5">{t("form.goalHint")}</p>
             </div>
 
-            {/* Reminder — Pro only */}
+            {/* Reminder - Pro only */}
             <div>
               <label className="text-xs text-muted mb-1.5 flex items-center gap-1.5">
                 {t("form.reminder")} <span className="opacity-50">{t("form.optional")}</span>

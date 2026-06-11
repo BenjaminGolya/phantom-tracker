@@ -35,7 +35,7 @@ export function HabitLockGate({ habits, pro }: { habits: GateHabit[]; pro: boole
   );
   const [saving, setSaving] = useState(false);
 
-  // Don't block the upgrade flow — let the user reach pricing.
+  // Don't block the upgrade flow - let the user reach pricing.
   if (pathname?.startsWith("/pricing")) return null;
   if (!isOverFreeLimit(habits, pro)) return null;
 

@@ -38,7 +38,7 @@ async function handle(req: NextRequest) {
     const nudges = await runStreakNudges();
     return NextResponse.json({ ok: true, downgraded, reminders, nudges });
   } catch (err) {
-    // Critical background job — alert the admin if it breaks.
+    // Critical background job - alert the admin if it breaks.
     logError("cron/reminders", err, { alert: true });
     return NextResponse.json({ error: "Reminder run failed" }, { status: 500 });
   }
@@ -83,7 +83,7 @@ async function runStreakNudges(): Promise<number> {
     if (local.hhmm !== STREAK_NUDGE_HHMM) continue;
 
     // Pick the habit with the longest current streak that's scheduled today and
-    // still undone — the one most worth protecting.
+    // still undone - the one most worth protecting.
     let best: { name: string; streak: number } | null = null;
     const dayOfMonth = parseInt(local.date.slice(8, 10), 10);
     for (const h of u.habits) {
@@ -96,7 +96,7 @@ async function runStreakNudges(): Promise<number> {
 
     await sendPushToUser(u.id, {
       title: `🔥 ${best.streak}-day streak`,
-      body: `Don't break it — complete "${best.name}" to keep your streak alive.`,
+      body: `Don't break it - complete "${best.name}" to keep your streak alive.`,
       url: "/dashboard",
       tag: "streak-nudge",
     });
@@ -120,7 +120,7 @@ async function runReminders() {
     const tz = habit.user.timezone;
     if (!tz || !habit.reminderTime) continue;
 
-    // Reminders are a Pro feature — skip free users.
+    // Reminders are a Pro feature - skip free users.
     if (habit.user.plan !== "pro") continue;
 
     let local;

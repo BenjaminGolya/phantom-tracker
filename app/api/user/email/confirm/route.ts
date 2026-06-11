@@ -8,7 +8,7 @@ function redirectTo(req: NextRequest, path: string) {
   return NextResponse.redirect(new URL(path, req.nextUrl.origin));
 }
 
-// Clicked from the confirmation email — token-based, no session required.
+// Clicked from the confirmation email - token-based, no session required.
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
   if (!token) return redirectTo(req, "/login?emailChange=invalid");
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // The active session's email is now stale — send them to log in fresh.
+    // The active session's email is now stale - send them to log in fresh.
     return redirectTo(req, `/login?emailChanged=1&email=${encodeURIComponent(newEmail)}`);
   } catch (err) {
     logError("user/email/confirm", err);
