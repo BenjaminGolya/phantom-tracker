@@ -87,7 +87,11 @@ export function computeTraits(habits: TraitHabit[], opts: { isPro?: boolean } = 
 // wilts when you miss days or stay away. Low vitality just makes the world look
 // overgrown and faded; staying consistent again regrows everything.
 
-export type PlanetStatus = "thriving" | "healthy" | "wilting" | "neglected";
+// 10 living-health bands, from barely-alive to peak. Driven by recent
+// consistency/streaks (not level).
+export type PlanetStatus =
+  | "radiant" | "thriving" | "flourishing" | "healthy" | "steady"
+  | "stable" | "wilting" | "struggling" | "fading" | "dormant";
 
 export type PlanetState = {
   level: number;
@@ -151,7 +155,16 @@ export function planetState(habits: TraitHabit[], opts: { isPro?: boolean; isDia
   const healthyTrees = Math.round(totalTrees * vitality);
 
   const status: PlanetStatus =
-    vitality >= 0.75 ? "thriving" : vitality >= 0.5 ? "healthy" : vitality >= 0.3 ? "wilting" : "neglected";
+    vitality >= 0.92 ? "radiant"
+    : vitality >= 0.84 ? "thriving"
+    : vitality >= 0.76 ? "flourishing"
+    : vitality >= 0.68 ? "healthy"
+    : vitality >= 0.60 ? "steady"
+    : vitality >= 0.52 ? "stable"
+    : vitality >= 0.42 ? "wilting"
+    : vitality >= 0.32 ? "struggling"
+    : vitality >= 0.22 ? "fading"
+    : "dormant";
 
   return { level, xp, radius, hasRing, moons, totalTrees, healthyTrees, vitality, neglectDays, messy, lush, status, diamond: !!opts.isDiamond };
 }

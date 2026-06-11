@@ -18,7 +18,7 @@ const EXAMPLES: { labelKey: DictKey; state: PlanetState }[] = [
   },
   {
     labelKey: "lp.worldNeglected",
-    state: { level: 9, xp: 320, radius: 66, hasRing: true, moons: 2, totalTrees: 12, healthyTrees: 3, vitality: 0.25, neglectDays: 14, messy: 0.7, lush: 0.2, status: "neglected" },
+    state: { level: 9, xp: 320, radius: 66, hasRing: true, moons: 2, totalTrees: 12, healthyTrees: 3, vitality: 0.25, neglectDays: 14, messy: 0.7, lush: 0.2, status: "fading" },
   },
 ];
 

@@ -10,10 +10,16 @@ import { planetState, type PlanetState, type PlanetStatus, type TraitHabit } fro
 const ACCENT = "#7f49c3";
 
 const STATUS_COLOR: Record<PlanetStatus, string> = {
+  radiant: "#34d399",
   thriving: "#46b06a",
+  flourishing: "#5cb866",
   healthy: "#7fae5a",
+  steady: "#a8c24d",
+  stable: "#d4c24a",
   wilting: "#e0a04b",
-  neglected: "#9ca3af",
+  struggling: "#c2845b",
+  fading: "#a8a29e",
+  dormant: "#9ca3af",
 };
 
 type Blob = { x: number; y: number; r: number };
