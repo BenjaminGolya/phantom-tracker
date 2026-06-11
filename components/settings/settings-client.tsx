@@ -447,7 +447,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
                   : { borderColor: "#222", color: "#a1a1aa" }
               }
             >
-              <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#38bdf8" }} />
+              <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#67e8f9" }} />
               {t("set.themeDiamond")}
             </button>
           </div>
