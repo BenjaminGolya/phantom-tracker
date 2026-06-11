@@ -7,6 +7,7 @@ import { TopBar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/prisma";
 import { getProfileLevel } from "@/lib/utils";
 import { isPro, partitionHabits } from "@/lib/plan";
+import { isAdminEmail } from "@/lib/admin";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
 import { isLocale } from "@/lib/i18n/config";
 import { LangSync } from "@/components/i18n/lang-sync";
@@ -33,7 +34,9 @@ export default async function DashboardLayout({
     redirect("/account/reactivate");
   }
 
-  const pro = isPro(dbUser);
+  // Admins use the app with full Pro access and get the extra Admin menu.
+  const admin = isAdminEmail(dbUser?.email);
+  const pro = isPro(dbUser) || admin;
 
   const user = {
     name: dbUser?.name ?? session.user.name ?? null,
@@ -60,6 +63,7 @@ export default async function DashboardLayout({
       <Sidebar
         user={user}
         pro={pro}
+        isAdmin={admin}
         profileLevel={{
           level: profileLevel.level,
           label: profileLevel.label,
@@ -75,7 +79,7 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
-      <MobileNav />
+      <MobileNav isAdmin={admin} />
     </div>
   );
 }

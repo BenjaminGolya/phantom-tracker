@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Target, BarChart2, Settings, Sparkles } from "lucide-react";
+import { LayoutDashboard, Target, BarChart2, Settings, Sparkles, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
@@ -20,10 +20,11 @@ const nav: { href: string; key: DictKey; icon: typeof LayoutDashboard }[] = [
 interface SidebarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
   pro?: boolean;
+  isAdmin?: boolean;
   profileLevel?: { level: number; label: string; emoji: string; color: string; progress: number; xp: number };
 }
 
-export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
+export function Sidebar({ user, pro, isAdmin, profileLevel }: SidebarProps) {
   const pathname = usePathname();
   const { t, lang } = useLang();
 
@@ -69,6 +70,30 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
             </Link>
           );
         })}
+
+        {/* Admin-only entry */}
+        {isAdmin && (() => {
+          const active = pathname.startsWith("/admin");
+          return (
+            <Link
+              href="/admin"
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all",
+                active ? "text-primary" : "text-muted hover:text-white hover:bg-surface-2"
+              )}
+            >
+              <span
+                className={cn(
+                  "flex items-center justify-center w-7 h-7 rounded-lg transition-all shrink-0",
+                  active ? "bg-primary/15 shadow-[0_0_10px_#7f49c330]" : ""
+                )}
+              >
+                <Shield size={15} />
+              </span>
+              Admin
+            </Link>
+          );
+        })()}
       </nav>
 
       {/* Upgrade CTA (free users only) */}
