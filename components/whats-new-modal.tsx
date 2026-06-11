@@ -30,17 +30,19 @@ export function WhatsNewModal({ version }: { version: string }) {
 
     const pub = publicEntries();
 
-    // First ever visit (or storage unavailable): set a baseline silently so we
-    // don't dump the whole history on brand-new users — show only future updates.
-    if (!seen) {
-      try { localStorage.setItem(STORAGE_KEY, version); } catch { /* ignore */ }
-      return;
-    }
-    if (seen === version) return; // already caught up
+    if (seen === version) return; // already caught up on this version
 
-    // Everything newer than the last-seen version (CHANGELOG is newest-first).
-    const seenIdx = pub.findIndex((e) => e.version === seen);
-    const fresh = seenIdx === -1 ? pub.slice(0, 4) : pub.slice(0, seenIdx);
+    // What to show:
+    //  • first-time visitor (no record) or unknown record → the latest updates
+    //  • returning visitor → everything newer than what they last saw
+    //    (CHANGELOG is newest-first, so that's the slice above their version)
+    let fresh: ChangelogEntry[];
+    if (!seen) {
+      fresh = pub.slice(0, 4);
+    } else {
+      const seenIdx = pub.findIndex((e) => e.version === seen);
+      fresh = seenIdx === -1 ? pub.slice(0, 4) : pub.slice(0, seenIdx);
+    }
     if (!fresh.length) {
       try { localStorage.setItem(STORAGE_KEY, version); } catch { /* ignore */ }
       return;
