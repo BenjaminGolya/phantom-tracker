@@ -44,13 +44,6 @@ export const CHANGELOG: ChangelogEntry[] = [
     summary: "What's new: a quick summary of updates the first time you sign in after a release — view anytime in Settings.",
   },
   {
-    version: "1.13.1",
-    date: "2026-06-11",
-    kind: "feature",
-    admin: true,
-    summary: "Admin: user-management panel with time-limited Pro / Diamond comps.",
-  },
-  {
     version: "1.13.0",
     date: "2026-06-11",
     kind: "feature",
