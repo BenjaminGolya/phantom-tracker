@@ -59,6 +59,19 @@ function fileToAvatar(file: File): Promise<string> {
 
 export function SettingsClient({ user, pro = false, lifetime = false, proUntil = null, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
+
+  // Accent theme (Diamond-only). Persisted in localStorage; applied to <html>.
+  const [theme, setTheme] = useState<"default" | "diamond">("default");
+  useEffect(() => {
+    try { setTheme(localStorage.getItem("pt:theme") === "diamond" ? "diamond" : "default"); } catch { /* ignore */ }
+  }, []);
+  function applyTheme(v: "default" | "diamond") {
+    setTheme(v);
+    try {
+      if (v === "diamond") { localStorage.setItem("pt:theme", "diamond"); document.documentElement.classList.add("theme-diamond"); }
+      else { localStorage.removeItem("pt:theme"); document.documentElement.classList.remove("theme-diamond"); }
+    } catch { /* ignore */ }
+  }
   const { t, lang, setLang } = useLang();
   const router = useRouter();
   const push = usePush();
@@ -407,6 +420,39 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
           </div>
         )}
       </div>
+
+      {/* Diamond accent theme (lifetime tier only) */}
+      {lifetime && (
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+            <Gem size={15} style={{ color: "#67e8f9" }} /> {t("set.accentTheme")}
+          </h2>
+          <p className="text-xs text-muted mb-3">{t("set.accentThemeDesc")}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => applyTheme("default")}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-all ${
+                theme === "default" ? "border-primary bg-primary/10 text-white" : "border-border text-muted hover:text-white"
+              }`}
+            >
+              <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#7f49c3" }} />
+              {t("set.themePhantom")}
+            </button>
+            <button
+              onClick={() => applyTheme("diamond")}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-all"
+              style={
+                theme === "diamond"
+                  ? { borderColor: "#67e8f9", background: "#67e8f91a", color: "#fff" }
+                  : { borderColor: "#222", color: "#a1a1aa" }
+              }
+            >
+              <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#38bdf8" }} />
+              {t("set.themeDiamond")}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Profile */}
       <div className="bg-surface border border-border rounded-xl p-5">

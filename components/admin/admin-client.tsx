@@ -59,7 +59,8 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
 
   const stats = useMemo(() => ({
     total: users.length,
-    pro: users.filter((u) => u.pro).length,
+    pro: users.filter((u) => u.pro && !u.lifetime).length,
+    diamond: users.filter((u) => u.lifetime).length,
     disabled: users.filter((u) => u.disabled || u.pendingDeletion).length,
   }), [users]);
 
@@ -119,9 +120,10 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard icon={<Users size={16} className="text-primary" />} label="Total users" value={stats.total} />
         <StatCard icon={<Crown size={16} className="text-amber-400" />} label="Pro" value={stats.pro} />
+        <StatCard icon={<Gem size={16} style={{ color: "#67e8f9" }} />} label="Diamond" value={stats.diamond} />
         <StatCard icon={<Ban size={16} className="text-red-400" />} label="Disabled" value={stats.disabled} />
       </div>
 

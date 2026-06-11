@@ -17,7 +17,7 @@ import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE
 import { PLAN_LIMITS } from "@/lib/plan";
 import {
   Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles, ChevronDown, CalendarDays,
-  Sparkle, Lightbulb, Sun, Cloud, Ghost, Orbit, Infinity as InfinityIcon, type LucideIcon,
+  Sparkle, Lightbulb, Sun, Cloud, Ghost, Orbit, Gem, Infinity as InfinityIcon, type LucideIcon,
 } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
@@ -31,7 +31,7 @@ import { ShareProgress } from "@/components/profile/share-progress";
 
 // Map a profile-level icon name to its lucide component.
 const LEVEL_ICONS: Record<string, LucideIcon> = {
-  Sparkles, Sparkle, Flame, Lightbulb, Star, Zap, Sun, Cloud, Ghost, Orbit, Infinity: InfinityIcon,
+  Sparkles, Sparkle, Flame, Lightbulb, Star, Zap, Sun, Cloud, Ghost, Orbit, Gem, Infinity: InfinityIcon,
 };
 function levelIcon(name?: string): LucideIcon {
   return (name && LEVEL_ICONS[name]) || Sparkles;
@@ -40,6 +40,7 @@ function levelIcon(name?: string): LucideIcon {
 interface StatsClientProps {
   habits: HabitWithLogs[];
   pro?: boolean;
+  diamond?: boolean;
 }
 
 // ─── Animated XP bar ─────────────────────────────────────────────────────────
@@ -58,17 +59,20 @@ function XPProgressBar({ progress, color, delay = 0 }: { progress: number; color
 }
 
 // ─── Profile level hero card ──────────────────────────────────────────────────
-function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boolean }) {
+function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; pro: boolean; diamond: boolean }) {
   const { t, lang } = useLang();
   const info = useMemo(() => getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category })),
-    { isPro: pro }
-  ), [habits, pro]);
+    { isPro: pro, isDiamond: diamond }
+  ), [habits, pro, diamond]);
 
-  // Tiers a free user can display are capped; Pro unlocks the full ladder.
-  const visibleLevels = pro
-    ? PROFILE_LEVELS
-    : PROFILE_LEVELS.filter((l) => !l.pro && l.level <= PLAN_LIMITS.freeProfileLevelCap);
+  // Free tiers are capped; Pro unlocks the full ladder; the Diamond summit
+  // (Singularity) only shows for Diamond.
+  const visibleLevels = PROFILE_LEVELS.filter((l) => {
+    if (l.diamond && !diamond) return false;
+    if (!pro && (l.pro || l.level > PLAN_LIMITS.freeProfileLevelCap)) return false;
+    return true;
+  });
   const next = visibleLevels.find((l) => l.level === info.level + 1);
 
   // Categories counted toward diversity (capped at 5). Derived from XP (10 each).
@@ -387,7 +391,7 @@ function AdvancedStats({
 }
 
 // ─── Main stats page ──────────────────────────────────────────────────────────
-export function StatsClient({ habits, pro = false }: StatsClientProps) {
+export function StatsClient({ habits, pro = false, diamond = false }: StatsClientProps) {
   const mounted = useMounted();
   const { t, lang } = useLang();
   const weekData = useMemo(() => {
@@ -411,7 +415,7 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
   // ── Advanced (Pro) metrics ──
   const profileInfo = getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category })),
-    { isPro: pro }
+    { isPro: pro, isDiamond: diamond }
   );
   const perfectDays = Math.round(profileInfo.breakdown.perfectDays / 5);
   const activeStreakSum = allStreaks.reduce((a, s) => a + s.current, 0);
@@ -490,10 +494,10 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
       ) : (
         <>
           {/* Profile level hero */}
-          <ProfileLevelCard habits={habits} pro={pro} />
+          <ProfileLevelCard habits={habits} pro={pro} diamond={diamond} />
 
           {/* Profile portrait — growing world + personality */}
-          <GrowingPlanet habits={habits} pro={pro} />
+          <GrowingPlanet habits={habits} pro={pro} diamond={diamond} />
           <PersonalityConstellation habits={habits} pro={pro} />
 
           {/* Overview cards */}

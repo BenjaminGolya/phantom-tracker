@@ -3,6 +3,18 @@
 @tailwind utilities;
 
 @layer base {
+  /* Accent colour as RGB channels so Tailwind's `primary` utilities can be
+     re-themed at runtime. Default = phantom purple. */
+  :root {
+    --primary: 127 73 195;     /* #7f49c3 */
+    --primary-dim: 92 52 145;  /* #5c3491 */
+  }
+  /* Diamond tier — icy cyan accent. */
+  .theme-diamond {
+    --primary: 56 189 248;     /* #38bdf8 */
+    --primary-dim: 14 165 233; /* #0ea5e9 */
+  }
+
   * {
     border-color: #222222;
   }

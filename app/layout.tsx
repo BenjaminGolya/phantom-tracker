@@ -88,6 +88,14 @@ export default function RootLayout({
   const lang = isLocale(cookieLang) ? cookieLang : DEFAULT_LOCALE;
   return (
     <html lang={lang} className="dark" suppressHydrationWarning>
+      <head>
+        {/* Apply the saved accent theme before paint to avoid a flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('pt:theme')==='diamond')document.documentElement.classList.add('theme-diamond')}catch(e){}`,
+          }}
+        />
+      </head>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-white`}>
         <Providers lang={lang}>{children}</Providers>
         <AppSplash />

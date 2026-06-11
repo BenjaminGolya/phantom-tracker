@@ -102,9 +102,10 @@ export type PlanetState = {
   messy: number;        // 0..1 overgrowth / fog when you've been away
   lush: number;         // 0..1 greenery + colour intensity
   status: PlanetStatus;
+  diamond?: boolean;    // Diamond tier → exclusive aurora
 };
 
-export function planetState(habits: TraitHabit[], opts: { isPro?: boolean } = {}): PlanetState {
+export function planetState(habits: TraitHabit[], opts: { isPro?: boolean; isDiamond?: boolean } = {}): PlanetState {
   const profile = getProfileLevel(habits, opts);
   const level = profile.level;
   const xp = profile.xp;
@@ -152,5 +153,5 @@ export function planetState(habits: TraitHabit[], opts: { isPro?: boolean } = {}
   const status: PlanetStatus =
     vitality >= 0.75 ? "thriving" : vitality >= 0.5 ? "healthy" : vitality >= 0.3 ? "wilting" : "neglected";
 
-  return { level, xp, radius, hasRing, moons, totalTrees, healthyTrees, vitality, neglectDays, messy, lush, status };
+  return { level, xp, radius, hasRing, moons, totalTrees, healthyTrees, vitality, neglectDays, messy, lush, status, diamond: !!opts.isDiamond };
 }

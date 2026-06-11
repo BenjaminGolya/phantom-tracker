@@ -209,7 +209,9 @@ export const PROFILE_LEVELS = [
   { level: 11, label: "Ascendant", icon: "Orbit",     emoji: "🪐", color: "#8b5cf6", xpRequired: 16000, pro: true },
   { level: 12, label: "Ethereal",  icon: "Sparkles",  emoji: "🌠", color: "#d946ef", xpRequired: 26000, pro: true },
   { level: 13, label: "Eternal",   icon: "Infinity",  emoji: "♾️", color: "#f43f5e", xpRequired: 42000, pro: true },
-] as { level: number; label: string; icon: string; emoji: string; color: string; xpRequired: number; pro?: boolean }[];
+  // ── Diamond-exclusive summit (lifetime tier only) ─────────────────────────
+  { level: 14, label: "Singularity", icon: "Gem",     emoji: "💠", color: "#67e8f9", xpRequired: 65000, pro: true, diamond: true },
+] as { level: number; label: string; icon: string; emoji: string; color: string; xpRequired: number; pro?: boolean; diamond?: boolean }[];
 
 export type XPBreakdown = {
   base: number;
@@ -292,9 +294,10 @@ export function calcProfileXP(
 
 export function getProfileLevel(
   habits: { logs: { date: string; completed: boolean }[]; category: string | null }[],
-  opts: { isPro?: boolean } = {}
+  opts: { isPro?: boolean; isDiamond?: boolean } = {}
 ): ProfileLevelInfo {
   const pro = !!opts.isPro;
+  const diamond = !!opts.isDiamond;
   const breakdown = calcProfileXP(habits);
   const baseXp = breakdown.total;
   // Pro perk: XP boost. Multiplied total flows into level progression + breakdown total.
@@ -304,6 +307,7 @@ export function getProfileLevel(
   // Free users can only climb the non-Pro ladder up to the free cap level.
   const ladder = PROFILE_LEVELS.filter((l) => {
     if (l.pro && !pro) return false;
+    if (l.diamond && !diamond) return false; // Diamond-only summit
     if (!pro && l.level > PLAN_LIMITS.freeProfileLevelCap) return false;
     return true;
   });

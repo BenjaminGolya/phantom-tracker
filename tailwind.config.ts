@@ -14,8 +14,10 @@ const config: Config = {
         surface: "#111111",
         "surface-2": "#1a1a1a",
         border: "#222222",
-        primary: "#7f49c3",
-        "primary-dim": "#5c3491",
+        // Driven by CSS vars so the accent can be themed at runtime
+        // (e.g. the Diamond cyan theme). Defaults to phantom purple.
+        primary: "rgb(var(--primary) / <alpha-value>)",
+        "primary-dim": "rgb(var(--primary-dim) / <alpha-value>)",
         muted: "#a1a1aa",
         phantom: {
           50: "#f3eeff",

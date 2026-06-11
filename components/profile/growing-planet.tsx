@@ -83,6 +83,18 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         </radialGradient>
         <clipPath id={id("clip")}><circle cx={120} cy={108} r={p.radius} /></clipPath>
         <filter id={id("coast")}><feGaussianBlur stdDeviation="1.1" /></filter>
+        {p.diamond && (
+          <>
+            <linearGradient id={id("aurora")} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#22d3ee00" />
+              <stop offset="35%" stopColor="#22d3ee" />
+              <stop offset="55%" stopColor="#a78bfa" />
+              <stop offset="75%" stopColor="#5eead4" />
+              <stop offset="100%" stopColor="#5eead400" />
+            </linearGradient>
+            <filter id={id("auroraBlur")}><feGaussianBlur stdDeviation="3.2" /></filter>
+          </>
+        )}
       </defs>
 
       {/* twinkling stars */}
@@ -143,6 +155,29 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("shade")})`} />
 
+      {/* Diamond-exclusive aurora — shimmering bands arcing over the world */}
+      {p.diamond && (
+        <g filter={`url(#${id("auroraBlur")})`}>
+          {[0, 1, 2].map((k) => {
+            const lift = p.radius + 16 + k * 10;
+            const span = p.radius + 16 + k * 7;
+            return (
+              <motion.path
+                key={`au${k}`}
+                d={`M ${120 - span} ${108 - p.radius * 0.18} Q 120 ${108 - lift} ${120 + span} ${108 - p.radius * 0.18}`}
+                fill="none"
+                stroke={`url(#${id("aurora")})`}
+                strokeWidth={3 - k * 0.6}
+                strokeLinecap="round"
+                initial={{ opacity: 0.15 }}
+                animate={{ opacity: [0.15, 0.6, 0.25, 0.55, 0.15] }}
+                transition={{ duration: 5 + k * 1.5, repeat: Infinity, ease: "easeInOut", delay: k * 0.6 }}
+              />
+            );
+          })}
+        </g>
+      )}
+
       {p.messy > 0.05 && (
         <g clipPath={`url(#${id("clip")})`}>
           <circle cx={120} cy={108} r={p.radius} fill="#9aa6b2" opacity={0.28 * p.messy} />
@@ -168,9 +203,9 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   );
 }
 
-export function GrowingPlanet({ habits, pro }: { habits: TraitHabit[]; pro: boolean }) {
+export function GrowingPlanet({ habits, pro, diamond = false }: { habits: TraitHabit[]; pro: boolean; diamond?: boolean }) {
   const { t } = useLang();
-  const p = useMemo(() => planetState(habits, { isPro: pro }), [habits, pro]);
+  const p = useMemo(() => planetState(habits, { isPro: pro, isDiamond: diamond }), [habits, pro, diamond]);
   const statusColor = STATUS_COLOR[p.status];
 
   return (
