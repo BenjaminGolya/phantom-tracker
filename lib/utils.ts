@@ -300,8 +300,10 @@ export function getProfileLevel(
   const diamond = !!opts.isDiamond;
   const breakdown = calcProfileXP(habits);
   const baseXp = breakdown.total;
-  // Pro perk: XP boost. Multiplied total flows into level progression + breakdown total.
-  const xp = pro ? Math.round(baseXp * PLAN_LIMITS.proXpMultiplier) : baseXp;
+  // XP boost: Diamond > Pro > free. The multiplied total flows into level
+  // progression + the breakdown total.
+  const mult = diamond ? PLAN_LIMITS.diamondXpMultiplier : pro ? PLAN_LIMITS.proXpMultiplier : 1;
+  const xp = Math.round(baseXp * mult);
   breakdown.total = xp;
 
   // Free users can only climb the non-Pro ladder up to the free cap level.

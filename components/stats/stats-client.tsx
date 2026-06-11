@@ -139,9 +139,15 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
           <p className="text-3xl font-mono font-bold" style={{ color: info.color }}>{info.xp}</p>
           <p className="text-xs text-muted">{t("stats.totalXp")}</p>
           {pro && (
-            <p className="text-[10px] text-primary font-medium flex items-center gap-1 justify-end mt-0.5">
-              <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× {t("stats.proBoost")}
-            </p>
+            diamond ? (
+              <p className="text-[10px] font-medium flex items-center gap-1 justify-end mt-0.5" style={{ color: "#67e8f9" }}>
+                <Gem size={9} /> {PLAN_LIMITS.diamondXpMultiplier}× {t("stats.diamondBoost")}
+              </p>
+            ) : (
+              <p className="text-[10px] text-primary font-medium flex items-center gap-1 justify-end mt-0.5">
+                <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× {t("stats.proBoost")}
+              </p>
+            )
           )}
         </div>
       </div>
