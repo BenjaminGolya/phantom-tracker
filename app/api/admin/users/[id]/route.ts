@@ -50,8 +50,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: true, proUntil: null, proSince: now } });
         } else {
           const months = Math.max(1, Math.min(120, Math.round(Number(data?.months) || 1)));
+          const current = await prisma.user.findUnique({ where: { id }, select: { proUntil: true, stripeSubscriptionId: true } });
+          // An active Stripe subscriber is already unlimited Pro - setting a
+          // comp expiry would wrongly lapse them later. Nothing to grant.
+          if (current?.stripeSubscriptionId) {
+            return NextResponse.json({ error: "User has an active subscription - already Pro with no expiry." }, { status: 400 });
+          }
           // Extend from an existing future expiry if there is one, else from now.
-          const current = await prisma.user.findUnique({ where: { id }, select: { proUntil: true } });
           const base = current?.proUntil && current.proUntil.getTime() > now.getTime() ? current.proUntil : now;
           const until = new Date(base);
           until.setMonth(until.getMonth() + months);
@@ -60,7 +65,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         break;
       }
       case "revokePro": {
-        await prisma.user.update({ where: { id }, data: { plan: "free", lifetime: false, proUntil: null } });
+        // Revoke only the comp. A paying Stripe subscriber keeps plan=pro -
+        // their subscription, not the comp, is what makes them Pro.
+        const current = await prisma.user.findUnique({ where: { id }, select: { stripeSubscriptionId: true } });
+        await prisma.user.update({
+          where: { id },
+          data: { plan: current?.stripeSubscriptionId ? "pro" : "free", lifetime: false, proUntil: null },
+        });
         break;
       }
       case "update": {

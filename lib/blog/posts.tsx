@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { HabitGridHero, TrackerCardHero, StreakHero } from "@/components/blog/heroes";
+import { HabitGridHero, TrackerCardHero, StreakHero, DiamondHero } from "@/components/blog/heroes";
 
 // Lightweight prose elements so each article stays readable without a markdown
 // dependency or global CSS.
@@ -28,6 +28,64 @@ export type Post = {
 };
 
 export const POSTS: Post[] = [
+  {
+    slug: "diamond-is-coming",
+    title: "Diamond Is Coming: Lifetime Pro, for a Limited Time",
+    description:
+      "Phantom Tracker's Diamond plan launches soon - pay once, keep Pro forever, plus exclusive perks. Available only for a limited window. Subscribe to the newsletter to hear the moment it opens.",
+    date: "2026-06-12",
+    readingMins: 3,
+    keywords: ["diamond plan", "lifetime habit tracker", "phantom tracker diamond", "lifetime deal"],
+    hero: <DiamondHero />,
+    content: (
+      <>
+        <P>
+          We&apos;ve been quietly building something special: <Strong>Diamond</Strong>, a one-time
+          purchase that gives you Pro <Strong>forever</Strong>. No subscription, no renewals - pay
+          once and you&apos;re set for life.
+        </P>
+
+        <H2>What Diamond includes</H2>
+        <UL>
+          <li><Strong>Everything in Pro, permanently</Strong> - unlimited habits, reminders, advanced stats.</li>
+          <li><Strong>A 2&times; XP boost</Strong> - the biggest in the app (Pro gets 1.5&times;).</li>
+          <li><Strong>The Diamond theme</Strong> - switch the whole app to an exclusive icy-cyan look.</li>
+          <li><Strong>An aurora over your world</Strong> - shimmering light bands only Diamond planets get.</li>
+          <li><Strong>A secret summit level</Strong> - one level above Eternal that only Diamond members can reach.</li>
+          <li><Strong>The Diamond badge</Strong> - shown across the app, so your world knows you were here early.</li>
+        </UL>
+
+        <H2>The catch: it&apos;s limited</H2>
+        <P>
+          Diamond won&apos;t be on sale year-round. It opens for a <Strong>limited launch window</Strong>,
+          and the price will be revealed when it does. When the window closes, it&apos;s gone until we
+          decide to open it again - if we ever do. Early supporters get the best deal we&apos;ll ever
+          offer.
+        </P>
+
+        <H2>How to not miss it</H2>
+        <P>
+          Subscribe to the newsletter and you&apos;ll get one email the moment Diamond opens, with the
+          price and the deadline. That&apos;s it - no spam, just the launch.
+        </P>
+        <UL>
+          <li>
+            Already have an account? Turn on the newsletter in{" "}
+            <a href="/settings#newsletter" className="text-primary hover:underline font-medium">Settings → Newsletter</a>.
+          </li>
+          <li>
+            New here?{" "}
+            <a href="/signup" className="text-primary hover:underline font-medium">Create a free account</a>{" "}
+            and tick the newsletter box - you&apos;ll be tracking habits today and first in line for Diamond.
+          </li>
+        </UL>
+
+        <P>
+          Until then, keep your streaks alive - your world keeps growing either way.
+        </P>
+      </>
+    ),
+  },
   {
     slug: "how-to-build-a-habit-that-sticks",
     title: "How to Build a Habit That Actually Sticks",
