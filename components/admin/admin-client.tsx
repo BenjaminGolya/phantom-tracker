@@ -57,10 +57,14 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
     setBusyId(id);
     setError(null);
     try {
+      // API expects { action, data? } — map our Action's `kind` to `action`.
+      const payload = action.kind === "update"
+        ? { action: "update", data: action.data }
+        : { action: action.kind };
       const res = await fetch(`/api/admin/users/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(action),
+        body: JSON.stringify(payload),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "Action failed.");
