@@ -25,7 +25,7 @@ export default async function DashboardLayout({
     getActiveHabitsWithLogs(session.user.id),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, image: true, plan: true, disabledAt: true, deletionRequestedAt: true, language: true },
+      select: { name: true, email: true, image: true, plan: true, lifetime: true, proUntil: true, disabledAt: true, deletionRequestedAt: true, language: true },
     }),
   ]);
 
@@ -37,6 +37,7 @@ export default async function DashboardLayout({
   // Admins use the app with full Pro access and get the extra Admin menu.
   const admin = isAdminEmail(dbUser?.email);
   const pro = isPro(dbUser) || admin;
+  const lifetime = !!dbUser?.lifetime;
 
   const user = {
     name: dbUser?.name ?? session.user.name ?? null,
@@ -63,6 +64,7 @@ export default async function DashboardLayout({
       <Sidebar
         user={user}
         pro={pro}
+        lifetime={lifetime}
         isAdmin={admin}
         profileLevel={{
           level: profileLevel.level,

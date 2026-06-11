@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Target, BarChart2, Settings, Sparkles, Shield } from "lucide-react";
+import { LayoutDashboard, Target, BarChart2, Settings, Sparkles, Shield, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
@@ -20,11 +20,12 @@ const nav: { href: string; key: DictKey; icon: typeof LayoutDashboard }[] = [
 interface SidebarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
   pro?: boolean;
+  lifetime?: boolean;
   isAdmin?: boolean;
   profileLevel?: { level: number; label: string; emoji: string; color: string; progress: number; xp: number };
 }
 
-export function Sidebar({ user, pro, isAdmin, profileLevel }: SidebarProps) {
+export function Sidebar({ user, pro, lifetime, isAdmin, profileLevel }: SidebarProps) {
   const pathname = usePathname();
   const { t, lang } = useLang();
 
@@ -35,9 +36,18 @@ export function Sidebar({ user, pro, isAdmin, profileLevel }: SidebarProps) {
         <GhostLogo size={28} className="phantom-glow" />
         <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
         {pro && (
-          <span className="ml-auto text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
-            PRO
-          </span>
+          lifetime ? (
+            <span
+              className="ml-auto inline-flex items-center gap-0.5 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md border"
+              style={{ background: "linear-gradient(135deg,#a5f3fc26,#38bdf826,#818cf826)", borderColor: "#67e8f966", color: "#67e8f9" }}
+            >
+              <Gem size={9} /> DIAMOND
+            </span>
+          ) : (
+            <span className="ml-auto text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
+              PRO
+            </span>
+          )
         )}
       </div>
 
