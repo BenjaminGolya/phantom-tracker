@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Target, BarChart2, Settings } from "lucide-react";
+import { LayoutDashboard, Target, BarChart2, Settings, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
@@ -14,7 +14,7 @@ const nav: { href: string; key: DictKey; icon: typeof LayoutDashboard }[] = [
   { href: "/settings", key: "common.settings", icon: Settings },
 ];
 
-export function MobileNav() {
+export function MobileNav({ isAdmin }: { isAdmin?: boolean }) {
   const pathname = usePathname();
   const t = useT();
 
@@ -44,6 +44,21 @@ export function MobileNav() {
             </Link>
           );
         })}
+        {isAdmin && (
+          <Link
+            href="/admin"
+            aria-label="Admin"
+            className={cn(
+              "flex flex-col items-center justify-center gap-0.5 w-16 py-2 rounded-2xl transition-all active:scale-95",
+              pathname.startsWith("/admin")
+                ? "bg-primary text-white shadow-[0_0_16px_#7f49c355]"
+                : "text-muted hover:text-white hover:bg-surface-2"
+            )}
+          >
+            <Shield size={19} />
+            <span className="text-[10px] font-medium leading-none">Admin</span>
+          </Link>
+        )}
       </div>
     </nav>
   );

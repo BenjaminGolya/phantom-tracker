@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Target, BarChart2, Settings, Sparkles } from "lucide-react";
+import { LayoutDashboard, Target, BarChart2, Settings, Sparkles, Shield, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 
@@ -20,23 +20,35 @@ const nav: { href: string; key: DictKey; icon: typeof LayoutDashboard }[] = [
 interface SidebarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
   pro?: boolean;
+  lifetime?: boolean;
+  isAdmin?: boolean;
   profileLevel?: { level: number; label: string; emoji: string; color: string; progress: number; xp: number };
 }
 
-export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
+export function Sidebar({ user, pro, lifetime, isAdmin, profileLevel }: SidebarProps) {
   const pathname = usePathname();
   const { t, lang } = useLang();
 
   return (
     <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-surface shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 h-14 border-b border-border">
-        <GhostLogo size={28} className="phantom-glow" />
-        <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
+      <div className="flex items-center gap-2 px-3 h-14 border-b border-border">
+        <GhostLogo size={26} className="phantom-glow shrink-0" />
+        <span className="font-semibold text-[13px] tracking-tight whitespace-nowrap">Phantom Tracker</span>
         {pro && (
-          <span className="ml-auto text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
-            PRO
-          </span>
+          lifetime ? (
+            <span
+              title="Diamond"
+              className="ml-auto shrink-0 inline-flex items-center gap-0.5 text-[8px] font-bold tracking-wider px-1 py-0.5 rounded-md border"
+              style={{ background: "linear-gradient(135deg,#a5f3fc26,#38bdf826,#818cf826)", borderColor: "#67e8f966", color: "#67e8f9" }}
+            >
+              <Gem size={8} /> DIAMOND
+            </span>
+          ) : (
+            <span className="ml-auto shrink-0 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
+              PRO
+            </span>
+          )
         )}
       </div>
 
@@ -69,6 +81,30 @@ export function Sidebar({ user, pro, profileLevel }: SidebarProps) {
             </Link>
           );
         })}
+
+        {/* Admin-only entry */}
+        {isAdmin && (() => {
+          const active = pathname.startsWith("/admin");
+          return (
+            <Link
+              href="/admin"
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all",
+                active ? "text-primary" : "text-muted hover:text-white hover:bg-surface-2"
+              )}
+            >
+              <span
+                className={cn(
+                  "flex items-center justify-center w-7 h-7 rounded-lg transition-all shrink-0",
+                  active ? "bg-primary/15 shadow-[0_0_10px_#7f49c330]" : ""
+                )}
+              >
+                <Shield size={15} />
+              </span>
+              Admin
+            </Link>
+          );
+        })()}
       </nav>
 
       {/* Upgrade CTA (free users only) */}

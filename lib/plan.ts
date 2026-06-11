@@ -5,9 +5,19 @@
 
 export type Plan = "free" | "pro";
 
-/** Normalize whatever we have on a user into a Plan. */
-export function isPro(user: { plan?: string | null; lifetime?: boolean | null } | null | undefined): boolean {
-  return user?.plan === "pro" || user?.lifetime === true;
+/** Normalize whatever we have on a user into a Plan.
+ *  Lifetime is always Pro. Otherwise plan must be "pro" and, if a comp expiry
+ *  (`proUntil`) is set, it must still be in the future. `proUntil` is optional —
+ *  callers that don't select it fall back to the DB `plan` flag (kept accurate
+ *  by the expiry-downgrade cron). */
+export function isPro(
+  user: { plan?: string | null; lifetime?: boolean | null; proUntil?: Date | string | null } | null | undefined
+): boolean {
+  if (!user) return false;
+  if (user.lifetime === true) return true;
+  if (user.plan !== "pro") return false;
+  if (user.proUntil) return new Date(user.proUntil).getTime() > Date.now();
+  return true;
 }
 
 // ─── Habit visibility (free limit + Pro-locked habits) ────────────────────────

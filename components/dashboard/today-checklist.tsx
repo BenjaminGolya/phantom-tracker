@@ -119,13 +119,6 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
             className="w-7 h-7 rounded-lg border border-border text-muted flex items-center justify-center hover:text-white hover:bg-surface-2 transition-all"
           ><RotateCcw size={13} /></button>
         )}
-        {!done && (
-          <button
-            onClick={() => setConfirm("all")}
-            style={{ backgroundColor: `${habit.color}15`, color: habit.color, borderColor: `${habit.color}40` }}
-            className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
-          >{t("dash.all")}</button>
-        )}
         {!done && val === 0 && (
           <button
             onClick={() => onFreeze(habit.id, today, !frozenToday)}
@@ -134,6 +127,13 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
               frozenToday ? "border-sky-400/50 text-sky-400 bg-sky-400/10" : "border-border text-muted hover:text-sky-400 hover:border-sky-400/40"
             }`}
           ><Snowflake size={13} /></button>
+        )}
+        {!done && (
+          <button
+            onClick={() => setConfirm("all")}
+            style={{ backgroundColor: `${habit.color}15`, color: habit.color, borderColor: `${habit.color}40` }}
+            className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
+          >{t("dash.all")}</button>
         )}
         {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">{t("dash.doneMark")}</span>}
         {frozenToday && <span className="text-[11px] text-sky-400 font-medium pl-1">{t("dash.restDay")}</span>}
@@ -265,40 +265,48 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
               {/* Actions */}
               {done ? (
-                // Completed → allow undo (redo by completing again afterwards)
+                // Completed → icon-only reset (undo)
                 <button
                   onClick={() => onToggle(habit.id, today, false)}
                   title={t("dash.undo")}
-                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                  aria-label={t("dash.undo")}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
                 >
-                  <RotateCcw size={13} /> {t("dash.undo")}
+                  <RotateCcw size={14} />
                 </button>
               ) : frozenToday ? (
-                // Resting → allow undo of the rest day
-                <button
-                  onClick={() => onFreeze(habit.id, today, false)}
-                  title={t("dash.undo")}
-                  className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-sky-400/40 text-xs font-medium text-sky-400 hover:bg-sky-400/10 shrink-0 transition-all"
-                >
-                  <RotateCcw size={13} /> {t("dash.undo")}
-                </button>
+                // Resting → "Rest day" mark + icon-only undo
+                <>
+                  <span className="text-[11px] text-sky-400 font-medium shrink-0">{t("dash.restDay")}</span>
+                  <button
+                    onClick={() => onFreeze(habit.id, today, false)}
+                    title={t("dash.undo")}
+                    aria-label={t("dash.undo")}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-sky-400/40 text-sky-400 hover:bg-sky-400/10 shrink-0 transition-all"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                </>
               ) : (
                 <>
-                  {/* Rest day — clearly labeled, protects the streak */}
+                  {/* Rest day (snowflake) — protects the streak */}
                   <button
                     onClick={() => onFreeze(habit.id, today, true)}
                     title={t("dash.freeze")}
-                    className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-sky-400 hover:border-sky-400/40 shrink-0 transition-all"
+                    aria-label={t("dash.rest")}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-sky-400 hover:border-sky-400/40 shrink-0 transition-all"
                   >
-                    <Snowflake size={13} /> {t("dash.rest")}
+                    <Snowflake size={14} />
                   </button>
-                  {/* Complete */}
+                  {/* Complete (checkmark) */}
                   <button
                     onClick={() => onToggle(habit.id, today, true)}
+                    title={t("dash.complete")}
+                    aria-label={t("dash.complete")}
                     style={{ backgroundColor: habit.color }}
-                    className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
+                    className="flex items-center justify-center w-8 h-8 rounded-lg text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
                   >
-                    <Check size={14} /> {t("dash.complete")}
+                    <Check size={15} />
                   </button>
                 </>
               )}
@@ -361,9 +369,10 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                     <button
                       onClick={() => onToggle(habit.id, today, false, habit.goal ? 0 : undefined)}
                       title={t("dash.undo")}
-                      className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                      aria-label={t("dash.undo")}
+                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
                     >
-                      <RotateCcw size={13} /> {t("dash.undo")}
+                      <RotateCcw size={14} />
                     </button>
                   ) : (
                     <button

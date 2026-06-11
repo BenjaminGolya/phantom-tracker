@@ -33,14 +33,31 @@ async function handle(req: NextRequest) {
   }
 
   try {
+    const downgraded = await downgradeExpiredComps();
     const reminders = await runReminders();
     const nudges = await runStreakNudges();
-    return NextResponse.json({ ok: true, reminders, nudges });
+    return NextResponse.json({ ok: true, downgraded, reminders, nudges });
   } catch (err) {
     // Critical background job — alert the admin if it breaks.
     logError("cron/reminders", err, { alert: true });
     return NextResponse.json({ error: "Reminder run failed" }, { status: 500 });
   }
+}
+
+// Lapse admin-granted, time-limited Pro comps once their expiry passes. Leaves
+// Stripe subscribers and lifetime users untouched. Keeps the DB `plan` flag
+// authoritative for the many routes that only select `plan`.
+async function downgradeExpiredComps(): Promise<number> {
+  const res = await prisma.user.updateMany({
+    where: {
+      plan: "pro",
+      lifetime: false,
+      stripeSubscriptionId: null,
+      proUntil: { not: null, lt: new Date() },
+    },
+    data: { plan: "free" },
+  });
+  return res.count;
 }
 
 // One daily push per user when they have a meaningful streak that isn't done

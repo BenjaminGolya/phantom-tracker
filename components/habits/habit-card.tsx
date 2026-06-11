@@ -43,26 +43,25 @@ function XPBar({ logs, habitColor }: { logs: { completed: boolean }[]; habitColo
     nextTierEmoji?: string; nextTierLabel?: string; nextTierColor?: string; nextTierMinLevel?: number;
   };
 
+  // XP earned toward the *next level* (within this level), so the numbers
+  // match the bar instead of showing lifetime totals.
+  const intoLevel = info.xp - info.xpRequired;
+  const levelSpan = info.xpNext - info.xpRequired;
+  const toNext = Math.max(0, info.xpNext - info.xp);
+
   return (
     <div className="mt-3">
+      {/* Current level — prominent */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-muted flex items-center gap-1">
+        <span className="flex items-center gap-1.5 text-[11px]">
           <span>{info.emoji}</span>
-          <span style={{ color: info.color }}>{levelLabel(info.label, lang)}</span>
-          {info.nextTierEmoji && (
-            <>
-              <span className="opacity-30">·</span>
-              <span className="opacity-50">{t("form.next")}</span>
-              <span>{info.nextTierEmoji}</span>
-              <span className="opacity-50">{levelLabel(info.nextTierLabel ?? "", lang)} {t("form.atLv")}{info.nextTierMinLevel}</span>
-            </>
-          )}
+          <span className="font-bold" style={{ color: info.color }}>{t("nav.level")} {info.level}</span>
+          <span className="text-muted">· {levelLabel(info.label, lang)}</span>
         </span>
-        <span className="text-[10px] font-mono text-muted">
-          {info.xp}/{info.xpNext} XP
-        </span>
+        <span className="text-[10px] font-mono text-muted">{intoLevel}/{levelSpan} XP</span>
       </div>
-      <div className="h-1 rounded-full bg-surface-2 overflow-hidden">
+
+      <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
         <motion.div
           className="h-full rounded-full"
           style={{ backgroundColor: habitColor }}
@@ -70,6 +69,20 @@ function XPBar({ logs, habitColor }: { logs: { completed: boolean }[]; habitColo
           animate={{ width: `${info.progress}%` }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         />
+      </div>
+
+      {/* Next level — and the next tier it unlocks, if any */}
+      <div className="flex items-center justify-between mt-1 text-[9px] text-muted">
+        <span>
+          {t("form.next")}: {t("nav.level")} {info.level + 1}
+          <span className="opacity-60"> · {toNext} XP</span>
+        </span>
+        {info.nextTierEmoji && (
+          <span className="flex items-center gap-1 opacity-80">
+            <span>{info.nextTierEmoji}</span>
+            <span>{levelLabel(info.nextTierLabel ?? "", lang)} {t("form.atLv")}{info.nextTierMinLevel}</span>
+          </span>
+        )}
       </div>
     </div>
   );

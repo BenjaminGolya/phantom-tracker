@@ -7,10 +7,13 @@ import { TopBar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/prisma";
 import { getProfileLevel } from "@/lib/utils";
 import { isPro, partitionHabits } from "@/lib/plan";
+import { isAdminEmail } from "@/lib/admin";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
 import { isLocale } from "@/lib/i18n/config";
 import { LangSync } from "@/components/i18n/lang-sync";
 import { HabitLockGate } from "@/components/habits/habit-lock-gate";
+import { WhatsNewModal } from "@/components/whats-new-modal";
+import { APP_VERSION } from "@/lib/version";
 
 export default async function DashboardLayout({
   children,
@@ -24,7 +27,7 @@ export default async function DashboardLayout({
     getActiveHabitsWithLogs(session.user.id),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, image: true, plan: true, disabledAt: true, deletionRequestedAt: true, language: true },
+      select: { name: true, email: true, image: true, plan: true, lifetime: true, proUntil: true, disabledAt: true, deletionRequestedAt: true, language: true },
     }),
   ]);
 
@@ -33,7 +36,10 @@ export default async function DashboardLayout({
     redirect("/account/reactivate");
   }
 
-  const pro = isPro(dbUser);
+  // Admins use the app with full Pro access and get the extra Admin menu.
+  const admin = isAdminEmail(dbUser?.email);
+  const pro = isPro(dbUser) || admin;
+  const lifetime = !!dbUser?.lifetime;
 
   const user = {
     name: dbUser?.name ?? session.user.name ?? null,
@@ -60,6 +66,8 @@ export default async function DashboardLayout({
       <Sidebar
         user={user}
         pro={pro}
+        lifetime={lifetime}
+        isAdmin={admin}
         profileLevel={{
           level: profileLevel.level,
           label: profileLevel.label,
@@ -75,7 +83,8 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
-      <MobileNav />
+      <MobileNav isAdmin={admin} />
+      <WhatsNewModal version={APP_VERSION} />
     </div>
   );
 }
