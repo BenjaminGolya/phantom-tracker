@@ -10,29 +10,57 @@ import { planetState, type PlanetState, type PlanetStatus, type TraitHabit } fro
 const ACCENT = "#7f49c3";
 
 const STATUS_COLOR: Record<PlanetStatus, string> = {
+  radiant: "#34d399",
   thriving: "#46b06a",
+  flourishing: "#5cb866",
   healthy: "#7fae5a",
+  steady: "#a8c24d",
+  stable: "#d4c24a",
   wilting: "#e0a04b",
-  neglected: "#9ca3af",
+  struggling: "#c2845b",
+  fading: "#a8a29e",
+  dormant: "#9ca3af",
 };
 
 type Blob = { x: number; y: number; r: number };
 
-// Two landmasses, each made of a few overlapping circles (read as blobby
-// continents once softened). Coordinates are local to the planet centre.
-function continents(R: number): Blob[] {
-  return [
-    { x: -0.30 * R, y: -0.06 * R, r: 0.30 * R },
-    { x: -0.12 * R, y: -0.24 * R, r: 0.20 * R },
-    { x: -0.40 * R, y: 0.16 * R, r: 0.17 * R },
-    { x: 0.26 * R, y: 0.22 * R, r: 0.26 * R },
-    { x: 0.42 * R, y: 0.30 * R, r: 0.15 * R },
-  ];
+// Small seeded PRNG so each user gets their own (but stable) land shape.
+function mulberry32(a: number) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Per-user random continents: 2–4 landmasses, each a cluster of overlapping
+// blobs (read as soft continents). Clipped to the globe, so blobs may spill
+// past the edge. Deterministic for a given `seed`.
+function continents(R: number, seed = 1): Blob[] {
+  const rnd = mulberry32(seed || 1);
+  const masses = 2 + Math.floor(rnd() * 3);
+  const out: Blob[] = [];
+  for (let m = 0; m < masses; m++) {
+    const ang = rnd() * Math.PI * 2;
+    const dist = (0.12 + rnd() * 0.42) * R;
+    const mx = Math.cos(ang) * dist;
+    const my = Math.sin(ang) * dist;
+    const blobs = 2 + Math.floor(rnd() * 3);
+    for (let b = 0; b < blobs; b++) {
+      out.push({
+        x: mx + (rnd() - 0.5) * R * 0.34,
+        y: my + (rnd() - 0.5) * R * 0.34,
+        r: R * (0.15 + rnd() * 0.17),
+      });
+    }
+  }
+  return out;
 }
 
 // Deterministically scatter trees INSIDE the continents (never on ocean).
-function treePositions(count: number, radius: number) {
-  const blobs = continents(radius);
+function treePositions(count: number, radius: number, seed = 1) {
+  const blobs = continents(radius, seed);
   const totalArea = blobs.reduce((s, b) => s + b.r * b.r, 0);
   const out: { x: number; y: number; s: number }[] = [];
   let placed = 0;
@@ -60,12 +88,14 @@ function treePositions(count: number, radius: number) {
 export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const uid = useId().replace(/[:]/g, "");
   const id = (k: string) => `${k}-${uid}`;
-  const trees = useMemo(() => treePositions(p.totalTrees, p.radius), [p.totalTrees, p.radius]);
+  const seed = p.seed ?? 1;
+  const blobs = useMemo(() => continents(p.radius, seed), [p.radius, seed]);
+  const trees = useMemo(() => treePositions(p.totalTrees, p.radius, seed), [p.totalTrees, p.radius, seed]);
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
   return (
-    <svg viewBox="0 0 240 220" className="w-full max-w-[320px]">
+    <svg viewBox="0 0 240 220" className="w-full max-w-[400px]">
       <defs>
         <radialGradient id={id("atmo")} cx="50%" cy="50%" r="50%">
           <stop offset="70%" stopColor={`${ACCENT}00`} />
@@ -83,6 +113,18 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         </radialGradient>
         <clipPath id={id("clip")}><circle cx={120} cy={108} r={p.radius} /></clipPath>
         <filter id={id("coast")}><feGaussianBlur stdDeviation="1.1" /></filter>
+        {p.diamond && (
+          <>
+            <linearGradient id={id("aurora")} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#22d3ee00" />
+              <stop offset="35%" stopColor="#22d3ee" />
+              <stop offset="55%" stopColor="#a78bfa" />
+              <stop offset="75%" stopColor="#5eead4" />
+              <stop offset="100%" stopColor="#5eead400" />
+            </linearGradient>
+            <filter id={id("auroraBlur")}><feGaussianBlur stdDeviation="3.2" /></filter>
+          </>
+        )}
       </defs>
 
       {/* twinkling stars */}
@@ -114,7 +156,7 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
       >
         <g transform="translate(120 108)">
           <g filter={`url(#${id("coast")})`}>
-            {continents(p.radius).map((b, i) => (
+            {blobs.map((b, i) => (
               <circle key={i} cx={b.x} cy={b.y} r={b.r} fill={land} />
             ))}
           </g>
@@ -143,6 +185,29 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("shade")})`} />
 
+      {/* Diamond-exclusive aurora — shimmering bands arcing over the world */}
+      {p.diamond && (
+        <g filter={`url(#${id("auroraBlur")})`}>
+          {[0, 1, 2].map((k) => {
+            const lift = p.radius + 16 + k * 10;
+            const span = p.radius + 16 + k * 7;
+            return (
+              <motion.path
+                key={`au${k}`}
+                d={`M ${120 - span} ${108 - p.radius * 0.18} Q 120 ${108 - lift} ${120 + span} ${108 - p.radius * 0.18}`}
+                fill="none"
+                stroke={`url(#${id("aurora")})`}
+                strokeWidth={3 - k * 0.6}
+                strokeLinecap="round"
+                initial={{ opacity: 0.15 }}
+                animate={{ opacity: [0.15, 0.6, 0.25, 0.55, 0.15] }}
+                transition={{ duration: 5 + k * 1.5, repeat: Infinity, ease: "easeInOut", delay: k * 0.6 }}
+              />
+            );
+          })}
+        </g>
+      )}
+
       {p.messy > 0.05 && (
         <g clipPath={`url(#${id("clip")})`}>
           <circle cx={120} cy={108} r={p.radius} fill="#9aa6b2" opacity={0.28 * p.messy} />
@@ -168,9 +233,9 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   );
 }
 
-export function GrowingPlanet({ habits, pro }: { habits: TraitHabit[]; pro: boolean }) {
+export function GrowingPlanet({ habits, pro, diamond = false, seed = 1 }: { habits: TraitHabit[]; pro: boolean; diamond?: boolean; seed?: number }) {
   const { t } = useLang();
-  const p = useMemo(() => planetState(habits, { isPro: pro }), [habits, pro]);
+  const p = useMemo(() => planetState(habits, { isPro: pro, isDiamond: diamond, seed }), [habits, pro, diamond, seed]);
   const statusColor = STATUS_COLOR[p.status];
 
   return (

@@ -5,7 +5,9 @@ import { useLang } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import { computeTraits, TRAIT_ORDER, type TraitHabit } from "@/lib/profile-traits";
 
-const ACCENT = "#7f49c3";
+// Follow the active accent theme (purple by default, cyan on Diamond).
+const ACCENT = "rgb(var(--primary))";
+const ACCENT_SOFT = "rgb(var(--primary) / 0.25)";
 
 export function PersonalityConstellation({ habits, pro }: { habits: TraitHabit[]; pro: boolean }) {
   const { t } = useLang();
@@ -37,13 +39,11 @@ export function PersonalityConstellation({ habits, pro }: { habits: TraitHabit[]
             })}
             <motion.polygon
               points={shape}
-              fill={`${ACCENT}40`}
-              stroke={ACCENT}
               strokeWidth={2}
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ transformOrigin: `${cx}px ${cy}px` }}
+              style={{ fill: ACCENT_SOFT, stroke: ACCENT, transformOrigin: `${cx}px ${cy}px` }}
             />
             {TRAIT_ORDER.map((k, i) => {
               const [x, y] = pt(i, R * Math.max(0.06, traits.scores[k]));

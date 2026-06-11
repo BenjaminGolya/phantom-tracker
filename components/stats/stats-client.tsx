@@ -13,11 +13,11 @@ const WeeklyChart = dynamic(() => import("./weekly-chart"), {
   loading: () => <div className="h-[140px] rounded-lg bg-surface-2 animate-pulse" />,
 });
 import Link from "next/link";
-import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
+import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS } from "@/lib/utils";
 import { PLAN_LIMITS } from "@/lib/plan";
 import {
   Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles, ChevronDown, CalendarDays,
-  Sparkle, Lightbulb, Sun, Cloud, Ghost, Orbit, Infinity as InfinityIcon, type LucideIcon,
+  Sparkle, Lightbulb, Sun, Cloud, Ghost, Orbit, Gem, Infinity as InfinityIcon, type LucideIcon,
 } from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
@@ -31,7 +31,7 @@ import { ShareProgress } from "@/components/profile/share-progress";
 
 // Map a profile-level icon name to its lucide component.
 const LEVEL_ICONS: Record<string, LucideIcon> = {
-  Sparkles, Sparkle, Flame, Lightbulb, Star, Zap, Sun, Cloud, Ghost, Orbit, Infinity: InfinityIcon,
+  Sparkles, Sparkle, Flame, Lightbulb, Star, Zap, Sun, Cloud, Ghost, Orbit, Gem, Infinity: InfinityIcon,
 };
 function levelIcon(name?: string): LucideIcon {
   return (name && LEVEL_ICONS[name]) || Sparkles;
@@ -40,6 +40,8 @@ function levelIcon(name?: string): LucideIcon {
 interface StatsClientProps {
   habits: HabitWithLogs[];
   pro?: boolean;
+  diamond?: boolean;
+  seed?: number;
 }
 
 // ─── Animated XP bar ─────────────────────────────────────────────────────────
@@ -58,17 +60,20 @@ function XPProgressBar({ progress, color, delay = 0 }: { progress: number; color
 }
 
 // ─── Profile level hero card ──────────────────────────────────────────────────
-function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boolean }) {
+function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; pro: boolean; diamond: boolean }) {
   const { t, lang } = useLang();
   const info = useMemo(() => getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category })),
-    { isPro: pro }
-  ), [habits, pro]);
+    { isPro: pro, isDiamond: diamond }
+  ), [habits, pro, diamond]);
 
-  // Tiers a free user can display are capped; Pro unlocks the full ladder.
-  const visibleLevels = pro
-    ? PROFILE_LEVELS
-    : PROFILE_LEVELS.filter((l) => !l.pro && l.level <= PLAN_LIMITS.freeProfileLevelCap);
+  // Free tiers are capped; Pro unlocks the full ladder; the Diamond summit
+  // (Singularity) only shows for Diamond.
+  const visibleLevels = PROFILE_LEVELS.filter((l) => {
+    if (l.diamond && !diamond) return false;
+    if (!pro && (l.pro || l.level > PLAN_LIMITS.freeProfileLevelCap)) return false;
+    return true;
+  });
   const next = visibleLevels.find((l) => l.level === info.level + 1);
 
   // Categories counted toward diversity (capped at 5). Derived from XP (10 each).
@@ -256,6 +261,8 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
             nextTierEmoji?: string; nextTierLabel?: string; nextTierColor?: string; nextTierMinLevel?: number;
           };
           const HabitIcon = getHabitIcon(habit.icon);
+          const intoLevel = info.xp - info.xpRequired;
+          const levelSpan = info.xpNext - info.xpRequired;
 
           return (
             <motion.div
@@ -263,47 +270,38 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-surface border border-border rounded-xl p-3"
+              className="bg-surface border border-border rounded-xl p-3.5"
             >
-              {/* Header row */}
-              <div className="flex items-center gap-3 mb-2.5">
+              {/* Header */}
+              <div className="flex items-center gap-3">
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: `${habit.color}20`, border: `1px solid ${habit.color}40`, color: habit.color }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{
+                    background: `linear-gradient(140deg, ${habit.color}33, ${habit.color}0d)`,
+                    border: `1px solid ${habit.color}40`,
+                    color: habit.color,
+                  }}
                 >
-                  <HabitIcon size={16} />
+                  <HabitIcon size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium truncate">{habit.name}</p>
-                    {/* Tier badge + level number */}
-                    <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                      <div
-                        className="px-1.5 py-0.5 rounded-md text-xs font-mono font-bold border"
-                        style={{ color: info.color, borderColor: `${info.color}40`, background: `${info.color}12` }}
-                      >
-                        {info.emoji}
-                      </div>
-                      <span className="text-xs font-mono text-muted">Lv.{info.level}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[11px] font-medium" style={{ color: info.color }}>{levelLabel(info.label, lang)}</span>
-                    {info.nextTierEmoji && (
-                      <span className="text-[11px] text-muted flex items-center gap-1">
-                        <span className="opacity-40">·</span>
-                        <span>{t("form.next")}</span>
-                        <span>{info.nextTierEmoji}</span>
-                        <span>{levelLabel(info.nextTierLabel ?? "", lang)} {t("form.atLv")}{info.nextTierMinLevel}</span>
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-sm font-medium truncate">{habit.name}</p>
+                  <p className="text-[11px] flex items-center gap-1 mt-0.5">
+                    <span>{info.emoji}</span>
+                    <span className="font-medium" style={{ color: info.color }}>{levelLabel(info.label, lang)}</span>
+                  </p>
                 </div>
+                <span
+                  className="shrink-0 inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold border"
+                  style={{ color: info.color, borderColor: `${info.color}40`, background: `${info.color}12` }}
+                >
+                  {t("nav.level")} {info.level}
+                </span>
               </div>
 
-              {/* XP progress bar with tier milestone dots */}
-              <div className="relative">
-                <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden mb-1">
+              {/* Progress to next level */}
+              <div className="mt-3">
+                <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{ backgroundColor: info.color }}
@@ -312,37 +310,19 @@ function HabitLevelTracker({ habits }: { habits: HabitWithLogs[] }) {
                     transition={{ duration: 0.7, delay: i * 0.05, ease: "easeOut" }}
                   />
                 </div>
-                {/* Tier milestone dots on the bar */}
-                <div className="flex justify-between mt-1.5">
-                  {LEVELS.map((tier) => {
-                    const reached = info.level >= tier.minLevel;
-                    const isCurrent = info.level >= tier.minLevel &&
-                      (LEVELS.find(t => t.minLevel > tier.minLevel)?.minLevel ?? Infinity) > info.level;
-                    return (
-                      <div key={tier.minLevel} className="flex flex-col items-center gap-0.5">
-                        <div
-                          className="w-1.5 h-1.5 rounded-full transition-all"
-                          style={{
-                            backgroundColor: reached ? tier.color : "#2a2a2a",
-                            boxShadow: isCurrent ? `0 0 6px ${tier.color}` : undefined,
-                          }}
-                        />
-                        <span
-                          className="text-[8px] font-bold font-mono"
-                          style={{ color: reached ? tier.color : "#3a3a3a" }}
-                        >
-                          {tier.emoji}
-                        </span>
-                      </div>
-                    );
-                  })}
+                <div className="flex items-center justify-between mt-1 text-[10px] text-muted">
+                  <span className="flex items-center gap-1">
+                    {t("form.next")}: {t("nav.level")} {info.level + 1}
+                    {info.nextTierEmoji && (
+                      <>
+                        <span className="opacity-40">·</span>
+                        <span>{info.nextTierEmoji}</span>
+                        <span>{levelLabel(info.nextTierLabel ?? "", lang)}</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="font-mono">{intoLevel} / {levelSpan} XP</span>
                 </div>
-              </div>
-
-              <div className="flex justify-end mt-1">
-                <span className="text-[10px] font-mono text-muted">
-                  {info.xp} / {info.xpNext} XP
-                </span>
               </div>
             </motion.div>
           );
@@ -412,7 +392,7 @@ function AdvancedStats({
 }
 
 // ─── Main stats page ──────────────────────────────────────────────────────────
-export function StatsClient({ habits, pro = false }: StatsClientProps) {
+export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: StatsClientProps) {
   const mounted = useMounted();
   const { t, lang } = useLang();
   const weekData = useMemo(() => {
@@ -436,7 +416,7 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
   // ── Advanced (Pro) metrics ──
   const profileInfo = getProfileLevel(
     habits.map((h) => ({ logs: h.logs, category: h.category })),
-    { isPro: pro }
+    { isPro: pro, isDiamond: diamond }
   );
   const perfectDays = Math.round(profileInfo.breakdown.perfectDays / 5);
   const activeStreakSum = allStreaks.reduce((a, s) => a + s.current, 0);
@@ -515,10 +495,10 @@ export function StatsClient({ habits, pro = false }: StatsClientProps) {
       ) : (
         <>
           {/* Profile level hero */}
-          <ProfileLevelCard habits={habits} pro={pro} />
+          <ProfileLevelCard habits={habits} pro={pro} diamond={diamond} />
 
           {/* Profile portrait — growing world + personality */}
-          <GrowingPlanet habits={habits} pro={pro} />
+          <GrowingPlanet habits={habits} pro={pro} diamond={diamond} seed={seed} />
           <PersonalityConstellation habits={habits} pro={pro} />
 
           {/* Overview cards */}

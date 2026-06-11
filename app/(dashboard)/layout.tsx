@@ -50,7 +50,7 @@ export default async function DashboardLayout({
   const { active: activeHabits } = partitionHabits(habits, pro);
   const profileLevel = getProfileLevel(
     activeHabits.map((h) => ({ logs: h.logs, category: h.category })),
-    { isPro: pro }
+    { isPro: pro, isDiamond: lifetime }
   );
 
   return (
