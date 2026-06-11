@@ -83,3 +83,29 @@
 @media (prefers-reduced-motion: reduce) {
   .phantom-bounce, .phantom-shadow { animation: none; }
 }
+
+/* ── Diamond theme — ambient cues beyond the accent colour ───────────────────
+   Unlayered (after @tailwind utilities) so these win over utility classes. */
+html.theme-diamond body {
+  background:
+    radial-gradient(110% 55% at 50% -18%, rgba(56, 189, 248, 0.13), transparent 55%),
+    radial-gradient(60% 45% at 100% -5%, rgba(129, 140, 248, 0.08), transparent 60%),
+    radial-gradient(50% 40% at 0% 0%, rgba(94, 234, 212, 0.05), transparent 60%),
+    #0a0a0a;
+  background-attachment: fixed;
+}
+/* A faint frost line + glow along the very top of the app. */
+html.theme-diamond body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 100;
+  background: linear-gradient(90deg, transparent, #38bdf8, #a78bfa, #5eead4, transparent);
+  opacity: 0.5;
+}
+/* Brand glow + scrollbar pick up the cyan accent too. */
+html.theme-diamond .phantom-glow { box-shadow: 0 0 20px rgba(56, 189, 248, 0.32); }
+html.theme-diamond .phantom-glow-md { box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); }
+html.theme-diamond ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
