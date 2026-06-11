@@ -41,6 +41,7 @@ interface StatsClientProps {
   habits: HabitWithLogs[];
   pro?: boolean;
   diamond?: boolean;
+  seed?: number;
 }
 
 // ─── Animated XP bar ─────────────────────────────────────────────────────────
@@ -391,7 +392,7 @@ function AdvancedStats({
 }
 
 // ─── Main stats page ──────────────────────────────────────────────────────────
-export function StatsClient({ habits, pro = false, diamond = false }: StatsClientProps) {
+export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: StatsClientProps) {
   const mounted = useMounted();
   const { t, lang } = useLang();
   const weekData = useMemo(() => {
@@ -497,7 +498,7 @@ export function StatsClient({ habits, pro = false, diamond = false }: StatsClien
           <ProfileLevelCard habits={habits} pro={pro} diamond={diamond} />
 
           {/* Profile portrait — growing world + personality */}
-          <GrowingPlanet habits={habits} pro={pro} diamond={diamond} />
+          <GrowingPlanet habits={habits} pro={pro} diamond={diamond} seed={seed} />
           <PersonalityConstellation habits={habits} pro={pro} />
 
           {/* Overview cards */}

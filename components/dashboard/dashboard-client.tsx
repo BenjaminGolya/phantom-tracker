@@ -25,9 +25,10 @@ interface DashboardClientProps {
   habits: HabitWithLogs[];
   pro?: boolean;
   diamond?: boolean;
+  seed?: number;
 }
 
-export function DashboardClient({ habits: initialHabits, pro = false, diamond = false }: DashboardClientProps) {
+export function DashboardClient({ habits: initialHabits, pro = false, diamond = false, seed = 1 }: DashboardClientProps) {
   const router = useRouter();
   const mounted = useMounted();
   const { t, lang } = useLang();
@@ -58,7 +59,7 @@ export function DashboardClient({ habits: initialHabits, pro = false, diamond = 
 
   const bestStreak = Math.max(0, ...habits.map((h) => calcStreak(h.logs).current));
   const score = phantomScore(habits.map((h) => ({ logs: h.logs })));
-  const planet = planetState(habits, { isPro: pro, isDiamond: diamond });
+  const planet = planetState(habits, { isPro: pro, isDiamond: diamond, seed });
 
   // Progress counts only habits actually scheduled for today.
   const dueToday = habits.filter((h) => isScheduledOn(h.frequency, new Date()));

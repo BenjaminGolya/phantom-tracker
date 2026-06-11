@@ -4,6 +4,7 @@ import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { getCurrentPlan } from "@/lib/get-plan";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
 import { partitionHabits } from "@/lib/plan";
+import { hashSeed } from "@/lib/profile-traits";
 
 export const dynamic = "force-dynamic";
 
@@ -16,5 +17,5 @@ export default async function DashboardPage() {
 
   // Locked habits (over the free limit) stay hidden from the dashboard.
   const { active } = partitionHabits(habits, pro);
-  return <DashboardClient habits={active} pro={pro} diamond={diamond} />;
+  return <DashboardClient habits={active} pro={pro} diamond={diamond} seed={hashSeed(session!.user!.id)} />;
 }

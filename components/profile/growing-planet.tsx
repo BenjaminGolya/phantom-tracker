@@ -24,21 +24,43 @@ const STATUS_COLOR: Record<PlanetStatus, string> = {
 
 type Blob = { x: number; y: number; r: number };
 
-// Two landmasses, each made of a few overlapping circles (read as blobby
-// continents once softened). Coordinates are local to the planet centre.
-function continents(R: number): Blob[] {
-  return [
-    { x: -0.30 * R, y: -0.06 * R, r: 0.30 * R },
-    { x: -0.12 * R, y: -0.24 * R, r: 0.20 * R },
-    { x: -0.40 * R, y: 0.16 * R, r: 0.17 * R },
-    { x: 0.26 * R, y: 0.22 * R, r: 0.26 * R },
-    { x: 0.42 * R, y: 0.30 * R, r: 0.15 * R },
-  ];
+// Small seeded PRNG so each user gets their own (but stable) land shape.
+function mulberry32(a: number) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Per-user random continents: 2–4 landmasses, each a cluster of overlapping
+// blobs (read as soft continents). Clipped to the globe, so blobs may spill
+// past the edge. Deterministic for a given `seed`.
+function continents(R: number, seed = 1): Blob[] {
+  const rnd = mulberry32(seed || 1);
+  const masses = 2 + Math.floor(rnd() * 3);
+  const out: Blob[] = [];
+  for (let m = 0; m < masses; m++) {
+    const ang = rnd() * Math.PI * 2;
+    const dist = (0.12 + rnd() * 0.42) * R;
+    const mx = Math.cos(ang) * dist;
+    const my = Math.sin(ang) * dist;
+    const blobs = 2 + Math.floor(rnd() * 3);
+    for (let b = 0; b < blobs; b++) {
+      out.push({
+        x: mx + (rnd() - 0.5) * R * 0.34,
+        y: my + (rnd() - 0.5) * R * 0.34,
+        r: R * (0.15 + rnd() * 0.17),
+      });
+    }
+  }
+  return out;
 }
 
 // Deterministically scatter trees INSIDE the continents (never on ocean).
-function treePositions(count: number, radius: number) {
-  const blobs = continents(radius);
+function treePositions(count: number, radius: number, seed = 1) {
+  const blobs = continents(radius, seed);
   const totalArea = blobs.reduce((s, b) => s + b.r * b.r, 0);
   const out: { x: number; y: number; s: number }[] = [];
   let placed = 0;
@@ -66,12 +88,14 @@ function treePositions(count: number, radius: number) {
 export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const uid = useId().replace(/[:]/g, "");
   const id = (k: string) => `${k}-${uid}`;
-  const trees = useMemo(() => treePositions(p.totalTrees, p.radius), [p.totalTrees, p.radius]);
+  const seed = p.seed ?? 1;
+  const blobs = useMemo(() => continents(p.radius, seed), [p.radius, seed]);
+  const trees = useMemo(() => treePositions(p.totalTrees, p.radius, seed), [p.totalTrees, p.radius, seed]);
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
   return (
-    <svg viewBox="0 0 240 220" className="w-full max-w-[320px]">
+    <svg viewBox="0 0 240 220" className="w-full max-w-[400px]">
       <defs>
         <radialGradient id={id("atmo")} cx="50%" cy="50%" r="50%">
           <stop offset="70%" stopColor={`${ACCENT}00`} />
@@ -132,7 +156,7 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
       >
         <g transform="translate(120 108)">
           <g filter={`url(#${id("coast")})`}>
-            {continents(p.radius).map((b, i) => (
+            {blobs.map((b, i) => (
               <circle key={i} cx={b.x} cy={b.y} r={b.r} fill={land} />
             ))}
           </g>
@@ -209,9 +233,9 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   );
 }
 
-export function GrowingPlanet({ habits, pro, diamond = false }: { habits: TraitHabit[]; pro: boolean; diamond?: boolean }) {
+export function GrowingPlanet({ habits, pro, diamond = false, seed = 1 }: { habits: TraitHabit[]; pro: boolean; diamond?: boolean; seed?: number }) {
   const { t } = useLang();
-  const p = useMemo(() => planetState(habits, { isPro: pro, isDiamond: diamond }), [habits, pro, diamond]);
+  const p = useMemo(() => planetState(habits, { isPro: pro, isDiamond: diamond, seed }), [habits, pro, diamond, seed]);
   const statusColor = STATUS_COLOR[p.status];
 
   return (

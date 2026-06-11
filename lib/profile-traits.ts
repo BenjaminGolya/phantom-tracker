@@ -107,15 +107,26 @@ export type PlanetState = {
   lush: number;         // 0..1 greenery + colour intensity
   status: PlanetStatus;
   diamond?: boolean;    // Diamond tier → exclusive aurora
+  seed?: number;        // per-user random land shape
 };
 
-export function planetState(habits: TraitHabit[], opts: { isPro?: boolean; isDiamond?: boolean } = {}): PlanetState {
+// Stable 32-bit seed from a string (e.g. user id) → unique land per user.
+export function hashSeed(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) || 1;
+}
+
+export function planetState(habits: TraitHabit[], opts: { isPro?: boolean; isDiamond?: boolean; seed?: number } = {}): PlanetState {
   const profile = getProfileLevel(habits, opts);
   const level = profile.level;
   const xp = profile.xp;
 
   const stage = Math.min(5, Math.floor((level - 1) / 2)); // lvl 1-2→0 … 11+→5
-  const radius = 38 + stage * 7;                          // 38 → 73
+  const radius = 46 + stage * 7;                          // 46 → 81 (bigger globe)
   const hasRing = level >= 6;
   const moons = level >= 9 ? 2 : level >= 4 ? 1 : 0;
   const totalTrees = Math.min(14, Math.round(xp / 25));
@@ -166,5 +177,5 @@ export function planetState(habits: TraitHabit[], opts: { isPro?: boolean; isDia
     : vitality >= 0.22 ? "fading"
     : "dormant";
 
-  return { level, xp, radius, hasRing, moons, totalTrees, healthyTrees, vitality, neglectDays, messy, lush, status, diamond: !!opts.isDiamond };
+  return { level, xp, radius, hasRing, moons, totalTrees, healthyTrees, vitality, neglectDays, messy, lush, status, diamond: !!opts.isDiamond, seed: opts.seed };
 }

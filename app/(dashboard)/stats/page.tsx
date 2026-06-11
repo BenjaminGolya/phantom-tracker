@@ -4,6 +4,7 @@ import { StatsClient } from "@/components/stats/stats-client";
 import { getCurrentPlan } from "@/lib/get-plan";
 import { getActiveHabitsWithLogs } from "@/lib/habits";
 import { partitionHabits } from "@/lib/plan";
+import { hashSeed } from "@/lib/profile-traits";
 
 export const dynamic = "force-dynamic";
 
@@ -15,5 +16,5 @@ export default async function StatsPage() {
   ]);
 
   const { active } = partitionHabits(habits, pro);
-  return <StatsClient habits={active} pro={pro} diamond={diamond} />;
+  return <StatsClient habits={active} pro={pro} diamond={diamond} seed={hashSeed(session!.user!.id)} />;
 }
