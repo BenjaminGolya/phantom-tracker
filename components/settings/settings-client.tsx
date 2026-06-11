@@ -894,7 +894,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
       )}
 
       {/* About / version */}
-      <div className="bg-surface border border-border rounded-xl p-5">
+      <div id="changelog" className="bg-surface border border-border rounded-xl p-5 scroll-mt-20">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium flex items-center gap-2">
             <GhostLogo size={16} /> Phantom Tracker
@@ -916,7 +916,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
             <span className="hidden group-open:inline">{t("set.hideChangelog")}</span>
           </summary>
           <ul className="mt-2 space-y-2 border-t border-border pt-2">
-            {CHANGELOG.map((c) => {
+            {CHANGELOG.filter((c) => !c.admin).map((c) => {
               const kind = {
                 feature: { label: t("set.kindFeature"), cls: "bg-primary/15 text-primary border-primary/30" },
                 fix: { label: t("set.kindFix"), cls: "bg-amber-500/15 text-amber-400 border-amber-500/30" },

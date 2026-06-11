@@ -12,6 +12,8 @@ import { getActiveHabitsWithLogs } from "@/lib/habits";
 import { isLocale } from "@/lib/i18n/config";
 import { LangSync } from "@/components/i18n/lang-sync";
 import { HabitLockGate } from "@/components/habits/habit-lock-gate";
+import { WhatsNewModal } from "@/components/whats-new-modal";
+import { APP_VERSION } from "@/lib/version";
 
 export default async function DashboardLayout({
   children,
@@ -82,6 +84,7 @@ export default async function DashboardLayout({
         </main>
       </div>
       <MobileNav isAdmin={admin} />
+      <WhatsNewModal version={APP_VERSION} />
     </div>
   );
 }

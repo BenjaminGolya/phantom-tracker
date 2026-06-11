@@ -16,6 +16,10 @@ export type ChangelogEntry = {
   date: string; // YYYY-MM-DD
   kind: ChangeKind;
   summary: string; // one short line — what shipped
+  /** Highlight in the "What's new" modal and sort ahead of minor entries. */
+  major?: boolean;
+  /** Admin-only change — hidden from the user-facing "What's new" + changelog. */
+  admin?: boolean;
 };
 
 // Most recent first. Curated: only entries worth a user's attention.
@@ -24,6 +28,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.13.0",
     date: "2026-06-11",
     kind: "feature",
+    major: true,
     summary: "Weekly & monthly habits — schedule habits for specific weekdays or days of the month. The dashboard now shows only what's due today, with a 'Coming up' list and scheduled days marked on every calendar.",
   },
   {
