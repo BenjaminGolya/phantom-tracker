@@ -3,7 +3,7 @@
 // users actually notice. Skip pure copy tweaks and tiny i18n fixes — keep this
 // list to features, fixes, and meaningful improvements.
 
-export const APP_VERSION = "1.13.0";
+export const APP_VERSION = "1.14.0";
 
 // What kind of change it is, so the UI can tag and prioritize it.
 //   feature      — new capability users can do something with
@@ -24,6 +24,32 @@ export type ChangelogEntry = {
 
 // Most recent first. Curated: only entries worth a user's attention.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.14.0",
+    date: "2026-06-11",
+    kind: "feature",
+    major: true,
+    summary: "Profile levels reimagined as a cosmic journey (Dust → Eternal) with a sleek new level card and a clearer habit XP bar that shows your current and next level.",
+  },
+  {
+    version: "1.13.3",
+    date: "2026-06-11",
+    kind: "improvement",
+    summary: "Clearer dashboard actions — dedicated Complete and Rest buttons with one-tap undo, and tidier completed rows.",
+  },
+  {
+    version: "1.13.2",
+    date: "2026-06-11",
+    kind: "feature",
+    summary: "What's new: a quick summary of updates the first time you sign in after a release — view anytime in Settings.",
+  },
+  {
+    version: "1.13.1",
+    date: "2026-06-11",
+    kind: "feature",
+    admin: true,
+    summary: "Admin: user-management panel with time-limited Pro / Diamond comps.",
+  },
   {
     version: "1.13.0",
     date: "2026-06-11",
