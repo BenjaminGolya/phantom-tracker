@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   Shield, Search, MoreHorizontal, Crown, Ban, CheckCircle2,
-  Pencil, Trash2, Users, Sparkles, X, Loader2,
+  Pencil, Trash2, Users, Sparkles, X, Loader2, ChevronDown,
+  Target, Flame, CheckCheck, Clock,
 } from "lucide-react";
 
 export interface AdminUserRow {
@@ -18,6 +19,9 @@ export interface AdminUserRow {
   pendingDeletion: boolean;
   verified: boolean;
   habitCount: number;
+  checkins: number;
+  bestStreak: number;
+  lastActive: string | null;
   createdAt: string;
 }
 
@@ -30,6 +34,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminUserRow | null>(null);
   const [deleting, setDeleting] = useState<AdminUserRow | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -138,18 +143,25 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
           {filtered.map((u) => {
             const busy = busyId === u.id;
             const isSelf = u.id === selfId;
+            const expanded = expandedId === u.id;
             return (
               <div key={u.id} className="px-4 py-3 hover:bg-surface-2/30 transition-colors">
                 <div className="md:grid md:grid-cols-[1fr_auto_auto_auto_auto] md:gap-3 md:items-center flex flex-wrap items-center gap-2">
-                  {/* User */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
-                      {isSelf && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/40">YOU</span>}
-                      {!u.verified && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-2 text-muted border border-border">unverified</span>}
+                  {/* User (click to expand stats) */}
+                  <button
+                    onClick={() => setExpandedId(expanded ? null : u.id)}
+                    className="min-w-0 flex-1 flex items-center gap-2 text-left"
+                  >
+                    <ChevronDown size={14} className={`text-muted shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
+                        {isSelf && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/40">YOU</span>}
+                        {!u.verified && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-2 text-muted border border-border">unverified</span>}
+                      </div>
+                      <p className="text-xs text-muted truncate">{u.email}</p>
                     </div>
-                    <p className="text-xs text-muted truncate">{u.email}</p>
-                  </div>
+                  </button>
 
                   {/* Plan */}
                   <div className="md:w-20 md:text-center">
@@ -212,6 +224,20 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                     </div>
                   </div>
                 </div>
+
+                {/* Expandable per-user stats */}
+                {expanded && (
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <MiniStat icon={<Target size={13} className="text-primary" />} label="Habits" value={u.habitCount} />
+                    <MiniStat icon={<CheckCheck size={13} className="text-green-400" />} label="Check-ins" value={u.checkins} />
+                    <MiniStat icon={<Flame size={13} className="text-orange-400" />} label="Best streak" value={`${u.bestStreak}d`} />
+                    <MiniStat
+                      icon={<Clock size={13} className="text-sky-400" />}
+                      label="Last active"
+                      value={u.lastActive ? format(new Date(u.lastActive), "MMM d") : "—"}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -265,6 +291,15 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
     <div className="p-3 bg-surface border border-border rounded-xl">
       <div className="flex items-center gap-1.5 mb-1">{icon}<span className="text-[11px] text-muted">{label}</span></div>
       <p className="text-xl font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+  return (
+    <div className="px-3 py-2 bg-surface-2/50 border border-border rounded-lg">
+      <div className="flex items-center gap-1.5 mb-0.5">{icon}<span className="text-[10px] text-muted">{label}</span></div>
+      <p className="text-sm font-semibold text-white">{value}</p>
     </div>
   );
 }
