@@ -419,7 +419,7 @@ function GrantModal({ user, busy, onCancel, onGrant }: {
           </button>
         </div>
         {user.pro && !user.lifetime && user.proUntil && (
-          <p className="text-[11px] text-muted mt-3 text-center">Currently Pro until {format(new Date(user.proUntil), "MMM d, yyyy")} - months add to this.</p>
+          <p className="text-[11px] text-muted mt-3 text-center">Currently Pro until {format(new Date(user.proUntil), "MMM d, yyyy")}. Months add to this.</p>
         )}
       </div>
     </div>

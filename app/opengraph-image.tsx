@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 // Edge runtime: @vercel/og loads fonts via fetch (avoids a Windows path bug),
 // and fetches the logo from its public URL.
 export const runtime = "edge";
-export const alt = "Phantom Tracker - habit tracker with streaks, levels and a living world";
+export const alt = "Phantom Tracker: habit tracker with streaks, levels and a living world";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

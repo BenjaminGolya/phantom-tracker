@@ -14,7 +14,7 @@ async function requireAdmin() {
   return session;
 }
 
-// PATCH /api/admin/users/:id - { action, data? }
+// PATCH /api/admin/users/:id: { action, data? }
 //   action: "disable" | "enable" | "grantPro" | "revokePro" | "update"
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await requireAdmin();
@@ -51,10 +51,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         } else {
           const months = Math.max(1, Math.min(120, Math.round(Number(data?.months) || 1)));
           const current = await prisma.user.findUnique({ where: { id }, select: { proUntil: true, stripeSubscriptionId: true } });
-          // An active Stripe subscriber is already unlimited Pro - setting a
+          // An active Stripe subscriber is already unlimited Pro: setting a
           // comp expiry would wrongly lapse them later. Nothing to grant.
           if (current?.stripeSubscriptionId) {
-            return NextResponse.json({ error: "User has an active subscription - already Pro with no expiry." }, { status: 400 });
+            return NextResponse.json({ error: "User has an active subscription: already Pro with no expiry." }, { status: 400 });
           }
           // Extend from an existing future expiry if there is one, else from now.
           const base = current?.proUntil && current.proUntil.getTime() > now.getTime() ? current.proUntil : now;
@@ -100,7 +100,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-// DELETE /api/admin/users/:id - permanent (cascades to all user data)
+// DELETE /api/admin/users/:id: permanent (cascades to all user data)
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });

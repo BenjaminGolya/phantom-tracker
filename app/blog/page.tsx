@@ -7,14 +7,14 @@ import { POSTS } from "@/lib/blog/posts";
 const SITE_URL = "https://phantomtracker.io";
 
 export const metadata: Metadata = {
-  title: "Blog - Habit-building guides & tips",
+  title: "Blog: Habit-building guides & tips",
   description:
     "Practical, science-backed guides on building habits, streaks, and consistency from the Phantom Tracker team.",
   alternates: { canonical: "/blog" },
   openGraph: {
     type: "website",
     url: `${SITE_URL}/blog`,
-    title: "Phantom Tracker Blog - habit-building guides",
+    title: "Phantom Tracker Blog: habit-building guides",
     description: "Practical guides on building habits, streaks, and consistency.",
   },
 };

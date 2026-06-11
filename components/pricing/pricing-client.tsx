@@ -39,7 +39,7 @@ type Tile = {
 const TILES: Tile[] = [
   { key: "free", name: "Free", price: "€0", per: "forever", blurb: "The essentials, free on every device." },
   { key: "monthly", name: "Pro Monthly", price: "€2", per: "/ mo", blurb: "All Pro features, billed monthly." },
-  { key: "yearly", name: "Pro Yearly", price: "€15", per: "/ yr", tag: { text: `SAVE ${YEARLY_SAVINGS_PCT}%`, cls: "bg-primary/20 text-primary" }, blurb: "All Pro features - best value." },
+  { key: "yearly", name: "Pro Yearly", price: "€15", per: "/ yr", tag: { text: `SAVE ${YEARLY_SAVINGS_PCT}%`, cls: "bg-primary/20 text-primary" }, blurb: "All Pro features: best value." },
   { key: "lifetime", name: "Diamond", price: "€29", per: "once", tag: { text: "SOON", cls: "bg-cyan-400/20 text-cyan-300" }, blurb: "Pay once, Pro forever.", diamond: true },
 ];
 
@@ -139,13 +139,13 @@ export function PricingClient({
     }
 
     if (t.key === "free") {
-      // Shown to Pro users - downgrading happens by cancelling.
+      // Shown to Pro users: downgrading happens by cancelling.
       return <div className="mt-4 text-[11px] text-muted text-center">Cancel Pro to return to Free.</div>;
     }
 
     // Paid Pro tile (monthly/yearly) that isn't the current plan.
     if (pro) {
-      // Already Pro on a different interval - switch via the billing portal.
+      // Already Pro on a different interval: switch via the billing portal.
       return hasBilling ? (
         <button
           onClick={openPortal}
@@ -177,7 +177,7 @@ export function PricingClient({
         <GhostLogo size={48} rounded="rounded-2xl" className="mb-3 mx-auto" />
         <h1 className="text-2xl font-bold">Plans</h1>
         <p className="text-sm text-muted mt-1">
-          {pro ? "You're on Pro - manage your plan below." : "Start free. Upgrade when you want more."}
+          {pro ? "You're on Pro: manage your plan below." : "Start free. Upgrade when you want more."}
         </p>
         {!pro && trialEligible && (
           <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30 text-xs font-medium text-primary">

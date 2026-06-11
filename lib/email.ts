@@ -12,7 +12,7 @@ export async function sendVerificationEmail(to: string, code: string, lang?: str
     console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log(`  📬  VERIFICATION CODE for ${to}`);
     console.log(`  ➜   ${code}`);
-    console.log("  (SMTP not configured - code logged to console)");
+    console.log("  (SMTP not configured: code logged to console)");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
     return;
   }
@@ -76,7 +76,7 @@ export async function sendVerificationEmail(to: string, code: string, lang?: str
 export async function sendWelcomeEmail(to: string, name?: string | null, lang?: string) {
   const es = emailStrings(lang);
   if (!isSmtpConfigured()) {
-    console.log(`\n  👋 (welcome email skipped - no SMTP) for ${to}\n`);
+    console.log(`\n  👋 (welcome email skipped: no SMTP) for ${to}\n`);
     return;
   }
 
@@ -90,7 +90,7 @@ export async function sendWelcomeEmail(to: string, name?: string | null, lang?: 
   const from = process.env.SMTP_FROM ?? `"Phantom Tracker" <noreply@phantomtracker.app>`;
   const appUrl = process.env.NEXTAUTH_URL ?? "https://phantomtracker.io";
   // Point at /login (pre-filled) rather than /dashboard, so opening this email on
-  // any device signs the user into THIS account - not whatever the device was on.
+  // any device signs the user into THIS account: not whatever the device was on.
   const openUrl = `${appUrl}/login?email=${encodeURIComponent(to)}`;
 
   await transporter.sendMail({
@@ -221,7 +221,7 @@ export async function sendWeeklySummaryEmail(opts: {
 }): Promise<void> {
   const es = emailStrings(opts.lang);
   if (!isSmtpConfigured()) {
-    console.log(`\n  📊 (weekly summary skipped - no SMTP) for ${opts.to}\n`);
+    console.log(`\n  📊 (weekly summary skipped: no SMTP) for ${opts.to}\n`);
     return;
   }
   const stat = (icon: string, label: string, value: string | number, color: string) =>
@@ -254,7 +254,7 @@ export async function sendTrialEndingEmail(opts: {
 }): Promise<void> {
   const es = emailStrings(opts.lang);
   if (!isSmtpConfigured()) {
-    console.log(`\n  ⏳ (trial-ending email skipped - no SMTP) for ${opts.to}\n`);
+    console.log(`\n  ⏳ (trial-ending email skipped: no SMTP) for ${opts.to}\n`);
     return;
   }
   const url = `${appUrl()}/settings`;
@@ -273,7 +273,7 @@ export async function sendTrialEndingEmail(opts: {
 /** Confirm the account was disabled (deactivated). */
 export async function sendAccountDisabledEmail(to: string, name?: string | null, lang?: string) {
   const es = emailStrings(lang);
-  if (!isSmtpConfigured()) { console.log(`\n  ⏸️  (account disabled email skipped - no SMTP) for ${to}\n`); return; }
+  if (!isSmtpConfigured()) { console.log(`\n  ⏸️  (account disabled email skipped: no SMTP) for ${to}\n`); return; }
   const url = `${appUrl()}/login?email=${encodeURIComponent(to)}`;
   await makeTransport().sendMail({
     from: emailFrom(), to,
@@ -290,7 +290,7 @@ export async function sendAccountDisabledEmail(to: string, name?: string | null,
 export async function sendAccountDeletionScheduledEmail(to: string, name: string | null, purgeOn: Date, graceDays: number, lang?: string) {
   const es = emailStrings(lang);
   const when = purgeOn.toLocaleDateString(lang === "hu" ? "hu-HU" : lang === "ro" ? "ro-RO" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
-  if (!isSmtpConfigured()) { console.log(`\n  🗑️  (deletion-scheduled email skipped - no SMTP) for ${to} - purge ${when}\n`); return; }
+  if (!isSmtpConfigured()) { console.log(`\n  🗑️  (deletion-scheduled email skipped: no SMTP) for ${to}: purge ${when}\n`); return; }
   const url = `${appUrl()}/login?email=${encodeURIComponent(to)}`;
   await makeTransport().sendMail({
     from: emailFrom(), to,
@@ -307,7 +307,7 @@ export async function sendAccountDeletionScheduledEmail(to: string, name: string
 /** Welcome the user back after reactivating. */
 export async function sendAccountReactivatedEmail(to: string, name?: string | null, lang?: string) {
   const es = emailStrings(lang);
-  if (!isSmtpConfigured()) { console.log(`\n  ✅ (reactivated email skipped - no SMTP) for ${to}\n`); return; }
+  if (!isSmtpConfigured()) { console.log(`\n  ✅ (reactivated email skipped: no SMTP) for ${to}\n`); return; }
   const url = `${appUrl()}/dashboard`;
   await makeTransport().sendMail({
     from: emailFrom(), to,
@@ -325,7 +325,7 @@ export async function sendEmailChangeConfirmation(toNewEmail: string, token: str
   const es = emailStrings(lang);
   const url = `${appUrl()}/api/user/email/confirm?token=${encodeURIComponent(token)}`;
   if (!isSmtpConfigured()) {
-    console.log(`\n  ✉️  (email-change confirm skipped - no SMTP) for ${toNewEmail}\n  ➜  ${url}\n`);
+    console.log(`\n  ✉️  (email-change confirm skipped: no SMTP) for ${toNewEmail}\n  ➜  ${url}\n`);
     return;
   }
   await makeTransport().sendMail({
@@ -343,7 +343,7 @@ export async function sendEmailChangeConfirmation(toNewEmail: string, token: str
 /** Notify the OLD email that a change was requested (security heads-up). */
 export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string, name?: string | null, lang?: string) {
   const es = emailStrings(lang);
-  if (!isSmtpConfigured()) { console.log(`\n  ✉️  (email-change notice skipped - no SMTP) for ${toOldEmail}\n`); return; }
+  if (!isSmtpConfigured()) { console.log(`\n  ✉️  (email-change notice skipped: no SMTP) for ${toOldEmail}\n`); return; }
   await makeTransport().sendMail({
     from: emailFrom(), to: toOldEmail,
     subject: es.ecNoticeSubject,
@@ -359,7 +359,7 @@ export async function sendEmailChangeNotice(toOldEmail: string, newEmail: string
 export async function sendTwoFactorCodeEmail(to: string, code: string, name?: string | null, lang?: string) {
   const es = emailStrings(lang);
   if (!isSmtpConfigured()) {
-    console.log(`\n  🔐 2FA CODE for ${to}: ${code}  (SMTP not configured - logged only)\n`);
+    console.log(`\n  🔐 2FA CODE for ${to}: ${code}  (SMTP not configured: logged only)\n`);
     return;
   }
   await makeTransport().sendMail({
@@ -381,7 +381,7 @@ export async function sendPasswordResetEmail(to: string, token: string, name?: s
   const es = emailStrings(lang);
   const url = `${appUrl()}/reset?token=${encodeURIComponent(token)}`;
   if (!isSmtpConfigured()) {
-    console.log(`\n  🔑 (password reset skipped - no SMTP) for ${to}\n  ➜  ${url}\n`);
+    console.log(`\n  🔑 (password reset skipped: no SMTP) for ${to}\n  ➜  ${url}\n`);
     return;
   }
   await makeTransport().sendMail({
@@ -417,7 +417,7 @@ export async function sendFeedbackEmail(opts: {
   const safeMsg = opts.message.replace(/</g, "&lt;");
 
   if (!isSmtpConfigured()) {
-    console.log(`\n  📨 ${label} from ${opts.fromEmail} → ${to}:\n  ${opts.message}\n  (SMTP not configured - logged only)\n`);
+    console.log(`\n  📨 ${label} from ${opts.fromEmail} → ${to}:\n  ${opts.message}\n  (SMTP not configured: logged only)\n`);
     return { ok: true };
   }
 
@@ -427,7 +427,7 @@ export async function sendFeedbackEmail(opts: {
       from: emailFrom(),
       to,
       replyTo: opts.fromEmail, // reply goes straight to the user
-      subject: `${label} - Phantom Tracker (${opts.fromEmail})`,
+      subject: `${label}. Phantom Tracker (${opts.fromEmail})`,
       text:
         `${label}\n\nFrom: ${opts.fromName || "-"} <${opts.fromEmail}>\n` +
         `Version: ${opts.appVersion ?? "-"}\nWhen: ${when}\n\nMessage:\n${opts.message}`,
@@ -448,7 +448,7 @@ export async function sendFeedbackEmail(opts: {
       })),
     });
 
-    // 2) Acknowledge to the user (best-effort - don't fail the request if this errors).
+    // 2) Acknowledge to the user (best-effort: don't fail the request if this errors).
     try {
       const es = emailStrings(opts.lang);
       await makeTransport().sendMail({
