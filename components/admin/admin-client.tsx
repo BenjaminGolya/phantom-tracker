@@ -6,8 +6,15 @@ import { format } from "date-fns";
 import {
   Shield, Search, MoreHorizontal, Crown, Ban, CheckCircle2,
   Pencil, Trash2, Users, Sparkles, X, Loader2, ChevronDown,
-  Target, Flame, CheckCheck, Clock,
+  Target, Flame, CheckCheck, Clock, Gem,
 } from "lucide-react";
+
+// Icy "Diamond" (lifetime) badge styling, reused in the row + grant modal.
+const DIAMOND = {
+  background: "linear-gradient(135deg, #a5f3fc26, #38bdf826, #818cf826)",
+  borderColor: "#67e8f966",
+  color: "#67e8f9",
+} as const;
 
 export interface AdminUserRow {
   id: string;
@@ -175,9 +182,18 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                   <div className="md:w-24 md:text-center">
                     {u.pro ? (
                       <>
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-400/15 text-amber-400 border border-amber-400/30">
-                          <Crown size={10} /> {u.lifetime ? "Life" : "Pro"}
-                        </span>
+                        {u.lifetime ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md border"
+                            style={DIAMOND}
+                          >
+                            <Gem size={10} /> Diamond
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-400/15 text-amber-400 border border-amber-400/30">
+                            <Crown size={10} /> Pro
+                          </span>
+                        )}
                         {!u.lifetime && u.proUntil && (
                           <p className="text-[9px] text-muted mt-0.5">until {format(new Date(u.proUntil), "MMM d, yyyy")}</p>
                         )}
@@ -380,11 +396,12 @@ function GrantModal({ user, busy, onCancel, onGrant }: {
         </div>
         <button
           onClick={() => setLifetime(true)}
+          style={lifetime ? DIAMOND : undefined}
           className={`w-full py-2 rounded-lg text-sm font-medium border transition-all mb-4 flex items-center justify-center gap-1.5 ${
-            lifetime ? "bg-amber-400 text-black border-amber-400" : "bg-surface-2 text-muted border-border hover:text-white"
+            lifetime ? "" : "bg-surface-2 text-muted border-border hover:text-white"
           }`}
         >
-          <Crown size={14} /> Lifetime
+          <Gem size={14} /> Diamond
         </button>
 
         <div className="flex items-center gap-2 justify-end">
@@ -394,8 +411,8 @@ function GrantModal({ user, busy, onCancel, onGrant }: {
             disabled={busy}
             className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-dim transition-colors disabled:opacity-60"
           >
-            {busy ? <Loader2 size={13} className="animate-spin" /> : <Crown size={13} />}
-            {lifetime ? "Grant lifetime" : months === 12 ? "Grant 1 year" : `Grant ${months} mo`}
+            {busy ? <Loader2 size={13} className="animate-spin" /> : lifetime ? <Gem size={13} /> : <Crown size={13} />}
+            {lifetime ? "Grant Diamond" : months === 12 ? "Grant 1 year" : `Grant ${months} mo`}
           </button>
         </div>
         {user.pro && !user.lifetime && user.proUntil && (
