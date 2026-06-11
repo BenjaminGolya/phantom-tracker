@@ -32,19 +32,20 @@ export function Sidebar({ user, pro, lifetime, isAdmin, profileLevel }: SidebarP
   return (
     <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-surface shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 h-14 border-b border-border">
-        <GhostLogo size={28} className="phantom-glow" />
-        <span className="font-semibold text-sm tracking-tight">Phantom Tracker</span>
+      <div className="flex items-center gap-2 px-3 h-14 border-b border-border">
+        <GhostLogo size={26} className="phantom-glow shrink-0" />
+        <span className="font-semibold text-[13px] tracking-tight whitespace-nowrap">Phantom Tracker</span>
         {pro && (
           lifetime ? (
             <span
-              className="ml-auto inline-flex items-center gap-0.5 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md border"
+              title="Diamond"
+              className="ml-auto shrink-0 inline-flex items-center gap-0.5 text-[8px] font-bold tracking-wider px-1 py-0.5 rounded-md border"
               style={{ background: "linear-gradient(135deg,#a5f3fc26,#38bdf826,#818cf826)", borderColor: "#67e8f966", color: "#67e8f9" }}
             >
-              <Gem size={9} /> DIAMOND
+              <Gem size={8} /> DIAMOND
             </span>
           ) : (
-            <span className="ml-auto text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
+            <span className="ml-auto shrink-0 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
               PRO
             </span>
           )
