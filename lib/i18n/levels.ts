@@ -2,9 +2,11 @@ import { translate, type DictKey } from "./dictionaries";
 import { type Locale } from "./config";
 
 const KNOWN = new Set([
+  // Habit tiers
   "Seed", "Sprout", "Grower", "Achiever", "Expert", "Champion", "Legend",
-  "Wanderer", "Initiate", "Seeker", "Builder", "Warrior", "Master",
-  "Grandmaster", "Phantom", "Ascendant", "Ethereal", "Eternal",
+  // Profile levels (cosmic ascension)
+  "Dust", "Spark", "Flame", "Beacon", "Comet", "Nova", "Pulsar", "Quasar",
+  "Nebula", "Phantom", "Ascendant", "Ethereal", "Eternal",
 ]);
 
 // Translate a habit-tier / profile-level label (English in code) for display.

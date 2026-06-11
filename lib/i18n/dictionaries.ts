@@ -281,8 +281,9 @@ const en = {
   "form.moveDown": "Move down",
   "lvl.Seed": "Seed", "lvl.Sprout": "Sprout", "lvl.Grower": "Grower", "lvl.Achiever": "Achiever",
   "lvl.Expert": "Expert", "lvl.Champion": "Champion", "lvl.Legend": "Legend",
-  "lvl.Wanderer": "Wanderer", "lvl.Initiate": "Initiate", "lvl.Seeker": "Seeker", "lvl.Builder": "Builder",
-  "lvl.Warrior": "Warrior", "lvl.Master": "Master", "lvl.Grandmaster": "Grandmaster", "lvl.Phantom": "Phantom",
+  "lvl.Dust": "Dust", "lvl.Spark": "Spark", "lvl.Flame": "Flame", "lvl.Beacon": "Beacon",
+  "lvl.Comet": "Comet", "lvl.Nova": "Nova", "lvl.Pulsar": "Pulsar", "lvl.Quasar": "Quasar",
+  "lvl.Nebula": "Nebula", "lvl.Phantom": "Phantom",
   "lvl.Ascendant": "Ascendant", "lvl.Ethereal": "Ethereal", "lvl.Eternal": "Eternal",
 
   // stats page
@@ -731,8 +732,9 @@ const hu: Partial<Record<DictKey, string>> = {
   "form.moveDown": "Mozgatás lefelé",
   "lvl.Seed": "Mag", "lvl.Sprout": "Hajtás", "lvl.Grower": "Növekvő", "lvl.Achiever": "Teljesítő",
   "lvl.Expert": "Szakértő", "lvl.Champion": "Bajnok", "lvl.Legend": "Legenda",
-  "lvl.Wanderer": "Vándor", "lvl.Initiate": "Beavatott", "lvl.Seeker": "Kereső", "lvl.Builder": "Építő",
-  "lvl.Warrior": "Harcos", "lvl.Master": "Mester", "lvl.Grandmaster": "Nagymester", "lvl.Phantom": "Phantom",
+  "lvl.Dust": "Por", "lvl.Spark": "Szikra", "lvl.Flame": "Láng", "lvl.Beacon": "Jelzőtűz",
+  "lvl.Comet": "Üstökös", "lvl.Nova": "Nóva", "lvl.Pulsar": "Pulzár", "lvl.Quasar": "Kvazár",
+  "lvl.Nebula": "Köd", "lvl.Phantom": "Phantom",
   "lvl.Ascendant": "Felemelkedő", "lvl.Ethereal": "Éteri", "lvl.Eternal": "Örök",
 
   "stats.profileLevel": "Profil szint",
@@ -1173,8 +1175,9 @@ const ro: Partial<Record<DictKey, string>> = {
   "form.moveDown": "Mută în jos",
   "lvl.Seed": "Sămânță", "lvl.Sprout": "Mlădiță", "lvl.Grower": "Cultivator", "lvl.Achiever": "Realizator",
   "lvl.Expert": "Expert", "lvl.Champion": "Campion", "lvl.Legend": "Legendă",
-  "lvl.Wanderer": "Rătăcitor", "lvl.Initiate": "Inițiat", "lvl.Seeker": "Căutător", "lvl.Builder": "Constructor",
-  "lvl.Warrior": "Războinic", "lvl.Master": "Maestru", "lvl.Grandmaster": "Mare maestru", "lvl.Phantom": "Phantom",
+  "lvl.Dust": "Praf", "lvl.Spark": "Scânteie", "lvl.Flame": "Flacără", "lvl.Beacon": "Far",
+  "lvl.Comet": "Cometă", "lvl.Nova": "Novă", "lvl.Pulsar": "Pulsar", "lvl.Quasar": "Quasar",
+  "lvl.Nebula": "Nebuloasă", "lvl.Phantom": "Phantom",
   "lvl.Ascendant": "Ascendent", "lvl.Ethereal": "Eteric", "lvl.Eternal": "Etern",
 
   "stats.profileLevel": "Nivel profil",

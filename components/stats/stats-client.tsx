@@ -15,7 +15,10 @@ const WeeklyChart = dynamic(() => import("./weekly-chart"), {
 import Link from "next/link";
 import { calcStreak, calcCompletionRate, getHabitLevel, getProfileLevel, PROFILE_LEVELS, LEVELS } from "@/lib/utils";
 import { PLAN_LIMITS } from "@/lib/plan";
-import { Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles, ChevronDown, CalendarDays } from "lucide-react";
+import {
+  Flame, TrendingUp, BarChart2, Award, Zap, Star, Shield, Trophy, Lock, Sparkles, ChevronDown, CalendarDays,
+  Sparkle, Lightbulb, Sun, Cloud, Ghost, Orbit, Infinity as InfinityIcon, type LucideIcon,
+} from "lucide-react";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { useMounted } from "@/lib/use-mounted";
 import { useT, useLang } from "@/lib/i18n/context";
@@ -25,6 +28,14 @@ import { categoryLabel } from "@/lib/i18n/category";
 import { PersonalityConstellation } from "@/components/profile/personality-constellation";
 import { GrowingPlanet } from "@/components/profile/growing-planet";
 import { ShareProgress } from "@/components/profile/share-progress";
+
+// Map a profile-level icon name to its lucide component.
+const LEVEL_ICONS: Record<string, LucideIcon> = {
+  Sparkles, Sparkle, Flame, Lightbulb, Star, Zap, Sun, Cloud, Ghost, Orbit, Infinity: InfinityIcon,
+};
+function levelIcon(name?: string): LucideIcon {
+  return (name && LEVEL_ICONS[name]) || Sparkles;
+}
 
 interface StatsClientProps {
   habits: HabitWithLogs[];
@@ -89,18 +100,37 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
       />
 
       {/* Top row */}
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-xs text-muted mb-1 uppercase tracking-widest font-medium">{t("stats.profileLevel")}</p>
-          <div className="flex items-center gap-2">
-            <span className="text-5xl font-light leading-none" style={{ color: info.color }}>{info.emoji}</span>
-            <div>
-              <h2 className="text-2xl font-bold" style={{ color: info.color }}>{levelLabel(info.label, lang)}</h2>
-              <p className="text-xs text-muted">{t("nav.level")} {info.level} {t("stats.of")} {visibleLevels.length}</p>
-            </div>
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-3.5 min-w-0">
+          {/* Modern level medallion */}
+          {(() => {
+            const Icon = levelIcon(info.icon);
+            return (
+              <div
+                className="relative w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+                style={{
+                  background: `linear-gradient(140deg, ${info.color}33, ${info.color}0d)`,
+                  border: `1px solid ${info.color}55`,
+                  boxShadow: `0 0 26px ${info.color}33, inset 0 0 16px ${info.color}1a`,
+                }}
+              >
+                <Icon size={28} style={{ color: info.color }} strokeWidth={1.75} />
+                <span
+                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none text-white border border-background"
+                  style={{ backgroundColor: info.color }}
+                >
+                  {t("nav.level")} {info.level}
+                </span>
+              </div>
+            );
+          })()}
+          <div className="min-w-0">
+            <p className="text-[10px] text-muted mb-0.5 uppercase tracking-widest font-medium">{t("stats.profileLevel")}</p>
+            <h2 className="text-2xl font-bold leading-tight truncate" style={{ color: info.color }}>{levelLabel(info.label, lang)}</h2>
+            <p className="text-xs text-muted">{t("nav.level")} {info.level} {t("stats.of")} {visibleLevels.length}</p>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-right shrink-0">
           <p className="text-3xl font-mono font-bold" style={{ color: info.color }}>{info.xp}</p>
           <p className="text-xs text-muted">{t("stats.totalXp")}</p>
           {pro && (
@@ -128,26 +158,37 @@ function ProfileLevelCard({ habits, pro }: { habits: HabitWithLogs[]; pro: boole
       <div className="mb-4">
         <div className="flex justify-between text-xs text-muted mb-1.5">
           <span>{info.isMax ? t("stats.maxLevel") : `${info.xp - info.xpRequired} / ${info.xpNext - info.xpRequired} ${t("stats.xpToNext")}`}</span>
-          {next && <span><span style={{ color: next.color }}>{next.emoji}</span> {levelLabel(next.label, lang)}</span>}
+          {next && (() => {
+            const NI = levelIcon(next.icon);
+            return (
+              <span className="flex items-center gap-1" style={{ color: next.color }}>
+                <NI size={12} strokeWidth={2} /> {levelLabel(next.label, lang)}
+              </span>
+            );
+          })()}
         </div>
         <XPProgressBar progress={info.progress} color={info.color} />
         {/* Level milestones */}
-        <div className="flex justify-between mt-1">
-          {visibleLevels.map((lvl) => (
-            <div
-              key={lvl.level}
-              title={`Lv.${lvl.level} ${levelLabel(lvl.label, lang)}${lvl.pro ? " (Pro)" : ""}`}
-              className="flex flex-col items-center gap-0.5"
-            >
+        <div className="flex justify-between mt-1.5">
+          {visibleLevels.map((lvl) => {
+            const reached = info.level >= lvl.level;
+            const isCurrent = info.level === lvl.level;
+            return (
               <div
-                className="w-1.5 h-1.5 rounded-full transition-all"
+                key={lvl.level}
+                title={`Lv.${lvl.level} ${levelLabel(lvl.label, lang)}${lvl.pro ? " (Pro)" : ""}`}
+                className="rounded-full transition-all"
                 style={{
-                  backgroundColor: info.level >= lvl.level ? lvl.color : "#2a2a2a",
-                  boxShadow: info.level === lvl.level ? `0 0 6px ${lvl.color}` : undefined,
+                  width: isCurrent ? 9 : 6,
+                  height: isCurrent ? 9 : 6,
+                  backgroundColor: reached ? lvl.color : "#2a2a2a",
+                  boxShadow: isCurrent ? `0 0 8px ${lvl.color}` : undefined,
+                  border: isCurrent ? `2px solid ${lvl.color}` : undefined,
+                  outline: isCurrent ? "2px solid var(--background, #0a0a0a)" : undefined,
                 }}
               />
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
