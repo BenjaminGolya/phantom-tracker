@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Sparkles, Loader2, X } from "lucide-react";
+import { Check, Sparkles, Loader2, X, Gem } from "lucide-react";
 import { GhostLogo } from "@/components/brand/ghost-mark";
 import { PLAN_LIMITS, YEARLY_SAVINGS_PCT, TRIAL_DAYS } from "@/lib/plan";
 
@@ -33,13 +33,14 @@ type Tile = {
   per: string;
   tag?: { text: string; cls: string };
   blurb: string;
+  diamond?: boolean;
 };
 
 const TILES: Tile[] = [
   { key: "free", name: "Free", price: "€0", per: "forever", blurb: "The essentials, free on every device." },
   { key: "monthly", name: "Pro Monthly", price: "€2", per: "/ mo", blurb: "All Pro features, billed monthly." },
   { key: "yearly", name: "Pro Yearly", price: "€15", per: "/ yr", tag: { text: `SAVE ${YEARLY_SAVINGS_PCT}%`, cls: "bg-primary/20 text-primary" }, blurb: "All Pro features — best value." },
-  { key: "lifetime", name: "Lifetime", price: "€29", per: "once", tag: { text: "SOON", cls: "bg-orange-500/20 text-orange-400" }, blurb: "Pay once, yours forever." },
+  { key: "lifetime", name: "Diamond", price: "€29", per: "once", tag: { text: "SOON", cls: "bg-cyan-400/20 text-cyan-300" }, blurb: "Pay once, Pro forever.", diamond: true },
 ];
 
 export function PricingClient({
@@ -206,8 +207,13 @@ export function PricingClient({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`relative rounded-2xl p-5 border-2 transition-colors ${
-                current ? "border-primary/60 bg-surface shadow-[0_0_30px_#7f49c320]" : "border-border bg-surface"
+                current
+                  ? "border-primary/60 bg-surface shadow-[0_0_30px_#7f49c320]"
+                  : t.diamond
+                    ? "border-cyan-400/45 shadow-[0_0_30px_#38bdf81f]"
+                    : "border-border bg-surface"
               }`}
+              style={t.diamond && !current ? { background: "linear-gradient(160deg,#38bdf80f,#818cf80a,var(--surface,#111))" } : undefined}
             >
               {t.tag && !current && (
                 <span className={`absolute -top-2.5 right-4 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md ${t.tag.cls}`}>
@@ -215,7 +221,13 @@ export function PricingClient({
                 </span>
               )}
               <div className="flex items-baseline justify-between">
-                <p className="text-xs uppercase tracking-widest text-muted font-medium">{t.name}</p>
+                <p
+                  className={`text-xs uppercase tracking-widest font-medium flex items-center gap-1 ${t.diamond ? "" : "text-muted"}`}
+                  style={t.diamond ? { color: "#67e8f9" } : undefined}
+                >
+                  {t.diamond && <Gem size={12} />}
+                  {t.name}
+                </p>
               </div>
               <p className="text-3xl font-bold mt-1">
                 {t.price}<span className="text-sm text-muted font-normal"> {t.per}</span>
