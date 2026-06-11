@@ -49,6 +49,21 @@ model User {
   sessions            Session[]
   accounts            Account[]
   pushSubscriptions   PushSubscription[]
+  notifications       Notification[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  url       String?
+  icon      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model PushSubscription {

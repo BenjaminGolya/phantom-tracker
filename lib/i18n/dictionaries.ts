@@ -7,6 +7,10 @@ const en = {
   // common
   "common.signIn": "Sign in",
   "common.signOut": "Sign out",
+  "notif.title": "Notifications",
+  "notif.markAll": "Mark all read",
+  "notif.empty": "No notifications yet",
+  "notif.emptySub": "Reminders and updates will show up here.",
   "common.getStarted": "Get started",
   "common.openApp": "Open app",
   "common.dashboard": "Dashboard",
@@ -498,6 +502,10 @@ export type DictKey = keyof typeof en;
 const hu: Partial<Record<DictKey, string>> = {
   "common.signIn": "Bejelentkezés",
   "common.signOut": "Kijelentkezés",
+  "notif.title": "Értesítések",
+  "notif.markAll": "Összes olvasott",
+  "notif.empty": "Még nincs értesítés",
+  "notif.emptySub": "Az emlékeztetők és frissítések itt jelennek meg.",
   "common.getStarted": "Kezdés",
   "common.openApp": "Alkalmazás",
   "common.dashboard": "Irányítópult",
@@ -972,6 +980,10 @@ const hu: Partial<Record<DictKey, string>> = {
 const ro: Partial<Record<DictKey, string>> = {
   "common.signIn": "Autentificare",
   "common.signOut": "Deconectare",
+  "notif.title": "Notificări",
+  "notif.markAll": "Marchează toate citite",
+  "notif.empty": "Nicio notificare încă",
+  "notif.emptySub": "Memento-urile și actualizările vor apărea aici.",
   "common.getStarted": "Începe",
   "common.openApp": "Deschide aplicația",
   "common.dashboard": "Panou",

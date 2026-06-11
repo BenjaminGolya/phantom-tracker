@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notify";
 import { logError } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         if (data?.lifetime === true) {
           // Permanent comp (no expiry, independent of Stripe).
           await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: true, proUntil: null, proSince: now } });
+          await createNotification(id, {
+            title: "💎 Welcome to Diamond",
+            body: "You now have Diamond: Pro forever, a 2× XP boost, the cyan theme, and your aurora.",
+            url: "/settings",
+            icon: "billing",
+          });
         } else {
           const months = Math.max(1, Math.min(120, Math.round(Number(data?.months) || 1)));
           const current = await prisma.user.findUnique({ where: { id }, select: { proUntil: true, stripeSubscriptionId: true } });
@@ -61,6 +68,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           const until = new Date(base);
           until.setMonth(until.getMonth() + months);
           await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: false, proUntil: until, proSince: now } });
+          await createNotification(id, {
+            title: "✨ You're now Pro",
+            body: `Pro features are unlocked until ${until.toLocaleDateString()}. Enjoy unlimited habits, reminders, and more.`,
+            url: "/settings",
+            icon: "billing",
+          });
         }
         break;
       }

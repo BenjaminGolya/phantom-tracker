@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendPushToUser } from "@/lib/push";
+import { notifyUser } from "@/lib/notify";
 import { calcStreak, isScheduledOnParts } from "@/lib/utils";
 import { logError } from "@/lib/log";
 
@@ -94,10 +94,11 @@ async function runStreakNudges(): Promise<number> {
     }
     if (!best) continue;
 
-    await sendPushToUser(u.id, {
+    await notifyUser(u.id, {
       title: `🔥 ${best.streak}-day streak`,
       body: `Don't break it - complete "${best.name}" to keep your streak alive.`,
       url: "/dashboard",
+      icon: "streak",
       tag: "streak-nudge",
     });
     sent++;
@@ -140,10 +141,11 @@ async function runReminders() {
     const doneToday = habit.logs.some((l) => l.date === local.date && l.completed);
     if (doneToday) continue;
 
-    await sendPushToUser(habit.user.id, {
+    await notifyUser(habit.user.id, {
       title: `⏰ ${habit.name}`,
       body: `Time to complete "${habit.name}". Tap to mark it done.`,
       url: "/dashboard",
+      icon: "reminder",
       tag: `habit-${habit.id}`,
     });
     sent++;
