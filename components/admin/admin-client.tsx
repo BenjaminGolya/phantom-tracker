@@ -144,9 +144,9 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
       </div>
 
       {/* Users */}
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-xl border border-border">
         {/* Header row (desktop) */}
-        <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto] gap-3 px-4 py-2.5 bg-surface-2/60 text-[11px] font-medium uppercase tracking-wider text-muted">
+        <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto] gap-3 px-4 py-2.5 rounded-t-xl bg-surface-2/60 text-[11px] font-medium uppercase tracking-wider text-muted">
           <span>User</span>
           <span className="w-24 text-center">Plan</span>
           <span className="w-24 text-center">Status</span>
@@ -155,7 +155,8 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
         </div>
 
         <div className="divide-y divide-border">
-          {filtered.map((u) => {
+          {filtered.map((u, idx) => {
+            const openUp = filtered.length > 3 && idx >= filtered.length - 2;
             const busy = busyId === u.id;
             const isSelf = u.id === selfId;
             const expanded = expandedId === u.id;
@@ -233,7 +234,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                       {menuId === u.id && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setMenuId(null)} />
-                          <div className="absolute right-0 top-8 z-50 w-44 bg-surface-2 border border-border rounded-xl shadow-xl py-1">
+                          <div className={`absolute right-0 ${openUp ? "bottom-8" : "top-8"} z-50 w-44 bg-surface-2 border border-border rounded-xl shadow-xl py-1`}>
                             <MenuItem icon={<Crown size={13} />} onClick={() => { setGranting(u); setMenuId(null); }}>
                               {u.pro ? "Change premium" : "Give premium"}
                             </MenuItem>
