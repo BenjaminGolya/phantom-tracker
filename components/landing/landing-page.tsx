@@ -6,14 +6,14 @@ import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
-  Smartphone, ChevronRight, CalendarDays, Sparkles,
+  Smartphone, ChevronRight, CalendarDays, Sparkles, Gem,
   Settings, LogOut, X, Apple, Play, Globe,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { WorldExamples } from "@/components/profile/world-examples";
 import { useT } from "@/lib/i18n/context";
-import { PRICE_LABEL } from "@/lib/plan";
+import { PRICE_LABEL, PRICE_LABEL_LIFETIME, PRICE_LABEL_LIFETIME_LAUNCH } from "@/lib/plan";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -304,7 +304,7 @@ export function LandingPage() {
           </p>
         </motion.div>
 
-        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto items-start">
           {/* Free */}
           <div className="bg-surface border border-border rounded-2xl p-6">
             <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">{t("landing.free")}</p>
@@ -364,6 +364,48 @@ export function LandingPage() {
               className="mt-6 flex items-center justify-center gap-1.5 text-sm font-semibold bg-primary hover:bg-primary-dim text-white py-2.5 rounded-xl transition-all hover:shadow-glow"
             >
               <Sparkles size={14} /> {authed ? t("lp.goPro") : t("common.startFree")}
+            </Link>
+          </div>
+
+          {/* Diamond - coming soon */}
+          <div
+            className="relative rounded-2xl p-6 border-2"
+            style={{ borderColor: "#67e8f966", background: "linear-gradient(165deg,#67e8f90f,#818cf80a,#111)" }}
+          >
+            <span
+              className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md border"
+              style={{ background: "#67e8f91a", borderColor: "#67e8f966", color: "#67e8f9" }}
+            >
+              {t("lp.diamondSoon")}
+            </span>
+            <p className="text-xs uppercase tracking-widest font-medium mb-1 flex items-center gap-1" style={{ color: "#67e8f9" }}>
+              <Gem size={12} /> Diamond
+            </p>
+            <p className="text-3xl font-bold flex items-end gap-2">
+              {PRICE_LABEL_LIFETIME_LAUNCH}
+              <span className="text-base text-muted font-normal line-through mb-0.5">{PRICE_LABEL_LIFETIME}</span>
+            </p>
+            <p className="text-[11px] mb-5" style={{ color: "#67e8f9" }}>{t("lp.diamondPriceSub")}</p>
+            <ul className="space-y-2.5">
+              {[
+                t("lp.diamondForever"),
+                t("lp.diamondXp"),
+                t("lp.diamondTheme"),
+                t("lp.diamondAurora"),
+                t("lp.diamondSummit"),
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm">
+                  <Gem size={13} className="shrink-0" style={{ color: "#67e8f9" }} />
+                  <span className="text-white">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/blog/diamond-is-coming"
+              className="mt-6 flex items-center justify-center gap-1.5 text-sm font-semibold py-2.5 rounded-xl border transition-colors"
+              style={{ borderColor: "#67e8f955", color: "#67e8f9" }}
+            >
+              {t("lp.diamondLearn")} <ChevronRight size={14} />
             </Link>
           </div>
         </motion.div>

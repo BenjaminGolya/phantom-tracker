@@ -32,7 +32,7 @@ export const POSTS: Post[] = [
     slug: "diamond-is-coming",
     title: "Diamond Is Coming: Lifetime Pro, for a Limited Time",
     description:
-      "Phantom Tracker's Diamond plan launches soon: pay once, keep Pro forever, plus exclusive perks. Available only for a limited window. Subscribe to the newsletter to hear the moment it opens.",
+      "Phantom Tracker's Diamond plan launches soon: pay once, keep Pro forever, plus exclusive perks. A limited launch price of €29 (regular €39). Subscribe to the newsletter to hear the moment it opens.",
     date: "2026-06-12",
     readingMins: 3,
     keywords: ["diamond plan", "lifetime habit tracker", "phantom tracker diamond", "lifetime deal"],
@@ -57,10 +57,10 @@ export const POSTS: Post[] = [
 
         <H2>The catch: it&apos;s limited</H2>
         <P>
-          Diamond won&apos;t be on sale year-round. It opens for a <Strong>limited launch window</Strong>,
-          and the price will be revealed when it does. When the window closes, it&apos;s gone until we
-          decide to open it again, if we ever do. Early supporters get the best deal we&apos;ll ever
-          offer.
+          Diamond won&apos;t be on sale year-round. It opens for a <Strong>limited launch window</Strong>
+          at a special early price of <Strong>&euro;29</Strong>, instead of the regular <Strong>&euro;39</Strong>.
+          When the window closes, the launch price is gone for good. Early supporters get the best deal
+          we&apos;ll ever offer.
         </P>
 
         <H2>How to not miss it</H2>

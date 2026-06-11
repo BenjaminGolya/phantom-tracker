@@ -71,6 +71,8 @@ export const TRIAL_DAYS = 14;
 
 export const PRICE_LABEL = "€2/mo";
 export const PRICE_LABEL_YEARLY = "€15/yr";
-export const PRICE_LABEL_LIFETIME = "€29";
+// Diamond (one-time lifetime). Regular price, plus the limited launch price.
+export const PRICE_LABEL_LIFETIME = "€39";
+export const PRICE_LABEL_LIFETIME_LAUNCH = "€29";
 /** Effective monthly cost when paying yearly (€15 / 12 ≈ €1.25), for "save X%" copy. */
 export const YEARLY_SAVINGS_PCT = Math.round((1 - 15 / (2 * 12)) * 100); // ~38%

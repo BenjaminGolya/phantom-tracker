@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage, Section } from "@/components/legal/legal-page";
 
 const CONTACT = "support@phantomtracker.io";
-const UPDATED = "June 10, 2026";
+const UPDATED = "June 12, 2026";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -36,20 +36,23 @@ export default function TermsPage() {
         <p>We may suspend or terminate accounts that violate these Terms.</p>
       </Section>
 
-      <Section title="3. Free & Pro plans">
+      <Section title="3. Free, Pro & Diamond plans">
         <ul className="list-disc pl-5 space-y-1">
           <li>The free plan lets you track up to a set number of active habits at no cost.</li>
           <li><strong>Pro</strong> unlocks unlimited habits, reminders, advanced stats and other perks for a recurring fee (currently €2/month or €15/year), with a 14-day free trial for new subscribers.</li>
           <li>Subscriptions renew automatically until cancelled. You can cancel any time from the billing portal; access continues until the end of the paid period.</li>
-          <li>If your Pro plan ends and you&apos;re over the free limit, extra habits are locked (kept safe, hidden) until you choose which to keep or re-subscribe. Nothing is deleted.</li>
+          <li><strong>Diamond</strong> is a one-time purchase that grants Pro features permanently (no recurring fee), plus exclusive perks. It may be offered only during limited windows and at promotional prices; the price shown at the time of purchase applies. &ldquo;Permanent&rdquo; means for as long as the Service operates.</li>
+          <li>We may also grant complimentary Pro or Diamond access at our discretion; complimentary access can be time-limited and may be changed or withdrawn.</li>
+          <li>If your Pro access ends and you&apos;re over the free limit, extra habits are locked (kept safe, hidden) until you choose which to keep or upgrade again. Nothing is deleted.</li>
         </ul>
       </Section>
 
       <Section title="4. Payments & refunds">
         <p>
           Payments are processed securely by Stripe. Prices may change, and we&apos;ll give notice of changes that
-          affect an active subscription. Except where required by law (including mandatory EU consumer rights),
-          fees already paid are generally non-refundable. For refund questions, contact us.
+          affect an active subscription. Except where required by law (including mandatory EU consumer rights,
+          such as the 14-day right of withdrawal for digital purchases where applicable), fees already paid,
+          including one-time Diamond purchases, are generally non-refundable. For refund questions, contact us.
         </p>
       </Section>
 

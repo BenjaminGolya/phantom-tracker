@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage, Section } from "@/components/legal/legal-page";
 
 const CONTACT = "support@phantomtracker.io";
-const UPDATED = "June 10, 2026";
+const UPDATED = "June 12, 2026";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           <li><strong>Your content:</strong> the habits, goals, categories, check-ins, streaks and notes you create.</li>
           <li><strong>Preferences:</strong> your language and plan/subscription status.</li>
           <li><strong>Notifications:</strong> if you enable reminders, a push subscription token for your device/browser so we can deliver them.</li>
-          <li><strong>Billing:</strong> if you upgrade to Pro, a Stripe customer/subscription identifier. We never see or store your full card number.</li>
+          <li><strong>Billing:</strong> if you upgrade to Pro or buy Diamond, a Stripe customer/subscription identifier. We never see or store your full card number.</li>
         </ul>
       </Section>
 
