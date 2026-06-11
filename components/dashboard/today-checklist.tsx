@@ -284,21 +284,24 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                 </button>
               ) : (
                 <>
-                  {/* Rest day — clearly labeled, protects the streak */}
+                  {/* Rest day (snowflake) — protects the streak */}
                   <button
                     onClick={() => onFreeze(habit.id, today, true)}
                     title={t("dash.freeze")}
-                    className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border text-xs font-medium text-muted hover:text-sky-400 hover:border-sky-400/40 shrink-0 transition-all"
+                    aria-label={t("dash.rest")}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-sky-400 hover:border-sky-400/40 shrink-0 transition-all"
                   >
-                    <Snowflake size={13} /> {t("dash.rest")}
+                    <Snowflake size={14} />
                   </button>
-                  {/* Complete */}
+                  {/* Complete (checkmark) */}
                   <button
                     onClick={() => onToggle(habit.id, today, true)}
+                    title={t("dash.complete")}
+                    aria-label={t("dash.complete")}
                     style={{ backgroundColor: habit.color }}
-                    className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
+                    className="flex items-center justify-center w-8 h-8 rounded-lg text-white shrink-0 transition-all hover:opacity-90 active:scale-95"
                   >
-                    <Check size={14} /> {t("dash.complete")}
+                    <Check size={15} />
                   </button>
                 </>
               )}
