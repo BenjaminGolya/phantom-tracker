@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, Settings, Info, Home } from "lucide-react";
+import { LogOut, Settings, Info, Home, Gem } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
@@ -10,9 +10,11 @@ import { useT } from "@/lib/i18n/context";
 
 interface TopBarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
+  pro?: boolean;
+  lifetime?: boolean;
 }
 
-export function TopBar({ user }: TopBarProps) {
+export function TopBar({ user, pro, lifetime }: TopBarProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -36,6 +38,21 @@ export function TopBar({ user }: TopBarProps) {
       <div className="lg:hidden flex items-center gap-2 min-w-0">
         <GhostLogo size={28} className="phantom-glow shrink-0" />
         <span className="font-semibold text-sm whitespace-nowrap">Phantom Tracker</span>
+        {pro && (
+          lifetime ? (
+            <span
+              title="Diamond"
+              className="shrink-0 inline-flex items-center gap-0.5 text-[8px] font-bold tracking-wider px-1 py-0.5 rounded-md border"
+              style={{ background: "linear-gradient(135deg,#a5f3fc26,#38bdf826,#818cf826)", borderColor: "#67e8f966", color: "#67e8f9" }}
+            >
+              <Gem size={8} /> DIAMOND
+            </span>
+          ) : (
+            <span className="shrink-0 text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
+              PRO
+            </span>
+          )
+        )}
       </div>
 
       {/* Back to the public landing page */}
