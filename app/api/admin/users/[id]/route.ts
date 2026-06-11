@@ -44,12 +44,23 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         break;
       }
       case "grantPro": {
-        // Comp a permanent Pro via the lifetime flag (independent of Stripe).
-        await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: true, proSince: new Date() } });
+        const now = new Date();
+        if (data?.lifetime === true) {
+          // Permanent comp (no expiry, independent of Stripe).
+          await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: true, proUntil: null, proSince: now } });
+        } else {
+          const months = Math.max(1, Math.min(120, Math.round(Number(data?.months) || 1)));
+          // Extend from an existing future expiry if there is one, else from now.
+          const current = await prisma.user.findUnique({ where: { id }, select: { proUntil: true } });
+          const base = current?.proUntil && current.proUntil.getTime() > now.getTime() ? current.proUntil : now;
+          const until = new Date(base);
+          until.setMonth(until.getMonth() + months);
+          await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: false, proUntil: until, proSince: now } });
+        }
         break;
       }
       case "revokePro": {
-        await prisma.user.update({ where: { id }, data: { plan: "free", lifetime: false } });
+        await prisma.user.update({ where: { id }, data: { plan: "free", lifetime: false, proUntil: null } });
         break;
       }
       case "update": {

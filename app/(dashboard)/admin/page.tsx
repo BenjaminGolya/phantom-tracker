@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { calcStreak } from "@/lib/utils";
+import { isPro } from "@/lib/plan";
 import { AdminClient } from "@/components/admin/admin-client";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,7 @@ export default async function AdminPage() {
       name: true,
       plan: true,
       lifetime: true,
+      proUntil: true,
       disabledAt: true,
       deletionRequestedAt: true,
       emailVerified: true,
@@ -51,8 +53,9 @@ export default async function AdminPage() {
       id: u.id,
       email: u.email,
       name: u.name,
-      pro: u.plan === "pro" || u.lifetime,
+      pro: isPro(u),
       lifetime: u.lifetime,
+      proUntil: u.proUntil ? u.proUntil.toISOString() : null,
       disabled: !!u.disabledAt,
       pendingDeletion: !!u.deletionRequestedAt,
       verified: !!u.emailVerified,

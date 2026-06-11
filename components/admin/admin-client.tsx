@@ -15,6 +15,7 @@ export interface AdminUserRow {
   name: string | null;
   pro: boolean;
   lifetime: boolean;
+  proUntil: string | null;
   disabled: boolean;
   pendingDeletion: boolean;
   verified: boolean;
@@ -26,7 +27,8 @@ export interface AdminUserRow {
 }
 
 type Action =
-  | { kind: "disable" | "enable" | "grantPro" | "revokePro" }
+  | { kind: "disable" | "enable" | "revokePro" }
+  | { kind: "grantPro"; data: { months?: number; lifetime?: boolean } }
   | { kind: "update"; data: { name?: string; email?: string } };
 
 export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: string }) {
@@ -36,6 +38,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
   const [menuId, setMenuId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminUserRow | null>(null);
+  const [granting, setGranting] = useState<AdminUserRow | null>(null);
   const [deleting, setDeleting] = useState<AdminUserRow | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,8 +61,8 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
     setError(null);
     try {
       // API expects { action, data? } — map our Action's `kind` to `action`.
-      const payload = action.kind === "update"
-        ? { action: "update", data: action.data }
+      const payload = "data" in action
+        ? { action: action.kind, data: action.data }
         : { action: action.kind };
       const res = await fetch(`/api/admin/users/${id}`, {
         method: "PATCH",
@@ -69,6 +72,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "Action failed.");
       setEditing(null);
+      setGranting(null);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Action failed.");
@@ -137,7 +141,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
         {/* Header row (desktop) */}
         <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto] gap-3 px-4 py-2.5 bg-surface-2/60 text-[11px] font-medium uppercase tracking-wider text-muted">
           <span>User</span>
-          <span className="w-20 text-center">Plan</span>
+          <span className="w-24 text-center">Plan</span>
           <span className="w-24 text-center">Status</span>
           <span className="w-16 text-center">Habits</span>
           <span className="w-24 text-right">Joined</span>
@@ -168,11 +172,16 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                   </button>
 
                   {/* Plan */}
-                  <div className="md:w-20 md:text-center">
+                  <div className="md:w-24 md:text-center">
                     {u.pro ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-400/15 text-amber-400 border border-amber-400/30">
-                        <Crown size={10} /> {u.lifetime ? "Life" : "Pro"}
-                      </span>
+                      <>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-400/15 text-amber-400 border border-amber-400/30">
+                          <Crown size={10} /> {u.lifetime ? "Life" : "Pro"}
+                        </span>
+                        {!u.lifetime && u.proUntil && (
+                          <p className="text-[9px] text-muted mt-0.5">until {format(new Date(u.proUntil), "MMM d, yyyy")}</p>
+                        )}
+                      </>
                     ) : (
                       <span className="text-[11px] text-muted">Free</span>
                     )}
@@ -209,10 +218,11 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setMenuId(null)} />
                           <div className="absolute right-0 top-8 z-50 w-44 bg-surface-2 border border-border rounded-xl shadow-xl py-1">
-                            {u.pro ? (
+                            <MenuItem icon={<Crown size={13} />} onClick={() => { setGranting(u); setMenuId(null); }}>
+                              {u.pro ? "Change premium" : "Give premium"}
+                            </MenuItem>
+                            {u.pro && (
                               <MenuItem icon={<Sparkles size={13} />} onClick={() => patch(u.id, { kind: "revokePro" })}>Remove premium</MenuItem>
-                            ) : (
-                              <MenuItem icon={<Crown size={13} />} onClick={() => patch(u.id, { kind: "grantPro" })}>Give premium</MenuItem>
                             )}
                             <MenuItem icon={<Pencil size={13} />} onClick={() => { setEditing(u); setMenuId(null); }}>Edit</MenuItem>
                             {u.disabled || u.pendingDeletion ? (
@@ -258,6 +268,16 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
           busy={busyId === editing.id}
           onCancel={() => setEditing(null)}
           onSave={(data) => patch(editing.id, { kind: "update", data })}
+        />
+      )}
+
+      {/* Grant premium modal */}
+      {granting && (
+        <GrantModal
+          user={granting}
+          busy={busyId === granting.id}
+          onCancel={() => setGranting(null)}
+          onGrant={(data) => patch(granting.id, { kind: "grantPro", data })}
         />
       )}
 
@@ -321,6 +341,68 @@ function MenuItem({ icon, children, onClick, danger, disabled }: {
     >
       {icon} {children}
     </button>
+  );
+}
+
+function GrantModal({ user, busy, onCancel, onGrant }: {
+  user: AdminUserRow; busy: boolean; onCancel: () => void; onGrant: (data: { months?: number; lifetime?: boolean }) => void;
+}) {
+  const MONTH_OPTIONS = [1, 3, 6, 12];
+  const [months, setMonths] = useState<number>(1);
+  const [lifetime, setLifetime] = useState(false);
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={onCancel}>
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+      <div className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm font-semibold flex items-center gap-2"><Crown size={15} className="text-amber-400" /> Give premium</h3>
+          <button onClick={onCancel} className="text-muted hover:text-white"><X size={16} /></button>
+        </div>
+        <p className="text-xs text-muted mb-4 truncate">{user.email}</p>
+
+        {/* Duration options */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          {MONTH_OPTIONS.map((m) => {
+            const active = !lifetime && months === m;
+            return (
+              <button
+                key={m}
+                onClick={() => { setLifetime(false); setMonths(m); }}
+                className={`py-2 rounded-lg text-sm font-medium border transition-all ${
+                  active ? "bg-primary text-white border-primary" : "bg-surface-2 text-muted border-border hover:text-white"
+                }`}
+              >
+                {m === 12 ? "1 year" : `${m} month${m > 1 ? "s" : ""}`}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          onClick={() => setLifetime(true)}
+          className={`w-full py-2 rounded-lg text-sm font-medium border transition-all mb-4 flex items-center justify-center gap-1.5 ${
+            lifetime ? "bg-amber-400 text-black border-amber-400" : "bg-surface-2 text-muted border-border hover:text-white"
+          }`}
+        >
+          <Crown size={14} /> Lifetime
+        </button>
+
+        <div className="flex items-center gap-2 justify-end">
+          <button onClick={onCancel} className="px-3 py-2 text-sm text-muted hover:text-white rounded-lg transition-colors">Cancel</button>
+          <button
+            onClick={() => onGrant(lifetime ? { lifetime: true } : { months })}
+            disabled={busy}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-dim transition-colors disabled:opacity-60"
+          >
+            {busy ? <Loader2 size={13} className="animate-spin" /> : <Crown size={13} />}
+            {lifetime ? "Grant lifetime" : months === 12 ? "Grant 1 year" : `Grant ${months} mo`}
+          </button>
+        </div>
+        {user.pro && !user.lifetime && user.proUntil && (
+          <p className="text-[11px] text-muted mt-3 text-center">Currently Pro until {format(new Date(user.proUntil), "MMM d, yyyy")} — months add to this.</p>
+        )}
+      </div>
+    </div>
   );
 }
 
