@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck, Globe } from "lucide-react";
+import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, Gem, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck, Globe } from "lucide-react";
 import { usePush } from "@/lib/use-push";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { APP_VERSION, LATEST, CHANGELOG } from "@/lib/version";
@@ -14,6 +14,8 @@ import { LOCALES, LOCALE_NAMES, LOCALE_FLAGS } from "@/lib/i18n/config";
 interface SettingsClientProps {
   user: { id: string; name: string | null; email: string; image: string | null };
   pro?: boolean;
+  lifetime?: boolean;
+  proUntil?: string | null;
   proSince?: string | null;
   trialEndsAt?: string | null;
   hasBilling?: boolean;
@@ -55,7 +57,7 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, lifetime = false, proUntil = null, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
   const { t, lang, setLang } = useLang();
   const router = useRouter();
@@ -335,12 +337,30 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
           <Crown size={15} className="text-primary" /> {t("settings.plan")}
         </h2>
         {pro ? (
-          <>
-            <div className="flex items-center justify-between gap-3 mt-3">
-              <div>
-                <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
-                  Pro
-                  <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/20 border border-primary/40">
+          <div className="flex items-center justify-between gap-3 mt-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Tier medallion */}
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border"
+                style={
+                  lifetime
+                    ? { background: "linear-gradient(135deg,#a5f3fc26,#38bdf826,#818cf826)", borderColor: "#67e8f966", color: "#67e8f9", boxShadow: "0 0 18px #38bdf833" }
+                    : { background: "linear-gradient(135deg,#7f49c333,#7f49c30d)", borderColor: "#7f49c355", color: "#a78bfa", boxShadow: "0 0 18px #7f49c333" }
+                }
+              >
+                {lifetime ? <Gem size={18} /> : <Crown size={18} />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-base font-bold flex items-center gap-1.5" style={{ color: lifetime ? "#67e8f9" : "#a78bfa" }}>
+                  {lifetime ? "Diamond" : "Pro"}
+                  <span
+                    className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md border"
+                    style={
+                      lifetime
+                        ? { background: "#67e8f91a", borderColor: "#67e8f955", color: "#67e8f9" }
+                        : { background: "#7f49c322", borderColor: "#7f49c366", color: "#a78bfa" }
+                    }
+                  >
                     {trialDaysLeft !== null ? "TRIAL" : "ACTIVE"}
                   </span>
                 </p>
@@ -350,27 +370,33 @@ export function SettingsClient({ user, pro = false, proSince = null, trialEndsAt
                     : proSince
                       ? `${t("set.memberSince")} ${new Date(proSince).toLocaleDateString()}`
                       : t("set.thanksPro")}
+                  {!lifetime && proUntil ? ` · until ${new Date(proUntil).toLocaleDateString()}` : ""}
                 </p>
               </div>
-              {hasBilling ? (
-                <Link
-                  href="/pricing"
-                  className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"
-                >
-                  {t("set.manage")}
-                </Link>
-              ) : (
-                <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
-                  {t("set.complimentary")}
-                </span>
-              )}
             </div>
-          </>
+            {hasBilling ? (
+              <Link
+                href="/pricing"
+                className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"
+              >
+                {t("set.manage")}
+              </Link>
+            ) : (
+              <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
+                {t("set.complimentary")}
+              </span>
+            )}
+          </div>
         ) : (
           <div className="flex items-center justify-between gap-3 mt-3">
-            <div>
-              <p className="text-sm font-medium">Free</p>
-              <p className="text-xs text-muted mt-0.5">{t("set.upgradeBlurb")}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border border-border bg-surface-2 text-muted">
+                <Sparkles size={18} />
+              </div>
+              <div>
+                <p className="text-base font-bold text-white">Free</p>
+                <p className="text-xs text-muted mt-0.5">{t("set.upgradeBlurb")}</p>
+              </div>
             </div>
             <Link
               href="/pricing"
