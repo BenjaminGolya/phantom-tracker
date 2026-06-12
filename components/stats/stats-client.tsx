@@ -25,6 +25,7 @@ import { useT, useLang } from "@/lib/i18n/context";
 import { levelLabel } from "@/lib/i18n/levels";
 import { dfLocale } from "@/lib/i18n/date";
 import { categoryLabel } from "@/lib/i18n/category";
+import { CategoryIcon } from "@/components/habits/category-icon";
 import { PersonalityConstellation } from "@/components/profile/personality-constellation";
 import { GrowingPlanet } from "@/components/profile/growing-planet";
 import { ShareProgress } from "@/components/profile/share-progress";
@@ -580,7 +581,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
                   {catRows.map(([key, v], i) => (
                     <div key={key}>
                       <div className="flex items-center justify-between text-[11px] mb-0.5">
-                        <span className="text-white/80">{key === "__none" ? t("stats.noCategory") : categoryLabel(key, lang)}</span>
+                        <span className="text-white/80 inline-flex items-center gap-1">{key === "__none" ? t("stats.noCategory") : <><CategoryIcon label={key} /> {categoryLabel(key, lang)}</>}</span>
                         <span className="font-mono text-muted">{v}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">

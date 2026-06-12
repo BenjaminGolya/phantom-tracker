@@ -8,6 +8,7 @@ import { getHabitIcon } from "@/lib/habit-icons";
 import { PLAN_LIMITS, isOverFreeLimit } from "@/lib/plan";
 import { useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
+import { CategoryIcon } from "@/components/habits/category-icon";
 
 export type GateHabit = {
   id: string;
@@ -101,7 +102,7 @@ export function HabitLockGate({ habits, pro }: { habits: GateHabit[]; pro: boole
                 <span style={{ color: h.color }} className="shrink-0"><HabitIcon size={16} /></span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-white truncate">{h.name}</p>
-                  {h.category && <p className="text-[11px] text-muted truncate">{categoryLabel(h.category, lang)}</p>}
+                  {h.category && <p className="text-[11px] text-muted truncate flex items-center gap-1"><CategoryIcon label={h.category} /> {categoryLabel(h.category, lang)}</p>}
                 </div>
                 <span
                   className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${

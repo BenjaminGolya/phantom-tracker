@@ -11,6 +11,7 @@ import { useLang } from "@/lib/i18n/context";
 import { dfLocale } from "@/lib/i18n/date";
 import { categoryLabel } from "@/lib/i18n/category";
 import { CategoryFilter, usedCategories } from "@/components/habits/category-filter";
+import { CategoryIcon } from "@/components/habits/category-icon";
 
 interface TodayChecklistProps {
   habits: HabitWithLogs[];
@@ -73,7 +74,7 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
         </div>
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-medium ${done ? "line-through text-muted" : "text-white"}`}>{habit.name}</p>
-          {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
+          {habit.category && <p className="text-xs text-muted flex items-center gap-1"><CategoryIcon label={habit.category} /> {categoryLabel(habit.category, lang)}</p>}
         </div>
         <span className="text-xs font-mono shrink-0">
           <span style={{ color: habit.color }}>{val}</span>
@@ -260,7 +261,7 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                 <p className={`text-sm font-medium transition-colors ${done || frozenToday ? "line-through text-muted" : "text-white"}`}>
                   {habit.name}
                 </p>
-                {habit.category && <p className="text-xs text-muted">{categoryLabel(habit.category, lang)}</p>}
+                {habit.category && <p className="text-xs text-muted flex items-center gap-1"><CategoryIcon label={habit.category} /> {categoryLabel(habit.category, lang)}</p>}
               </div>
 
               {/* Actions */}

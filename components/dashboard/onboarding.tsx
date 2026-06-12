@@ -8,6 +8,7 @@ import { PLAN_LIMITS } from "@/lib/plan";
 import { useLang } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import { categoryLabel } from "@/lib/i18n/category";
+import { CategoryIcon } from "@/components/habits/category-icon";
 
 export type Template = {
   key: DictKey;     // i18n key for the habit name
@@ -94,7 +95,7 @@ export function Onboarding({
               <span style={{ color: tpl.color }} className="shrink-0"><Icon size={18} /></span>
               <span className="min-w-0">
                 <span className="block text-sm font-medium text-white truncate">{t(tpl.key)}</span>
-                <span className="block text-[11px] text-muted truncate">{categoryLabel(tpl.category, lang)}</span>
+                <span className="text-[11px] text-muted truncate flex items-center gap-1"><CategoryIcon label={tpl.category} /> {categoryLabel(tpl.category, lang)}</span>
               </span>
               {sel && (
                 <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-md bg-primary text-white flex items-center justify-center">

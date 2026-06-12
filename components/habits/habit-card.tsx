@@ -12,6 +12,7 @@ import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel, isScheduledOn } from "@/lib/utils";
 import { useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
+import { CategoryIcon } from "@/components/habits/category-icon";
 import { levelLabel } from "@/lib/i18n/levels";
 import { dfLocale, weekdayInitials } from "@/lib/i18n/date";
 import { getHabitIcon } from "@/lib/habit-icons";
@@ -494,12 +495,12 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
                 <button
                   type="button"
                   onClick={() => onCategoryClick(habit.category!)}
-                  className="text-xs text-primary hover:underline"
+                  className="text-xs text-primary hover:underline inline-flex items-center gap-1"
                 >
-                  {categoryLabel(habit.category, lang)}
+                  <CategoryIcon label={habit.category} /> {categoryLabel(habit.category, lang)}
                 </button>
               ) : (
-                <span className="text-xs text-primary">{categoryLabel(habit.category, lang)}</span>
+                <span className="text-xs text-primary inline-flex items-center gap-1"><CategoryIcon label={habit.category} /> {categoryLabel(habit.category, lang)}</span>
               )
             )}
             {habit.description && (

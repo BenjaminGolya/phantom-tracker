@@ -2,6 +2,7 @@
 
 import { useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
+import { CategoryIcon } from "@/components/habits/category-icon";
 
 // Pill row to filter habits by category. `value === null` means "All".
 // Renders nothing if there are fewer than 2 categories (no point filtering).
@@ -30,8 +31,8 @@ export function CategoryFilter({
         {t("dash.all")}
       </button>
       {categories.map((c) => (
-        <button key={c} onClick={() => onChange(c)} className={chip(value === c)}>
-          {categoryLabel(c, lang)}
+        <button key={c} onClick={() => onChange(c)} className={`${chip(value === c)} inline-flex items-center gap-1`}>
+          <CategoryIcon label={c} /> {categoryLabel(c, lang)}
         </button>
       ))}
     </div>
