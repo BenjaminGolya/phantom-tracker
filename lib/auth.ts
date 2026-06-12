@@ -96,6 +96,7 @@ export const authOptions: NextAuthOptions = {
             emailVerified: new Date(),
             acceptedTerms: true,
             acceptedTermsAt: new Date(),
+            worldSeed: Math.floor(Math.random() * 2_000_000_000) + 1,
           },
         });
       } else if (!existing.emailVerified) {

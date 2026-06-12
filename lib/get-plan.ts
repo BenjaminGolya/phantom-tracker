@@ -15,17 +15,18 @@ export const getCurrentPlan = cache(async (): Promise<{
   plan: Plan;
   pro: boolean;
   diamond: boolean;
+  worldSeed: number | null;
 }> => {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id ?? null;
-  if (!userId) return { userId: null, plan: "free", pro: false, diamond: false };
+  if (!userId) return { userId: null, plan: "free", pro: false, diamond: false, worldSeed: null };
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { plan: true, lifetime: true, proUntil: true },
+    select: { plan: true, lifetime: true, proUntil: true, worldSeed: true },
   });
   const pro = isPro(user);
   // Diamond = the permanent (lifetime) tier.
   const diamond = !!user?.lifetime;
-  return { userId, plan: pro ? "pro" : "free", pro, diamond };
+  return { userId, plan: pro ? "pro" : "free", pro, diamond, worldSeed: user?.worldSeed ?? null };
 });
