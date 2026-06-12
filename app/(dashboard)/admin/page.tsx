@@ -26,6 +26,7 @@ export default async function AdminPage() {
       disabledAt: true,
       deletionRequestedAt: true,
       emailVerified: true,
+      newsletterOptIn: true,
       createdAt: true,
       _count: { select: { habits: true } },
       habits: {
@@ -59,6 +60,7 @@ export default async function AdminPage() {
       disabled: !!u.disabledAt,
       pendingDeletion: !!u.deletionRequestedAt,
       verified: !!u.emailVerified,
+      newsletter: !!u.newsletterOptIn,
       habitCount: u._count.habits,
       checkins,
       bestStreak,

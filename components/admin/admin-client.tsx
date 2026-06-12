@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import {
   Shield, Search, MoreHorizontal, Crown, Ban, CheckCircle2,
   Pencil, Trash2, Users, Sparkles, X, Loader2, ChevronDown,
-  Target, Flame, CheckCheck, Clock, Gem,
+  Target, Flame, CheckCheck, Clock, Gem, Mail,
 } from "lucide-react";
 
 // Icy "Diamond" (lifetime) badge styling, reused in the row + grant modal.
@@ -26,6 +26,7 @@ export interface AdminUserRow {
   disabled: boolean;
   pendingDeletion: boolean;
   verified: boolean;
+  newsletter: boolean;
   habitCount: number;
   checkins: number;
   bestStreak: number;
@@ -62,6 +63,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
     pro: users.filter((u) => u.pro && !u.lifetime).length,
     diamond: users.filter((u) => u.lifetime).length,
     disabled: users.filter((u) => u.disabled || u.pendingDeletion).length,
+    newsletter: users.filter((u) => u.newsletter).length,
   }), [users]);
 
   async function patch(id: string, action: Action) {
@@ -120,10 +122,11 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard icon={<Users size={16} className="text-primary" />} label="Total users" value={stats.total} />
         <StatCard icon={<Crown size={16} className="text-amber-400" />} label="Pro" value={stats.pro} />
         <StatCard icon={<Gem size={16} style={{ color: "#67e8f9" }} />} label="Diamond" value={stats.diamond} />
+        <StatCard icon={<Mail size={16} className="text-primary" />} label="Newsletter" value={stats.newsletter} />
         <StatCard icon={<Ban size={16} className="text-red-400" />} label="Disabled" value={stats.disabled} />
       </div>
 
@@ -177,7 +180,12 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                         {isSelf && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/40">YOU</span>}
                         {!u.verified && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-2 text-muted border border-border">unverified</span>}
                       </div>
-                      <p className="text-xs text-muted truncate">{u.email}</p>
+                      <p className="text-xs text-muted truncate flex items-center gap-1">
+                        {u.newsletter && (
+                          <Mail size={11} className="text-primary shrink-0" aria-label="Subscribed to newsletter" />
+                        )}
+                        <span className="truncate">{u.email}</span>
+                      </p>
                     </div>
                   </button>
 
@@ -268,6 +276,11 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                       icon={<Clock size={13} className="text-sky-400" />}
                       label="Last active"
                       value={u.lastActive ? format(new Date(u.lastActive), "MMM d") : "-"}
+                    />
+                    <MiniStat
+                      icon={<Mail size={13} className={u.newsletter ? "text-primary" : "text-muted"} />}
+                      label="Newsletter"
+                      value={u.newsletter ? "Subscribed" : "No"}
                     />
                   </div>
                 )}
