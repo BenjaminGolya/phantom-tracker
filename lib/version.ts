@@ -3,7 +3,7 @@
 // users actually notice. Skip pure copy tweaks and tiny i18n fixes: keep this
 // list to features, fixes, and meaningful improvements.
 
-export const APP_VERSION = "1.15.0";
+export const APP_VERSION = "1.16.0";
 
 // What kind of change it is, so the UI can tag and prioritize it.
 //   feature     : new capability users can do something with
@@ -24,6 +24,19 @@ export type ChangelogEntry = {
 
 // Most recent first. Curated: only entries worth a user's attention.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.16.0",
+    date: "2026-06-12",
+    kind: "feature",
+    major: true,
+    summary: "Notifications: a new bell in the top bar collects your reminders, streak nudges and updates. See what was sent, what's unread, and mark them read.",
+  },
+  {
+    version: "1.15.1",
+    date: "2026-06-12",
+    kind: "improvement",
+    summary: "Custom categories now sync across your devices, the Diamond world aurora is more breathtaking, and pricing shows the Diamond launch deal (€29, then €39).",
+  },
   {
     version: "1.15.0",
     date: "2026-06-12",
