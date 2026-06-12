@@ -266,15 +266,18 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
               {/* Actions */}
               {done ? (
-                // Completed → icon-only reset (undo)
-                <button
-                  onClick={() => onToggle(habit.id, today, false)}
-                  title={t("dash.undo")}
-                  aria-label={t("dash.undo")}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
-                >
-                  <RotateCcw size={14} />
-                </button>
+                // Completed → "Done" label + icon-only reset (undo)
+                <>
+                  <span className="text-[11px] font-medium capitalize shrink-0" style={{ color: habit.color }}>{t("dash.done")}</span>
+                  <button
+                    onClick={() => onToggle(habit.id, today, false)}
+                    title={t("dash.undo")}
+                    aria-label={t("dash.undo")}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-border text-muted hover:text-white hover:border-primary/40 shrink-0 transition-all"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                </>
               ) : frozenToday ? (
                 // Resting → "Rest day" mark + icon-only undo
                 <>
