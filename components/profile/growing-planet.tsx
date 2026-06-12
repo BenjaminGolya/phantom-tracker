@@ -94,21 +94,25 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
-  // Saturn-style rings. Diamond gets a brighter triple ring; others a purple
-  // pair. Each is drawn in two halves: the far (top) arc behind the globe and
-  // the near (bottom) arc in front, so the ring wraps the planet.
+  // Rings grow with level: more rings the higher you climb. Non-Diamond rings
+  // are concentric (Saturn-style, one tilt); Diamond crosses several rings at
+  // different angles so the world reads like an atom. Each ring is drawn in two
+  // halves - the far arc behind the globe, the near arc in front - so it wraps.
+  const ringCount = p.level >= 13 ? 3 : p.level >= 9 ? 2 : p.level >= 6 ? 1 : 0;
   const ringDefs = p.diamond
     ? [
-        { off: 32, w: 3.4, color: "#67e8f9", op: 0.92 },
-        { off: 46, w: 2.6, color: "#a78bfa", op: 0.72 },
-        { off: 61, w: 2.0, color: "#5eead4", op: 0.55 },
+        { off: 30, w: 6, color: "#67e8f9", op: 0.7, tilt: -20 },
+        { off: 40, w: 5.2, color: "#a78bfa", op: 0.6, tilt: 30 },
+        { off: 38, w: 5, color: "#5eead4", op: 0.55, tilt: 78 },
+        { off: 50, w: 4.4, color: "#f0abfc", op: 0.5, tilt: 124 },
       ]
-    : p.hasRing
-    ? [
-        { off: 36, w: 3.2, color: ACCENT, op: 0.7 },
-        { off: 27, w: 1.6, color: ACCENT, op: 0.32 },
-      ]
-    : [];
+    : Array.from({ length: ringCount }).map((_, i) => ({
+        off: 32 + i * 12,
+        w: 5 - i * 0.8,
+        color: ACCENT,
+        op: 0.55 - i * 0.12,
+        tilt: -18,
+      }));
   const RING_RY = 0.3;
   const ringArc = (rx: number, near: boolean) =>
     `M ${-rx} 0 A ${rx} ${rx * RING_RY} 0 0 ${near ? 0 : 1} ${rx} 0`;
@@ -132,6 +136,7 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         </radialGradient>
         <clipPath id={id("clip")}><circle cx={120} cy={108} r={p.radius} /></clipPath>
         <filter id={id("coast")}><feGaussianBlur stdDeviation="1.1" /></filter>
+        <filter id={id("ringBlur")} x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.7" /></filter>
         {p.diamond && (
           <>
             <linearGradient id={id("aurora")} x1="0%" y1="0%" x2="100%" y2="0%">
@@ -167,12 +172,14 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       {/* Rings - far half (behind the planet) */}
       {ringDefs.length > 0 && (
-        <g transform="translate(120 108) rotate(-18)">
+        <g filter={`url(#${id("ringBlur")})`}>
           {ringDefs.map((r, i) => {
             const rx = p.radius + r.off;
             return (
-              <path key={`rb${i}`} d={ringArc(rx, false)} fill="none"
-                stroke={r.color} strokeOpacity={r.op} strokeWidth={r.w} strokeLinecap="round" />
+              <g key={`rb${i}`} transform={`translate(120 108) rotate(${r.tilt})`}>
+                <path d={ringArc(rx, false)} fill="none"
+                  stroke={r.color} strokeOpacity={r.op} strokeWidth={r.w} strokeLinecap="round" />
+              </g>
             );
           })}
         </g>
@@ -219,78 +226,78 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       {/* Rings - near half (in front of the planet) */}
       {ringDefs.length > 0 && (
-        <g transform="translate(120 108) rotate(-18)">
+        <g filter={`url(#${id("ringBlur")})`}>
           {ringDefs.map((r, i) => {
             const rx = p.radius + r.off;
             return (
-              <path key={`rf${i}`} d={ringArc(rx, true)} fill="none"
-                stroke={r.color} strokeOpacity={r.op} strokeWidth={r.w} strokeLinecap="round" />
+              <g key={`rf${i}`} transform={`translate(120 108) rotate(${r.tilt})`}>
+                <path d={ringArc(rx, true)} fill="none"
+                  stroke={r.color} strokeOpacity={r.op} strokeWidth={r.w} strokeLinecap="round" />
+              </g>
             );
           })}
         </g>
       )}
 
-      {/* Diamond aurora - a luminous band hugging the upper limb, with wisps
-          streaming outward (like aurora seen at a planet's edge from space) */}
+      {/* Diamond aurora - a glowing polar cap over the top pole (not the whole
+          globe), with a few wisps lifting off it */}
       {p.diamond && (() => {
         const cx = 120, cy = 108, R = p.radius;
-        const A0 = 168, SPAN = 204;                  // arc from 168 deg over the top
-        const limb = (rr: number) => {
-          const a = (A0 * Math.PI) / 180;
-          const lx = cx + Math.cos(a) * rr, ly = cy + Math.sin(a) * rr;
-          const rxp = cx - Math.cos(a) * rr;         // mirror of left across vertical
-          return `M ${lx} ${ly} A ${rr} ${rr} 0 1 1 ${rxp} ${ly}`;
+        const A0 = 232, SPAN = 76;                    // ~76 deg cap centred on the top pole
+        const cap = (rr: number) => {
+          const a0 = (A0 * Math.PI) / 180, a1 = ((A0 + SPAN) * Math.PI) / 180;
+          return `M ${cx + Math.cos(a0) * rr} ${cy + Math.sin(a0) * rr} A ${rr} ${rr} 0 0 1 ${cx + Math.cos(a1) * rr} ${cy + Math.sin(a1) * rr}`;
         };
-        const wisps = [0.16, 0.32, 0.48, 0.64, 0.8];
+        const wisps = [0.25, 0.5, 0.75];
         return (
           <g style={{ mixBlendMode: "screen" }}>
-            {/* Bloom glow above the planet */}
+            {/* Bloom over the pole */}
             <motion.ellipse
-              cx={cx} cy={cy - R * 0.55} rx={R * 1.4} ry={R * 0.78}
+              cx={cx} cy={cy - R * 0.82} rx={R * 0.72} ry={R * 0.5}
               fill={`url(#${id("auroraBloom")})`} filter={`url(#${id("auroraBlur")})`}
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: [0.3, 0.6, 0.4, 0.55, 0.3] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            />
-
-            {/* Outer soft halo band */}
-            <motion.path
-              d={limb(R + 10)} fill="none" stroke={`url(#${id("aurora")})`}
-              strokeWidth={12} strokeLinecap="round" filter={`url(#${id("auroraBlur")})`}
-              initial={{ opacity: 0.16 }}
-              animate={{ opacity: [0.16, 0.4, 0.24, 0.36, 0.16] }}
+              initial={{ opacity: 0.35 }}
+              animate={{ opacity: [0.35, 0.65, 0.45, 0.6, 0.35] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             />
 
-            {/* Wisps streaming outward from the limb */}
+            {/* Soft outer cap */}
+            <motion.path
+              d={cap(R + 7)} fill="none" stroke={`url(#${id("aurora")})`}
+              strokeWidth={11} strokeLinecap="round" filter={`url(#${id("auroraBlur")})`}
+              initial={{ opacity: 0.18 }}
+              animate={{ opacity: [0.18, 0.45, 0.26, 0.4, 0.18] }}
+              transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Wisps lifting off the cap */}
             <g filter={`url(#${id("auroraSoft")})`}>
               {wisps.map((f, i) => {
                 const ang = ((A0 + f * SPAN) * Math.PI) / 180;
                 const bx = cx + Math.cos(ang) * (R + 1), by = cy + Math.sin(ang) * (R + 1);
-                const len = 18 + Math.sin(f * Math.PI) * 20;
+                const len = 16 + Math.sin(f * Math.PI) * 18;
                 const tx = cx + Math.cos(ang) * (R + 1 + len), ty = cy + Math.sin(ang) * (R + 1 + len);
-                const ccx = cx + Math.cos(ang + 0.22) * (R + 1 + len * 0.55);
-                const ccy = cy + Math.sin(ang + 0.22) * (R + 1 + len * 0.55);
+                const ccx = cx + Math.cos(ang + 0.25) * (R + 1 + len * 0.55);
+                const ccy = cy + Math.sin(ang + 0.25) * (R + 1 + len * 0.55);
                 return (
                   <motion.path
                     key={`w${i}`}
                     d={`M ${bx} ${by} Q ${ccx} ${ccy} ${tx} ${ty}`}
                     fill="none" stroke={`url(#${id("aurora")})`} strokeWidth={2} strokeLinecap="round"
                     initial={{ opacity: 0.2, pathLength: 0.7 }}
-                    animate={{ opacity: [0.12, 0.8, 0.35, 0.65, 0.12], pathLength: [0.65, 1, 0.85, 1, 0.65] }}
-                    transition={{ duration: 3.6 + (i % 3) * 0.7, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
+                    animate={{ opacity: [0.15, 0.8, 0.35, 0.65, 0.15], pathLength: [0.65, 1, 0.85, 1, 0.65] }}
+                    transition={{ duration: 3.6 + i * 0.7, repeat: Infinity, ease: "easeInOut", delay: i * 0.35 }}
                   />
                 );
               })}
             </g>
 
-            {/* Bright core band on the limb */}
+            {/* Bright core cap on the limb */}
             <motion.path
-              d={limb(R + 2.5)} fill="none" stroke={`url(#${id("aurora")})`}
+              d={cap(R + 2)} fill="none" stroke={`url(#${id("aurora")})`}
               strokeWidth={4.5} strokeLinecap="round" filter={`url(#${id("auroraSoft")})`}
-              initial={{ opacity: 0.5 }}
-              animate={{ opacity: [0.5, 0.95, 0.65, 0.88, 0.5] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              initial={{ opacity: 0.55 }}
+              animate={{ opacity: [0.55, 0.95, 0.68, 0.9, 0.55] }}
+              transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
             />
           </g>
         );
