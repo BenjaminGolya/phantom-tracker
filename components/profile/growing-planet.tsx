@@ -39,25 +39,28 @@ function mulberry32(a: number) {
 // per user); `amount` (0..1, grows with level) reveals more of them and nudges
 // their size. Clustered + capped so there is ALWAYS open ocean.
 const LAND_POOL = 6;
+// Continents live on a horizontal "strip" (longitude x in [0, 2R), latitude y
+// in roughly [-0.45R, 0.45R]). The strip scrolls under the clipped globe, so
+// land and ocean rotate past the limb. A stable per-user pool is revealed
+// progressively by level; clustered + capped so open ocean always remains.
 function continents(R: number, seed = 1, amount = 0.5): Blob[] {
   const rnd = mulberry32(seed || 1);
   const visible = Math.max(1, Math.round(1 + amount * (LAND_POOL - 1))); // 1..6
   const sizeScale = 0.8 + amount * 0.5;
+  const W = R * 2;                            // strip width = one full rotation
   const out: Blob[] = [];
   for (let m = 0; m < LAND_POOL; m++) {
     // Always consume the same RNG sequence so the pool stays stable as the
     // visible count changes with level.
-    const ang = rnd() * Math.PI * 2;
-    const dist = (0.08 + rnd() * 0.46) * R;
-    const mx = Math.cos(ang) * dist;
-    const my = Math.sin(ang) * dist;
+    const lon = rnd() * W;                    // longitude across the strip
+    const lat = (rnd() - 0.5) * R * 0.9;      // latitude (avoid the poles)
     const nBlobs = 2 + Math.floor(rnd() * 3);
     const masses: Blob[] = [];
     for (let b = 0; b < nBlobs; b++) {
       masses.push({
-        x: mx + (rnd() - 0.5) * R * 0.36,
-        y: my + (rnd() - 0.5) * R * 0.36,
-        r: R * (0.1 + rnd() * 0.16) * sizeScale,
+        x: lon + (rnd() - 0.5) * R * 0.4,
+        y: lat + (rnd() - 0.5) * R * 0.3,
+        r: R * (0.1 + rnd() * 0.15) * sizeScale,
       });
     }
     if (m < visible) out.push(...masses);
@@ -214,40 +217,45 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("globe")})`} />
 
-      <motion.g
-        style={{ transformOrigin: "120px 108px" }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 70, repeat: Infinity, ease: "linear" }}
-        clipPath={`url(#${id("clip")})`}
-      >
-        <g transform="translate(120 108)">
-          <g filter={`url(#${id("coast")})`}>
-            {blobs.map((b, i) => (
-              <circle key={i} cx={b.x} cy={b.y} r={b.r} fill={land} />
-            ))}
-          </g>
-
-          {trees.map((tp, i) => {
-            const healthy = i < p.healthyTrees;
-            const r = 2.1 * tp.s;
-            return (
-              <g key={i} transform={`translate(${tp.x} ${tp.y})`}>
-                <rect x={-0.6} y={r * 0.4} width={1.2} height={r * 1.2} fill="#5b3d22" />
-                {healthy ? (
-                  <circle cx={0} cy={-r * 0.3} r={r} fill={`hsl(${hue}, 58%, 42%)`} />
-                ) : (
-                  <circle cx={0} cy={-r * 0.2} r={r * 0.7} fill="#6b5836" opacity={0.75} />
-                )}
+      {/* Rotating surface: a strip of continents scrolls under the clipped
+          globe so land and ocean pass across the limb. Two tiled copies make
+          the wrap seamless. */}
+      <g clipPath={`url(#${id("clip")})`}>
+        <motion.g
+          animate={{ x: [0, -p.radius * 2] }}
+          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        >
+          {[0, p.radius * 2].map((off) => (
+            <g key={off} transform={`translate(${120 - p.radius + off} 108)`}>
+              <g filter={`url(#${id("coast")})`}>
+                {blobs.map((b, i) => (
+                  <circle key={i} cx={b.x} cy={b.y} r={b.r} fill={land} />
+                ))}
               </g>
-            );
-          })}
 
-          {p.vitality > 0.7 && trees.slice(0, 5).map((tp, i) => (
-            <circle key={`f${i}`} cx={tp.x + 3} cy={tp.y + 2} r={1}
-              fill={["#f6c945", "#ef6f9e", "#fff"][i % 3]} />
+              {trees.map((tp, i) => {
+                const healthy = i < p.healthyTrees;
+                const r = 2.1 * tp.s;
+                return (
+                  <g key={i} transform={`translate(${tp.x} ${tp.y})`}>
+                    <rect x={-0.6} y={r * 0.4} width={1.2} height={r * 1.2} fill="#5b3d22" />
+                    {healthy ? (
+                      <circle cx={0} cy={-r * 0.3} r={r} fill={`hsl(${hue}, 58%, 42%)`} />
+                    ) : (
+                      <circle cx={0} cy={-r * 0.2} r={r * 0.7} fill="#6b5836" opacity={0.75} />
+                    )}
+                  </g>
+                );
+              })}
+
+              {p.vitality > 0.7 && trees.slice(0, 5).map((tp, i) => (
+                <circle key={`f${i}`} cx={tp.x + 3} cy={tp.y + 2} r={1}
+                  fill={["#f6c945", "#ef6f9e", "#fff"][i % 3]} />
+              ))}
+            </g>
           ))}
-        </g>
-      </motion.g>
+        </motion.g>
+      </g>
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("shade")})`} />
 
