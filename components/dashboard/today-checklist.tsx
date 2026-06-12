@@ -266,9 +266,8 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
 
               {/* Actions */}
               {done ? (
-                // Completed → "Done" label + icon-only reset (undo)
+                // Completed → icon-only reset (undo), "Done" label, then a check
                 <>
-                  <span className="text-[11px] font-medium capitalize shrink-0" style={{ color: habit.color }}>{t("dash.done")}</span>
                   <button
                     onClick={() => onToggle(habit.id, today, false)}
                     title={t("dash.undo")}
@@ -277,6 +276,8 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
                   >
                     <RotateCcw size={14} />
                   </button>
+                  <span className="text-[11px] font-medium capitalize shrink-0" style={{ color: habit.color }}>{t("dash.done")}</span>
+                  <Check size={15} className="shrink-0" style={{ color: habit.color }} />
                 </>
               ) : frozenToday ? (
                 // Resting → "Rest day" mark + icon-only undo
