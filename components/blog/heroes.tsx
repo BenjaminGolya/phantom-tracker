@@ -24,6 +24,50 @@ function Frame({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Living world - a planet with land, ocean, a ring and a moon.
+export function WorldHero() {
+  return (
+    <Frame>
+      <defs>
+        <radialGradient id="whGlobe" cx="38%" cy="30%" r="78%">
+          <stop offset="0%" stopColor="#bfe9ff" />
+          <stop offset="45%" stopColor="#3a7bd5" />
+          <stop offset="100%" stopColor="#0c1230" />
+        </radialGradient>
+        <radialGradient id="whShade" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stopColor="#00000000" />
+          <stop offset="100%" stopColor="#000000aa" />
+        </radialGradient>
+        <clipPath id="whClip"><circle cx="400" cy="172" r="96" /></clipPath>
+      </defs>
+      {/* twinkles */}
+      {[[150, 70, 2], [650, 90, 2.5], [600, 260, 2], [180, 250, 1.6], [720, 180, 2]].map(([x, y, r], i) => (
+        <circle key={i} cx={x} cy={y} r={r} fill="#fff" opacity={0.5} />
+      ))}
+      {/* ring - far half */}
+      <g transform="translate(400 172) rotate(-16)">
+        <path d="M -158 0 A 158 47 0 0 1 158 0" fill="none" stroke={`${ACCENT}cc`} strokeWidth="7" strokeLinecap="round" />
+      </g>
+      {/* globe */}
+      <circle cx="400" cy="172" r="96" fill="url(#whGlobe)" />
+      {/* land */}
+      <g clipPath="url(#whClip)">
+        <circle cx="372" cy="146" r="38" fill="#3f9e5a" />
+        <circle cx="406" cy="166" r="27" fill="#46b06a" />
+        <circle cx="430" cy="198" r="20" fill="#3f9e5a" />
+        <circle cx="356" cy="196" r="16" fill="#46b06a" />
+      </g>
+      <circle cx="400" cy="172" r="96" fill="url(#whShade)" />
+      {/* ring - near half */}
+      <g transform="translate(400 172) rotate(-16)">
+        <path d="M -158 0 A 158 47 0 0 0 158 0" fill="none" stroke="#9b6bff" strokeWidth="7" strokeLinecap="round" />
+      </g>
+      {/* moon */}
+      <circle cx="585" cy="135" r="11" fill="#cbd5e1" />
+    </Frame>
+  );
+}
+
 // Diamond announcement - an icy gem with aurora arcs and sparkles.
 export function DiamondHero() {
   const CYAN = "#67e8f9";

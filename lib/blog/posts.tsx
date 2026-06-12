@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { HabitGridHero, TrackerCardHero, StreakHero, DiamondHero } from "@/components/blog/heroes";
+import { HabitGridHero, TrackerCardHero, StreakHero, DiamondHero, WorldHero } from "@/components/blog/heroes";
 
 // Lightweight prose elements so each article stays readable without a markdown
 // dependency or global CSS.
@@ -28,6 +28,82 @@ export type Post = {
 };
 
 export const POSTS: Post[] = [
+  {
+    slug: "your-living-world",
+    title: "Your Living World: How to Grow the Ultimate Planet",
+    description:
+      "Every Phantom Tracker account has a unique living world that grows with your habits. Here's how it works, and how to grow it into the ultimate planet.",
+    date: "2026-06-12",
+    readingMins: 5,
+    keywords: ["habit tracker gamification", "living world", "phantom tracker planet", "habit streaks rewards"],
+    hero: <WorldHero />,
+    content: (
+      <>
+        <P>
+          Every Phantom Tracker account is born with its own <Strong>living world</Strong>: a small
+          planet, unique to you, that grows and changes as you build habits. It is not just a badge.
+          It is a living reflection of your consistency, and it can become genuinely beautiful.
+          Here is exactly how it works, and how to grow the best possible version.
+        </P>
+
+        <H2>It starts as a tiny ocean world</H2>
+        <P>
+          When you sign up, you get a one-of-a-kind seed that shapes your planet forever: a small
+          blue world with a single speck of land and a lot of open ocean. Every account&apos;s world
+          looks different from day one, and yours will always be yours.
+        </P>
+
+        <H2>The process: show up, earn XP, level up</H2>
+        <P>
+          Your world grows through the same thing that builds real habits: <Strong>consistency</Strong>.
+          Every check-in earns XP, and XP raises your <Strong>profile level</Strong>. As you level up,
+          your world visibly evolves:
+        </P>
+        <UL>
+          <li><Strong>More land.</Strong> New continents rise in random places as you climb the levels (there is always ocean, never a fully covered globe).</li>
+          <li><Strong>The planet grows.</Strong> It gets larger and more detailed, and the surface rotates so you can watch your lands and oceans drift by.</li>
+          <li><Strong>Rings and moons.</Strong> A moon appears early on, and a glowing ring forms once you reach the higher levels.</li>
+          <li><Strong>More trees.</Strong> Greenery fills your continents as your total XP grows.</li>
+        </UL>
+
+        <H2>Health: keep it thriving</H2>
+        <P>
+          Beyond size, your world has a <Strong>living health</Strong> that follows your{" "}
+          <em>recent</em> consistency: stack good days and it climbs through ten states, from
+          <Strong> Dormant</Strong> all the way up to <Strong>Radiant</Strong>. Drift away and it
+          fades and gets overgrown, but it can never die: get consistent again and everything
+          regrows. Tap the status badge on your world to see all ten states and where you stand.
+        </P>
+
+        <H2>How to grow the best version</H2>
+        <P>A few simple habits make a beautiful planet:</P>
+        <UL>
+          <li><Strong>Be consistent.</Strong> Recent streaks and perfect days are what push your world toward Radiant.</li>
+          <li><Strong>Diversify.</Strong> Spread habits across different categories: each unique category adds bonus XP, so variety both levels you up faster and earns more.</li>
+          <li><Strong>Protect your streaks.</Strong> Use a rest day when you need it instead of breaking the chain.</li>
+          <li><Strong>Aim for the summit.</Strong> The very top levels unlock the most dramatic worlds.</li>
+        </UL>
+
+        <H2>The ultimate: the Diamond world</H2>
+        <P>
+          The most spectacular world belongs to <Strong>Diamond</Strong> members who reach the top.
+          At the summit, your rings cross at different angles so the world reads like an{" "}
+          <Strong>atom</Strong> while still looking like a planet, and a green{" "}
+          <Strong>aurora</Strong> sweeps over the pole. It is the rarest, most beautiful version of
+          your world, and you earn it by leveling all the way up.
+        </P>
+
+        <H2>Go see yours</H2>
+        <P>
+          Your world is waiting on your Stats page. Open it, watch it spin, and check its health,
+          then go build a habit to make it grow.
+        </P>
+        <P>
+          <a href="/stats" className="text-primary hover:underline font-medium">Visit your world &rarr;</a>
+        </P>
+      </>
+    ),
+  },
   {
     slug: "diamond-is-coming",
     title: "Diamond Is Coming: Lifetime Pro, for a Limited Time",
