@@ -10,11 +10,11 @@ export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
   const session = await getServerSession(authOptions);
-  const [habits, { pro, diamond }] = await Promise.all([
+  const [habits, { pro, diamond, worldSeed }] = await Promise.all([
     getActiveHabitsWithLogs(session!.user!.id),
     getCurrentPlan(),
   ]);
 
   const { active } = partitionHabits(habits, pro);
-  return <StatsClient habits={active} pro={pro} diamond={diamond} seed={hashSeed(session!.user!.id)} />;
+  return <StatsClient habits={active} pro={pro} diamond={diamond} seed={worldSeed ?? hashSeed(session!.user!.id)} />;
 }

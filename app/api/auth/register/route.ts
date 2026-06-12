@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
         acceptedTermsAt: new Date(),
         newsletterOptIn: !!newsletterOptIn,
         language: lang,
+        worldSeed: Math.floor(Math.random() * 2_000_000_000) + 1,
         verificationCode: code,
         verificationExpires: expires,
       },

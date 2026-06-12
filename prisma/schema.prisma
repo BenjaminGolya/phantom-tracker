@@ -35,6 +35,9 @@ model User {
   resetToken           String?           @unique
   resetExpires         DateTime?
   language             String            @default("en")
+  // Stable per-user seed for the unique look of their living world (set at
+  // registration). Falls back to a hash of the id when absent.
+  worldSeed            Int?
   twoFactorEnabled     Boolean           @default(false)
   twoFactorCode        String?
   twoFactorCodeExpires DateTime?
