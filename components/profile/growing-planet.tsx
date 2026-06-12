@@ -34,33 +34,40 @@ function mulberry32(a: number) {
   };
 }
 
-// Per-user random continents: 2–4 landmasses, each a cluster of overlapping
-// blobs (read as soft continents). Clipped to the globe, so blobs may spill
-// past the edge. Deterministic for a given `seed`.
-function continents(R: number, seed = 1): Blob[] {
+// Per-user continents revealed progressively by level. A fixed pool of
+// landmasses is generated deterministically from `seed` (positions stay stable
+// per user); `amount` (0..1, grows with level) reveals more of them and nudges
+// their size. Clustered + capped so there is ALWAYS open ocean.
+const LAND_POOL = 6;
+function continents(R: number, seed = 1, amount = 0.5): Blob[] {
   const rnd = mulberry32(seed || 1);
-  const masses = 2 + Math.floor(rnd() * 3);
+  const visible = Math.max(1, Math.round(1 + amount * (LAND_POOL - 1))); // 1..6
+  const sizeScale = 0.8 + amount * 0.5;
   const out: Blob[] = [];
-  for (let m = 0; m < masses; m++) {
+  for (let m = 0; m < LAND_POOL; m++) {
+    // Always consume the same RNG sequence so the pool stays stable as the
+    // visible count changes with level.
     const ang = rnd() * Math.PI * 2;
-    const dist = (0.12 + rnd() * 0.42) * R;
+    const dist = (0.08 + rnd() * 0.46) * R;
     const mx = Math.cos(ang) * dist;
     const my = Math.sin(ang) * dist;
-    const blobs = 2 + Math.floor(rnd() * 3);
-    for (let b = 0; b < blobs; b++) {
-      out.push({
-        x: mx + (rnd() - 0.5) * R * 0.34,
-        y: my + (rnd() - 0.5) * R * 0.34,
-        r: R * (0.15 + rnd() * 0.17),
+    const nBlobs = 2 + Math.floor(rnd() * 3);
+    const masses: Blob[] = [];
+    for (let b = 0; b < nBlobs; b++) {
+      masses.push({
+        x: mx + (rnd() - 0.5) * R * 0.36,
+        y: my + (rnd() - 0.5) * R * 0.36,
+        r: R * (0.1 + rnd() * 0.16) * sizeScale,
       });
     }
+    if (m < visible) out.push(...masses);
   }
   return out;
 }
 
 // Deterministically scatter trees INSIDE the continents (never on ocean).
-function treePositions(count: number, radius: number, seed = 1) {
-  const blobs = continents(radius, seed);
+function treePositions(count: number, radius: number, seed = 1, amount = 0.5) {
+  const blobs = continents(radius, seed, amount);
   const totalArea = blobs.reduce((s, b) => s + b.r * b.r, 0);
   const out: { x: number; y: number; s: number }[] = [];
   let placed = 0;
@@ -89,8 +96,10 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const uid = useId().replace(/[:]/g, "");
   const id = (k: string) => `${k}-${uid}`;
   const seed = p.seed ?? 1;
-  const blobs = useMemo(() => continents(p.radius, seed), [p.radius, seed]);
-  const trees = useMemo(() => treePositions(p.totalTrees, p.radius, seed), [p.totalTrees, p.radius, seed]);
+  // Land grows with level (more continents), but always leaves ocean.
+  const landAmount = Math.min(1, Math.max(0, (p.level - 1) / 12));
+  const blobs = useMemo(() => continents(p.radius, seed, landAmount), [p.radius, seed, landAmount]);
+  const trees = useMemo(() => treePositions(p.totalTrees, p.radius, seed, landAmount), [p.totalTrees, p.radius, seed, landAmount]);
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
