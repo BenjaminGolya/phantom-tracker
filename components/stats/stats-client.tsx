@@ -550,11 +550,11 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
             {/* Day-of-week distribution */}
             <div className="bg-surface border border-border rounded-xl p-4">
               <h3 className="text-xs font-medium text-muted mb-3">{t("stats.byWeekday")}</h3>
-              <div className="flex items-end justify-between gap-1.5 h-24">
+              <div className="flex items-stretch justify-between gap-1.5 h-24">
                 {weekdayCounts.map((c, i) => {
                   const isBusiest = i === busiestIdx && c > 0;
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full">
                       <div className="w-full flex-1 flex items-end">
                         <motion.div
                           className="w-full rounded-t-md"
