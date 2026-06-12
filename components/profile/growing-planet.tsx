@@ -94,6 +94,25 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
+  // Saturn-style rings. Diamond gets a brighter triple ring; others a purple
+  // pair. Each is drawn in two halves: the far (top) arc behind the globe and
+  // the near (bottom) arc in front, so the ring wraps the planet.
+  const ringDefs = p.diamond
+    ? [
+        { off: 32, w: 3.4, color: "#67e8f9", op: 0.92 },
+        { off: 46, w: 2.6, color: "#a78bfa", op: 0.72 },
+        { off: 61, w: 2.0, color: "#5eead4", op: 0.55 },
+      ]
+    : p.hasRing
+    ? [
+        { off: 36, w: 3.2, color: ACCENT, op: 0.7 },
+        { off: 27, w: 1.6, color: ACCENT, op: 0.32 },
+      ]
+    : [];
+  const RING_RY = 0.3;
+  const ringArc = (rx: number, near: boolean) =>
+    `M ${-rx} 0 A ${rx} ${rx * RING_RY} 0 0 ${near ? 0 : 1} ${rx} 0`;
+
   return (
     <svg viewBox="0 0 240 220" className="w-full max-w-[400px]">
       <defs>
@@ -128,11 +147,6 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
               <stop offset="42%" stopColor="#a78bfa" stopOpacity="0.22" />
               <stop offset="100%" stopColor="#67e8f9" stopOpacity="0" />
             </radialGradient>
-            <linearGradient id={id("auroraCurtain")} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#a78bfa" stopOpacity="0" />
-              <stop offset="32%" stopColor="#67e8f9" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#5eead4" stopOpacity="0" />
-            </linearGradient>
             <filter id={id("auroraBlur")} x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.4" /></filter>
             <filter id={id("auroraSoft")} x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.5" /></filter>
           </>
@@ -151,10 +165,16 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius + 16} fill={`url(#${id("atmo")})`} opacity={0.4 + 0.6 * p.vitality} />
 
-      {p.hasRing && (
+      {/* Rings - far half (behind the planet) */}
+      {ringDefs.length > 0 && (
         <g transform="translate(120 108) rotate(-18)">
-          <ellipse cx={0} cy={0} rx={p.radius + 30} ry={(p.radius + 30) * 0.28} fill="none" stroke={`${ACCENT}aa`} strokeWidth={3} />
-          <ellipse cx={0} cy={0} rx={p.radius + 22} ry={(p.radius + 22) * 0.28} fill="none" stroke={`${ACCENT}40`} strokeWidth={1.5} />
+          {ringDefs.map((r, i) => {
+            const rx = p.radius + r.off;
+            return (
+              <path key={`rb${i}`} d={ringArc(rx, false)} fill="none"
+                stroke={r.color} strokeOpacity={r.op} strokeWidth={r.w} strokeLinecap="round" />
+            );
+          })}
         </g>
       )}
 
@@ -197,63 +217,81 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("shade")})`} />
 
-      {/* Diamond-exclusive aurora - a glowing crown of light over the world */}
+      {/* Rings - near half (in front of the planet) */}
+      {ringDefs.length > 0 && (
+        <g transform="translate(120 108) rotate(-18)">
+          {ringDefs.map((r, i) => {
+            const rx = p.radius + r.off;
+            return (
+              <path key={`rf${i}`} d={ringArc(rx, true)} fill="none"
+                stroke={r.color} strokeOpacity={r.op} strokeWidth={r.w} strokeLinecap="round" />
+            );
+          })}
+        </g>
+      )}
+
+      {/* Diamond aurora - a luminous band hugging the upper limb, with wisps
+          streaming outward (like aurora seen at a planet's edge from space) */}
       {p.diamond && (() => {
         const cx = 120, cy = 108, R = p.radius;
-        const baseY = cy - R * 0.05;           // where bands meet the horizon
-        const arcTop = (f: number) => cy - (R + 6) - Math.sin(f * Math.PI) * 22; // bowed-up top edge
+        const A0 = 168, SPAN = 204;                  // arc from 168 deg over the top
+        const limb = (rr: number) => {
+          const a = (A0 * Math.PI) / 180;
+          const lx = cx + Math.cos(a) * rr, ly = cy + Math.sin(a) * rr;
+          const rxp = cx - Math.cos(a) * rr;         // mirror of left across vertical
+          return `M ${lx} ${ly} A ${rr} ${rr} 0 1 1 ${rxp} ${ly}`;
+        };
+        const wisps = [0.16, 0.32, 0.48, 0.64, 0.8];
         return (
-          <g>
-            {/* Soft bloom halo crowning the planet */}
+          <g style={{ mixBlendMode: "screen" }}>
+            {/* Bloom glow above the planet */}
             <motion.ellipse
-              cx={cx} cy={cy - R * 0.35} rx={R * 1.55} ry={R * 0.95}
+              cx={cx} cy={cy - R * 0.55} rx={R * 1.4} ry={R * 0.78}
               fill={`url(#${id("auroraBloom")})`} filter={`url(#${id("auroraBlur")})`}
-              initial={{ opacity: 0.35 }}
-              animate={{ opacity: [0.35, 0.7, 0.45, 0.65, 0.35] }}
-              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: [0.3, 0.6, 0.4, 0.55, 0.3] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
             />
 
-            {/* Curtain rays hanging from the crown */}
+            {/* Outer soft halo band */}
+            <motion.path
+              d={limb(R + 10)} fill="none" stroke={`url(#${id("aurora")})`}
+              strokeWidth={12} strokeLinecap="round" filter={`url(#${id("auroraBlur")})`}
+              initial={{ opacity: 0.16 }}
+              animate={{ opacity: [0.16, 0.4, 0.24, 0.36, 0.16] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Wisps streaming outward from the limb */}
             <g filter={`url(#${id("auroraSoft")})`}>
-              {Array.from({ length: 13 }).map((_, i) => {
-                const f = i / 12;
-                const x = cx - (R + 4) + f * (R + 4) * 2;
-                const top = arcTop(f);
-                const len = 16 + Math.sin(f * Math.PI) * 26;
+              {wisps.map((f, i) => {
+                const ang = ((A0 + f * SPAN) * Math.PI) / 180;
+                const bx = cx + Math.cos(ang) * (R + 1), by = cy + Math.sin(ang) * (R + 1);
+                const len = 18 + Math.sin(f * Math.PI) * 20;
+                const tx = cx + Math.cos(ang) * (R + 1 + len), ty = cy + Math.sin(ang) * (R + 1 + len);
+                const ccx = cx + Math.cos(ang + 0.22) * (R + 1 + len * 0.55);
+                const ccy = cy + Math.sin(ang + 0.22) * (R + 1 + len * 0.55);
                 return (
-                  <motion.rect
-                    key={`cr${i}`}
-                    x={x - 1} y={top} width={2} height={len} rx={1}
-                    fill={`url(#${id("auroraCurtain")})`}
-                    initial={{ opacity: 0.2 }}
-                    animate={{ opacity: [0.15, 0.85, 0.3, 0.7, 0.15], scaleY: [0.85, 1.12, 0.92, 1.05, 0.85] }}
-                    transition={{ duration: 3.4 + (i % 5) * 0.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.16 }}
-                    style={{ transformOrigin: `${x}px ${top}px` }}
+                  <motion.path
+                    key={`w${i}`}
+                    d={`M ${bx} ${by} Q ${ccx} ${ccy} ${tx} ${ty}`}
+                    fill="none" stroke={`url(#${id("aurora")})`} strokeWidth={2} strokeLinecap="round"
+                    initial={{ opacity: 0.2, pathLength: 0.7 }}
+                    animate={{ opacity: [0.12, 0.8, 0.35, 0.65, 0.12], pathLength: [0.65, 1, 0.85, 1, 0.65] }}
+                    transition={{ duration: 3.6 + (i % 3) * 0.7, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
                   />
                 );
               })}
             </g>
 
-            {/* Bright arcing bands */}
-            <g filter={`url(#${id("auroraBlur")})`}>
-              {[0, 1, 2, 3, 4].map((k) => {
-                const lift = R + 12 + k * 9;
-                const span = R + 12 + k * 6;
-                return (
-                  <motion.path
-                    key={`au${k}`}
-                    d={`M ${cx - span} ${baseY} Q ${cx} ${cy - lift} ${cx + span} ${baseY}`}
-                    fill="none"
-                    stroke={`url(#${id("aurora")})`}
-                    strokeWidth={3.6 - k * 0.5}
-                    strokeLinecap="round"
-                    initial={{ opacity: 0.2 }}
-                    animate={{ opacity: [0.2, 0.75, 0.35, 0.6, 0.2] }}
-                    transition={{ duration: 4.2 + k * 1.1, repeat: Infinity, ease: "easeInOut", delay: k * 0.45 }}
-                  />
-                );
-              })}
-            </g>
+            {/* Bright core band on the limb */}
+            <motion.path
+              d={limb(R + 2.5)} fill="none" stroke={`url(#${id("aurora")})`}
+              strokeWidth={4.5} strokeLinecap="round" filter={`url(#${id("auroraSoft")})`}
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: [0.5, 0.95, 0.65, 0.88, 0.5] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            />
           </g>
         );
       })()}
