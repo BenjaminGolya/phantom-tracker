@@ -49,9 +49,12 @@ function saveCategories(cats: typeof DEFAULT_CATEGORIES) {
 function CategoryPicker({
   value,
   onChange,
+  extra = [],
 }: {
   value: string;
   onChange: (v: string) => void;
+  /** Categories pulled from the user's existing habits (account-synced). */
+  extra?: string[];
 }) {
   const { t, lang } = useLang();
   const [open, setOpen] = useState(false);
@@ -103,7 +106,14 @@ function CategoryPicker({
     if (value === label) onChange("");
   }
 
-  const selected = categories.find((c) => c.label === value);
+  // Merge in categories from existing habits (so they appear on any device).
+  const displayed = [
+    ...categories,
+    ...extra
+      .filter((e) => e && !categories.some((c) => c.label === e))
+      .map((label) => ({ label, emoji: "◆" })),
+  ];
+  const selected = displayed.find((c) => c.label === value);
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -143,7 +153,7 @@ function CategoryPicker({
           >
             {/* Category list */}
             <div className="max-h-52 overflow-y-auto py-1">
-              {categories.map((cat) => {
+              {displayed.map((cat) => {
                 const active = value === cat.label;
                 return (
                   <div
@@ -159,8 +169,8 @@ function CategoryPicker({
                     </div>
                     <div className="flex items-center gap-1.5">
                       {active && <Check size={12} className="text-primary" />}
-                      {/* Remove - only show for custom (non-default) cats */}
-                      {!DEFAULT_CATEGORIES.find((d) => d.label === cat.label) && (
+                      {/* Remove - only for your own added cats (not defaults or in-use ones) */}
+                      {!DEFAULT_CATEGORIES.find((d) => d.label === cat.label) && !extra.includes(cat.label) && (
                         <button
                           onClick={(e) => removeCategory(cat.label, e)}
                           className="opacity-0 group-hover/item:opacity-100 text-muted hover:text-red-400 transition-all p-0.5 rounded"
@@ -350,11 +360,13 @@ function TimePicker({ value, onChange }: { value: string; onChange: (v: string) 
 interface HabitFormProps {
   initial?: HabitWithLogs;
   pro?: boolean;
+  /** Categories already used on the user's habits, so they sync across devices. */
+  categoryOptions?: string[];
   onSubmit: (data: HabitFormData) => Promise<void>;
   onClose: () => void;
 }
 
-export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitFormProps) {
+export function HabitForm({ initial, pro = false, categoryOptions = [], onSubmit, onClose }: HabitFormProps) {
   const t = useT();
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -588,7 +600,7 @@ export function HabitForm({ initial, pro = false, onSubmit, onClose }: HabitForm
             {/* Category */}
             <div>
               <label className="text-xs text-muted mb-1.5 block">{t("form.category")}</label>
-              <CategoryPicker value={category} onChange={setCategory} />
+              <CategoryPicker value={category} onChange={setCategory} extra={categoryOptions} />
             </div>
 
             {/* Goal */}

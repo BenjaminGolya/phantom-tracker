@@ -304,12 +304,12 @@ export function LandingPage() {
           </p>
         </motion.div>
 
-        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto items-start">
+        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto items-stretch">
           {/* Free */}
-          <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col">
             <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">{t("landing.free")}</p>
             <p className="text-3xl font-bold mb-5">€0<span className="text-sm text-muted font-normal">{t("landing.perForever")}</span></p>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2.5 flex-1">
               {[
                 { label: t("lp.freeHabits"), ok: true },
                 { label: t("lp.dailyTracking"), ok: true },
@@ -335,7 +335,7 @@ export function LandingPage() {
           </div>
 
           {/* Pro */}
-          <div className="relative bg-surface border-2 border-primary/50 rounded-2xl p-6 shadow-[0_0_40px_#7f49c320]">
+          <div className="relative bg-surface border-2 border-primary/50 rounded-2xl p-6 shadow-[0_0_40px_#7f49c320] flex flex-col">
             <span className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md bg-primary text-white">
               {t("landing.mostPopular")}
             </span>
@@ -344,7 +344,7 @@ export function LandingPage() {
             </p>
             <p className="text-3xl font-bold">{PRICE_LABEL}</p>
             <p className="text-[11px] text-primary mb-5">{t("lp.proPriceSub")}</p>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2.5 flex-1">
               {[
                 t("lp.unlimited"),
                 t("lp.pushReminders"),
@@ -386,7 +386,7 @@ export function LandingPage() {
               <span className="text-base text-muted font-normal line-through mb-0.5">{PRICE_LABEL_LIFETIME}</span>
             </p>
             <p className="text-[11px] mb-5" style={{ color: "#67e8f9" }}>{t("lp.diamondPriceSub")}</p>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2.5 flex-1">
               {[
                 t("lp.diamondForever"),
                 t("lp.diamondXp"),
@@ -418,27 +418,6 @@ export function LandingPage() {
           <p className="text-muted mt-3 max-w-lg mx-auto">
             {t("lp.installSubtitle")}
           </p>
-
-          {/* Native apps - coming soon (disabled store buttons) */}
-          <p className="text-sm text-muted mt-6 max-w-lg mx-auto">{t("lp.storesComingSoon")}</p>
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-            {[
-              { icon: <Apple size={20} className="shrink-0" />, label: t("lp.appStore") },
-              { icon: <Play size={18} className="shrink-0" />, label: t("lp.googlePlay") },
-            ].map((s) => (
-              <div
-                key={s.label}
-                aria-disabled
-                className="relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-border bg-surface opacity-60 cursor-not-allowed select-none"
-              >
-                {s.icon}
-                <span className="text-left leading-tight">
-                  <span className="block text-[10px] text-muted">{t("lp.comingSoon")}</span>
-                  <span className="block text-sm font-semibold">{s.label}</span>
-                </span>
-              </div>
-            ))}
-          </div>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-4">
@@ -488,7 +467,30 @@ export function LandingPage() {
           </motion.div>
         </div>
 
-        <motion.p {...fadeUp} className="text-xs text-muted text-center mt-5">
+        {/* Native apps - coming soon (disabled store buttons) */}
+        <motion.div {...fadeUp} className="text-center mt-10">
+          <p className="text-sm text-muted">{t("lp.storesComingSoon")}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+            {[
+              { icon: <Apple size={20} className="shrink-0" />, label: t("lp.appStore") },
+              { icon: <Play size={18} className="shrink-0" />, label: t("lp.googlePlay") },
+            ].map((s) => (
+              <div
+                key={s.label}
+                aria-disabled
+                className="relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-border bg-surface opacity-60 cursor-not-allowed select-none"
+              >
+                {s.icon}
+                <span className="text-left leading-tight">
+                  <span className="block text-[10px] text-muted">{t("lp.comingSoon")}</span>
+                  <span className="block text-sm font-semibold">{s.label}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.p {...fadeUp} className="text-xs text-muted text-center mt-6">
           {t("lp.installNote")}
         </motion.p>
       </section>

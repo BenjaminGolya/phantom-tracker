@@ -275,6 +275,7 @@ export function DashboardClient({ habits: initialHabits, pro = false, diamond = 
       {showForm && (
         <HabitForm
           pro={pro}
+          categoryOptions={Array.from(new Set(habits.map((h) => h.category).filter((c): c is string => !!c)))}
           onSubmit={handleCreateHabit}
           onClose={() => setShowForm(false)}
         />

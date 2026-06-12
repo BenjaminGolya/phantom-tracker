@@ -383,6 +383,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
         <HabitForm
           initial={editingHabit ?? undefined}
           pro={pro}
+          categoryOptions={Array.from(new Set(habits.map((h) => h.category).filter((c): c is string => !!c)))}
           onSubmit={editingHabit ? handleEdit : handleCreate}
           onClose={() => { setShowForm(false); setEditingHabit(null); }}
         />
