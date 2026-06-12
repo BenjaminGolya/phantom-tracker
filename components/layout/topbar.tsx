@@ -68,22 +68,25 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
       <div className="flex items-center gap-1 shrink-0">
         <NotificationBell />
         <LanguageSwitcher />
-        <div className="relative" ref={ref}>
+        <div className="relative shrink-0" ref={ref}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 p-1.5 sm:pr-3 rounded-full hover:bg-surface-2 transition-colors"
+          className="flex items-center gap-2 p-1.5 sm:pr-3 rounded-full hover:bg-surface-2 transition-colors shrink-0"
         >
           {user?.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={user.image}
               alt="avatar"
-              className="w-7 h-7 rounded-full object-cover border border-primary/30"
+              width={28}
+              height={28}
+              style={{ width: 28, height: 28 }}
+              className="rounded-full object-cover border border-primary/30 shrink-0"
             />
           ) : (
             <GhostAvatar size={28} className="border border-primary/30" />
           )}
-          <span className="text-sm text-muted hidden sm:block">{user?.name ?? user?.email}</span>
+          <span className="text-sm text-muted hidden sm:block truncate max-w-[160px]">{user?.name ?? user?.email}</span>
         </button>
 
         {open && (
