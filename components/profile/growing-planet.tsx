@@ -94,17 +94,20 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
-  // A normal ringed world gets a single Saturn-style ring. Only the ultimate
-  // (Diamond) crosses several rings at different angles, so it reads like an
-  // atom while still looking like a planet. Each ring is drawn in two halves -
-  // the far arc behind the globe, the near arc in front - so it wraps.
+  // A normal ringed world gets a single Saturn-style ring. Diamond unlocks the
+  // crossing "atom" rings, but you still EARN them by leveling: one more ring
+  // per tier, reaching the full atom only at the Singularity summit (Lv14).
+  // Each ring is drawn in two halves - the far arc behind the globe, the near
+  // arc in front - so it wraps the planet.
+  const ATOM_RINGS = [
+    { off: 30, w: 6, color: "#67e8f9", op: 0.7, tilt: -20 },
+    { off: 40, w: 5.2, color: "#a78bfa", op: 0.6, tilt: 30 },
+    { off: 38, w: 5, color: "#5eead4", op: 0.55, tilt: 78 },
+    { off: 50, w: 4.4, color: "#f0abfc", op: 0.5, tilt: 124 },
+  ];
+  const atomCount = p.level >= 14 ? 4 : p.level >= 11 ? 3 : p.level >= 8 ? 2 : p.level >= 5 ? 1 : 0;
   const ringDefs = p.diamond
-    ? [
-        { off: 30, w: 6, color: "#67e8f9", op: 0.7, tilt: -20 },
-        { off: 40, w: 5.2, color: "#a78bfa", op: 0.6, tilt: 30 },
-        { off: 38, w: 5, color: "#5eead4", op: 0.55, tilt: 78 },
-        { off: 50, w: 4.4, color: "#f0abfc", op: 0.5, tilt: 124 },
-      ]
+    ? ATOM_RINGS.slice(0, atomCount)
     : p.level >= 6
     ? [{ off: 34, w: 4.5, color: ACCENT, op: 0.6, tilt: -18 }]
     : [];
@@ -234,66 +237,50 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         </g>
       )}
 
-      {/* Diamond aurora - a glowing polar cap over the top pole (not the whole
-          globe), with a few wisps lifting off it */}
-      {p.diamond && (() => {
+      {/* Diamond aurora - a glowing auroral oval painted around the upper pole,
+          earned alongside the rings. Sits on the planet, not around the whole
+          globe. */}
+      {p.diamond && p.level >= 5 && (() => {
         const cx = 120, cy = 108, R = p.radius;
-        const A0 = 232, SPAN = 76;                    // ~76 deg cap centred on the top pole
-        const cap = (rr: number) => {
-          const a0 = (A0 * Math.PI) / 180, a1 = ((A0 + SPAN) * Math.PI) / 180;
-          return `M ${cx + Math.cos(a0) * rr} ${cy + Math.sin(a0) * rr} A ${rr} ${rr} 0 0 1 ${cx + Math.cos(a1) * rr} ${cy + Math.sin(a1) * rr}`;
-        };
-        const wisps = [0.25, 0.5, 0.75];
+        const ox = cx, oy = cy - R * 0.38;            // oval centre on the upper hemisphere
+        const orx = R * 0.58, ory = R * 0.2;
+        const tilt = -12;
+        const grad = `url(#${id("aurora")})`;
         return (
           <g style={{ mixBlendMode: "screen" }}>
             {/* Bloom over the pole */}
             <motion.ellipse
-              cx={cx} cy={cy - R * 0.82} rx={R * 0.72} ry={R * 0.5}
+              cx={cx} cy={cy - R * 0.5} rx={R * 0.9} ry={R * 0.58}
               fill={`url(#${id("auroraBloom")})`} filter={`url(#${id("auroraBlur")})`}
-              initial={{ opacity: 0.35 }}
-              animate={{ opacity: [0.35, 0.65, 0.45, 0.6, 0.35] }}
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: [0.3, 0.6, 0.4, 0.55, 0.3] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             />
-
-            {/* Soft outer cap */}
-            <motion.path
-              d={cap(R + 7)} fill="none" stroke={`url(#${id("aurora")})`}
-              strokeWidth={11} strokeLinecap="round" filter={`url(#${id("auroraBlur")})`}
-              initial={{ opacity: 0.18 }}
-              animate={{ opacity: [0.18, 0.45, 0.26, 0.4, 0.18] }}
-              transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-            />
-
-            {/* Wisps lifting off the cap */}
-            <g filter={`url(#${id("auroraSoft")})`}>
-              {wisps.map((f, i) => {
-                const ang = ((A0 + f * SPAN) * Math.PI) / 180;
-                const bx = cx + Math.cos(ang) * (R + 1), by = cy + Math.sin(ang) * (R + 1);
-                const len = 16 + Math.sin(f * Math.PI) * 18;
-                const tx = cx + Math.cos(ang) * (R + 1 + len), ty = cy + Math.sin(ang) * (R + 1 + len);
-                const ccx = cx + Math.cos(ang + 0.25) * (R + 1 + len * 0.55);
-                const ccy = cy + Math.sin(ang + 0.25) * (R + 1 + len * 0.55);
-                return (
-                  <motion.path
-                    key={`w${i}`}
-                    d={`M ${bx} ${by} Q ${ccx} ${ccy} ${tx} ${ty}`}
-                    fill="none" stroke={`url(#${id("aurora")})`} strokeWidth={2} strokeLinecap="round"
-                    initial={{ opacity: 0.2, pathLength: 0.7 }}
-                    animate={{ opacity: [0.15, 0.8, 0.35, 0.65, 0.15], pathLength: [0.65, 1, 0.85, 1, 0.65] }}
-                    transition={{ duration: 3.6 + i * 0.7, repeat: Infinity, ease: "easeInOut", delay: i * 0.35 }}
-                  />
-                );
-              })}
+            {/* Outer glow oval */}
+            <g transform={`rotate(${tilt} ${ox} ${oy})`}>
+              <motion.ellipse
+                cx={ox} cy={oy} rx={orx} ry={ory} fill="none"
+                stroke={grad} strokeWidth={10} filter={`url(#${id("auroraBlur")})`}
+                initial={{ opacity: 0.2 }}
+                animate={{ opacity: [0.2, 0.45, 0.28, 0.4, 0.2] }}
+                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+              />
             </g>
-
-            {/* Bright core cap on the limb */}
-            <motion.path
-              d={cap(R + 2)} fill="none" stroke={`url(#${id("aurora")})`}
-              strokeWidth={4.5} strokeLinecap="round" filter={`url(#${id("auroraSoft")})`}
-              initial={{ opacity: 0.55 }}
-              animate={{ opacity: [0.55, 0.95, 0.68, 0.9, 0.55] }}
-              transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
-            />
+            {/* Bright auroral rings on the surface */}
+            <g transform={`rotate(${tilt} ${ox} ${oy})`} filter={`url(#${id("auroraSoft")})`}>
+              <motion.ellipse
+                cx={ox} cy={oy} rx={orx} ry={ory} fill="none" stroke={grad} strokeWidth={3.2}
+                initial={{ opacity: 0.55 }}
+                animate={{ opacity: [0.55, 0.95, 0.7, 0.9, 0.55] }}
+                transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.ellipse
+                cx={ox} cy={oy} rx={orx * 0.6} ry={ory * 0.62} fill="none" stroke={grad} strokeWidth={2}
+                initial={{ opacity: 0.3 }}
+                animate={{ opacity: [0.3, 0.6, 0.4, 0.55, 0.3] }}
+                transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+              />
+            </g>
           </g>
         );
       })()}
