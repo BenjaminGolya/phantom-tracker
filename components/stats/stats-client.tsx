@@ -555,6 +555,9 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
                   const isBusiest = i === busiestIdx && c > 0;
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full">
+                      <span className={`text-[10px] font-mono tabular-nums ${isBusiest ? "text-primary font-semibold" : c > 0 ? "text-white/70" : "text-muted/50"}`}>
+                        {c}
+                      </span>
                       <div className="w-full flex-1 flex items-end">
                         <motion.div
                           className="w-full rounded-t-md"
