@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
   const format = req.nextUrl.searchParams.get("format");
 
-  // JSON backup — full fidelity, consumable by /api/import.
+  // JSON backup - full fidelity, consumable by /api/import.
   if (format === "json") {
     const payload = {
       version: 1,

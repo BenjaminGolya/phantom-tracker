@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendPushToUser } from "@/lib/push";
+import { notifyUser } from "@/lib/notify";
 import { calcStreak, isScheduledOnParts } from "@/lib/utils";
 import { logError } from "@/lib/log";
 
@@ -38,7 +38,7 @@ async function handle(req: NextRequest) {
     const nudges = await runStreakNudges();
     return NextResponse.json({ ok: true, downgraded, reminders, nudges });
   } catch (err) {
-    // Critical background job — alert the admin if it breaks.
+    // Critical background job - alert the admin if it breaks.
     logError("cron/reminders", err, { alert: true });
     return NextResponse.json({ error: "Reminder run failed" }, { status: 500 });
   }
@@ -83,7 +83,7 @@ async function runStreakNudges(): Promise<number> {
     if (local.hhmm !== STREAK_NUDGE_HHMM) continue;
 
     // Pick the habit with the longest current streak that's scheduled today and
-    // still undone — the one most worth protecting.
+    // still undone - the one most worth protecting.
     let best: { name: string; streak: number } | null = null;
     const dayOfMonth = parseInt(local.date.slice(8, 10), 10);
     for (const h of u.habits) {
@@ -94,10 +94,11 @@ async function runStreakNudges(): Promise<number> {
     }
     if (!best) continue;
 
-    await sendPushToUser(u.id, {
+    await notifyUser(u.id, {
       title: `🔥 ${best.streak}-day streak`,
-      body: `Don't break it — complete "${best.name}" to keep your streak alive.`,
+      body: `Don't break it - complete "${best.name}" to keep your streak alive.`,
       url: "/dashboard",
+      icon: "streak",
       tag: "streak-nudge",
     });
     sent++;
@@ -120,7 +121,7 @@ async function runReminders() {
     const tz = habit.user.timezone;
     if (!tz || !habit.reminderTime) continue;
 
-    // Reminders are a Pro feature — skip free users.
+    // Reminders are a Pro feature - skip free users.
     if (habit.user.plan !== "pro") continue;
 
     let local;
@@ -140,10 +141,11 @@ async function runReminders() {
     const doneToday = habit.logs.some((l) => l.date === local.date && l.completed);
     if (doneToday) continue;
 
-    await sendPushToUser(habit.user.id, {
+    await notifyUser(habit.user.id, {
       title: `⏰ ${habit.name}`,
       body: `Time to complete "${habit.name}". Tap to mark it done.`,
       url: "/dashboard",
+      icon: "reminder",
       tag: `habit-${habit.id}`,
     });
     sent++;

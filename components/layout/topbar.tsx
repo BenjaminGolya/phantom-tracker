@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { NotificationBell } from "@/components/layout/notification-bell";
 import { useT } from "@/lib/i18n/context";
 
 interface TopBarProps {
@@ -65,6 +66,7 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
       </Link>
 
       <div className="flex items-center gap-1 shrink-0">
+        <NotificationBell />
         <LanguageSwitcher />
         <div className="relative" ref={ref}>
         <button

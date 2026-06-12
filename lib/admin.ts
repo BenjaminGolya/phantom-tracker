@@ -1,5 +1,5 @@
 // Admin access is controlled by an allowlist of emails in the ADMIN_EMAILS
-// env var (comma-separated). Keeping it in env — not the database — means
+// env var (comma-separated). Keeping it in env - not the database - means
 // admin rights can't be granted by tampering with user rows.
 
 export function adminEmails(): string[] {

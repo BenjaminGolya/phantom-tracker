@@ -139,9 +139,15 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
           <p className="text-3xl font-mono font-bold" style={{ color: info.color }}>{info.xp}</p>
           <p className="text-xs text-muted">{t("stats.totalXp")}</p>
           {pro && (
-            <p className="text-[10px] text-primary font-medium flex items-center gap-1 justify-end mt-0.5">
-              <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× {t("stats.proBoost")}
-            </p>
+            diamond ? (
+              <p className="text-[10px] font-medium flex items-center gap-1 justify-end mt-0.5" style={{ color: "#67e8f9" }}>
+                <Gem size={9} /> {PLAN_LIMITS.diamondXpMultiplier}× {t("stats.diamondBoost")}
+              </p>
+            ) : (
+              <p className="text-[10px] text-primary font-medium flex items-center gap-1 justify-end mt-0.5">
+                <Sparkles size={9} /> {PLAN_LIMITS.proXpMultiplier}× {t("stats.proBoost")}
+              </p>
+            )
           )}
         </div>
       </div>
@@ -197,7 +203,7 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
         </div>
       </div>
 
-      {/* XP breakdown — how you earn it + how to earn more (collapsible) */}
+      {/* XP breakdown - how you earn it + how to earn more (collapsible) */}
       <details className="group border-t border-border pt-4">
         <summary className="flex items-center justify-between cursor-pointer list-none select-none group/sum">
           <span className="text-xs text-muted uppercase tracking-wider font-medium transition-colors group-hover/sum:text-primary">{t("stats.howEarnXp")}</span>
@@ -438,7 +444,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
   const prev30 = completedDates.filter((d) => inWindow(d, 60, 30)).length;
   const trendPct = prev30 > 0 ? Math.round(((last30 - prev30) / prev30) * 100) : last30 > 0 ? 100 : 0;
   // Average over the days actually tracked (since the oldest habit was created),
-  // capped at 30 — so a brand-new account isn't divided by a full month.
+  // capped at 30 - so a brand-new account isn't divided by a full month.
   const oldestCreatedAt = habits.reduce<Date | null>((min, h) => {
     const c = new Date(h.createdAt);
     return !min || c < min ? c : min;
@@ -455,7 +461,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
   const busiestIdx = completedDates.length ? weekdayCounts.indexOf(Math.max(...weekdayCounts)) : -1;
   const busiestDay = busiestIdx >= 0
     ? format(new Date(2023, 0, 1 + busiestIdx), "EEE", { locale: dfLocale(lang) })
-    : "—";
+    : "-";
 
   // Completions per category (top 6).
   const catTotals = new Map<string, number>();
@@ -468,7 +474,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
   const catRows = Array.from(catTotals.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6);
   const catMax = Math.max(1, ...catRows.map(([, v]) => v));
 
-  // Date-based charts/streaks differ server vs client — render a shell until mounted.
+  // Date-based charts/streaks differ server vs client - render a shell until mounted.
   if (!mounted) {
     return (
       <div className="max-w-3xl mx-auto space-y-6 pb-28 lg:pb-6">
@@ -497,7 +503,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
           {/* Profile level hero */}
           <ProfileLevelCard habits={habits} pro={pro} diamond={diamond} />
 
-          {/* Profile portrait — growing world + personality */}
+          {/* Profile portrait - growing world + personality */}
           <GrowingPlanet habits={habits} pro={pro} diamond={diamond} seed={seed} />
           <PersonalityConstellation habits={habits} pro={pro} />
 
@@ -539,7 +545,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
             <WeeklyChart data={weekData} total={habits.length} />
           </div>
 
-          {/* Advanced stats — Pro */}
+          {/* Advanced stats - Pro */}
           <AdvancedStats
             pro={pro}
             metrics={[

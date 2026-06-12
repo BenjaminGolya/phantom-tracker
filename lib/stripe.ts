@@ -1,7 +1,7 @@
 import "server-only";
 import Stripe from "stripe";
 
-// Stripe is optional at build time — keys are injected via env. We lazily
+// Stripe is optional at build time - keys are injected via env. We lazily
 // construct the client so the app still builds/runs without Stripe configured
 // (the checkout route returns a friendly error instead of crashing).
 let _stripe: Stripe | null = null;

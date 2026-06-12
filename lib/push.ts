@@ -50,7 +50,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
         if (code === 404 || code === 410) {
           await prisma.pushSubscription.delete({ where: { endpoint: sub.endpoint } }).catch(() => {});
         } else {
-          // Unexpected push failure (e.g. bad VAPID config) — worth seeing in logs
+          // Unexpected push failure (e.g. bad VAPID config) - worth seeing in logs
           logError("push/send", `statusCode=${code}: ${e?.body || e?.message || "unknown"}`);
         }
       }

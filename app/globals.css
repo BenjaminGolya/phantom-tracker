@@ -9,7 +9,7 @@
     --primary: 127 73 195;     /* #7f49c3 */
     --primary-dim: 92 52 145;  /* #5c3491 */
   }
-  /* Diamond tier — icy cyan accent. */
+  /* Diamond tier - icy cyan accent. */
   .theme-diamond {
     --primary: 103 232 249;    /* #67e8f9 */
     --primary-dim: 34 211 238; /* #22d3ee */
@@ -84,7 +84,7 @@
   .phantom-bounce, .phantom-shadow { animation: none; }
 }
 
-/* ── Diamond theme — ambient cues beyond the accent colour ───────────────────
+/* ── Diamond theme - ambient cues beyond the accent colour ───────────────────
    Unlayered (after @tailwind utilities) so these win over utility classes. */
 html.theme-diamond body {
   background:
@@ -109,3 +109,16 @@ html.theme-diamond body::before {
 html.theme-diamond .phantom-glow { box-shadow: 0 0 20px rgba(103, 232, 249, 0.32); }
 html.theme-diamond .phantom-glow-md { box-shadow: 0 0 30px rgba(103, 232, 249, 0.4); }
 html.theme-diamond ::-webkit-scrollbar-thumb:hover { background: #67e8f9; }
+
+/* The icy cyan accent is light, so white text on a SOLID primary fill is
+   unreadable. Force dark ink on filled primary surfaces (buttons, badges).
+   Opacity variants (bg-primary/15 etc.) are untouched - they carry cyan text
+   on a faint tint and stay readable. */
+html.theme-diamond .bg-primary,
+html.theme-diamond .hover\:bg-primary-dim:hover,
+html.theme-diamond .bg-primary :where(span, p, b, strong, svg, small) {
+  color: #06242b !important;
+}
+html.theme-diamond .bg-primary svg { stroke: #06242b; }
+/* Gradient text that fades from primary needs the cyan to read on dark. */
+html.theme-diamond .from-primary { --tw-gradient-from: #67e8f9 var(--tw-gradient-from-position); }

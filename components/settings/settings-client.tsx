@@ -21,6 +21,7 @@ interface SettingsClientProps {
   hasBilling?: boolean;
   pendingEmail?: string | null;
   twoFactorEnabled?: boolean;
+  newsletterOptIn?: boolean;
 }
 
 // Whole days remaining until a date (rounded up). Returns 0 if already past.
@@ -57,8 +58,29 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, lifetime = false, proUntil = null, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, lifetime = false, proUntil = null, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false, newsletterOptIn = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
+
+  // Newsletter opt-in - saved to the user profile.
+  const [newsletter, setNewsletter] = useState(newsletterOptIn);
+  const [newsletterBusy, setNewsletterBusy] = useState(false);
+  async function toggleNewsletter() {
+    const next = !newsletter;
+    setNewsletter(next);
+    setNewsletterBusy(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newsletterOptIn: next }),
+      });
+      if (!res.ok) setNewsletter(!next); // revert on failure
+    } catch {
+      setNewsletter(!next);
+    } finally {
+      setNewsletterBusy(false);
+    }
+  }
 
   // Accent theme (Diamond-only). Persisted in localStorage; applied to <html>.
   const [theme, setTheme] = useState<"default" | "diamond">("default");
@@ -394,11 +416,12 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
               >
                 {t("set.manage")}
               </Link>
-            ) : (
+            ) : !lifetime ? (
+              // Comp Pro note - Diamond needs no billing explanation at all.
               <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
                 {t("set.complimentary")}
               </span>
-            )}
+            ) : null}
           </div>
         ) : (
           <div className="flex items-center justify-between gap-3 mt-3">
@@ -647,7 +670,33 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
         )}
       </div>
 
-      {/* Data — Pro */}
+      {/* Newsletter */}
+      <div id="newsletter" className="bg-surface border border-border rounded-xl p-5 scroll-mt-20">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
+              <Send size={15} className="text-primary" /> {t("set.newsletter")}
+            </h2>
+            <p className="text-xs text-muted">{t("set.newsletterDesc")}</p>
+          </div>
+          <button
+            onClick={toggleNewsletter}
+            disabled={newsletterBusy}
+            aria-pressed={newsletter}
+            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 disabled:opacity-60 ${
+              newsletter ? "bg-primary" : "bg-surface-2 border border-border"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
+                newsletter ? "left-[22px]" : "left-0.5"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Data - Pro */}
       <div className="bg-surface border border-border rounded-xl p-5">
         <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
           {t("settings.data")}

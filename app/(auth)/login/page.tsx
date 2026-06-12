@@ -30,7 +30,7 @@ function LoginForm() {
 
   // Already signed in → go to the dashboard. The one exception: an email link
   // for a DIFFERENT account (?email=) opened on a device logged into another
-  // account — there we keep the form so they can switch accounts.
+  // account - there we keep the form so they can switch accounts.
   useEffect(() => {
     if (status !== "authenticated") return;
     const differentAccountLink = emailParam && session?.user?.email !== emailParam;

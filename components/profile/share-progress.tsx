@@ -47,7 +47,7 @@ export function ShareProgress({
       const file = new File([blob], "phantom-tracker-progress.png", { type: "image/png" });
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
       if (nav.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "My habit progress", text: "Build habits that actually stick — phantomtracker.io" });
+        await navigator.share({ files: [file], title: "My habit progress", text: "Build habits that actually stick: phantomtracker.io" });
       } else {
         await download();
       }

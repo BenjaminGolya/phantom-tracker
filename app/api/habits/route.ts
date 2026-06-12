@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       frequency: data.frequency ?? "daily",
       goal: data.goal ?? null,
       category: data.category ?? null,
-      // Reminders are a Pro feature — ignore for free users.
+      // Reminders are a Pro feature - ignore for free users.
       reminderTime: pro ? (data.reminderTime ?? null) : null,
     },
     include: { logs: true },

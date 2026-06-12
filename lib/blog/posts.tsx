@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { HabitGridHero, TrackerCardHero, StreakHero } from "@/components/blog/heroes";
+import { HabitGridHero, TrackerCardHero, StreakHero, DiamondHero } from "@/components/blog/heroes";
 
 // Lightweight prose elements so each article stays readable without a markdown
 // dependency or global CSS.
@@ -29,10 +29,68 @@ export type Post = {
 
 export const POSTS: Post[] = [
   {
+    slug: "diamond-is-coming",
+    title: "Diamond Is Coming: Lifetime Pro, for a Limited Time",
+    description:
+      "Phantom Tracker's Diamond plan launches soon: pay once, keep Pro forever, plus exclusive perks. A limited launch price of €29 (regular €39). Subscribe to the newsletter to hear the moment it opens.",
+    date: "2026-06-12",
+    readingMins: 3,
+    keywords: ["diamond plan", "lifetime habit tracker", "phantom tracker diamond", "lifetime deal"],
+    hero: <DiamondHero />,
+    content: (
+      <>
+        <P>
+          We&apos;ve been quietly building something special: <Strong>Diamond</Strong>, a one-time
+          purchase that gives you Pro <Strong>forever</Strong>. No subscription, no renewals: pay
+          once and you&apos;re set for life.
+        </P>
+
+        <H2>What Diamond includes</H2>
+        <UL>
+          <li><Strong>Everything in Pro, permanently</Strong>: unlimited habits, reminders, advanced stats.</li>
+          <li><Strong>A 2&times; XP boost</Strong>: the biggest in the app (Pro gets 1.5&times;).</li>
+          <li><Strong>The Diamond theme</Strong>: switch the whole app to an exclusive icy-cyan look.</li>
+          <li><Strong>An aurora over your world</Strong>: shimmering light bands only Diamond planets get.</li>
+          <li><Strong>A secret summit level</Strong>: one level above Eternal that only Diamond members can reach.</li>
+          <li><Strong>The Diamond badge</Strong>: shown across the app, so your world knows you were here early.</li>
+        </UL>
+
+        <H2>The catch: it&apos;s limited</H2>
+        <P>
+          Diamond won&apos;t be on sale year-round. It opens for a <Strong>limited launch window</Strong>
+          at a special early price of <Strong>&euro;29</Strong>, instead of the regular <Strong>&euro;39</Strong>.
+          When the window closes, the launch price is gone for good. Early supporters get the best deal
+          we&apos;ll ever offer.
+        </P>
+
+        <H2>How to not miss it</H2>
+        <P>
+          Subscribe to the newsletter and you&apos;ll get one email the moment Diamond opens, with the
+          price and the deadline. That&apos;s it: no spam, just the launch.
+        </P>
+        <UL>
+          <li>
+            Already have an account? Turn on the newsletter in{" "}
+            <a href="/settings#newsletter" className="text-primary hover:underline font-medium">Settings → Newsletter</a>.
+          </li>
+          <li>
+            New here?{" "}
+            <a href="/signup" className="text-primary hover:underline font-medium">Create a free account</a>{" "}
+            and tick the newsletter box: you&apos;ll be tracking habits today and first in line for Diamond.
+          </li>
+        </UL>
+
+        <P>
+          Until then, keep your streaks alive: your world keeps growing either way.
+        </P>
+      </>
+    ),
+  },
+  {
     slug: "how-to-build-a-habit-that-sticks",
     title: "How to Build a Habit That Actually Sticks",
     description:
-      "A practical, science-backed guide to building habits that last — start tiny, anchor to a cue, track your streak, and recover fast when you slip.",
+      "A practical, science-backed guide to building habits that last: start tiny, anchor to a cue, track your streak, and recover fast when you slip.",
     date: "2026-06-10",
     readingMins: 6,
     keywords: ["how to build a habit", "build habits", "habit formation", "habit tracker"],
@@ -49,7 +107,7 @@ export const POSTS: Post[] = [
         <P>
           The biggest mistake is going all-in on day one. Instead, shrink the habit until it feels
           almost too easy: one push-up, one page, two minutes of meditation. A tiny habit you do
-          every day beats a big one you abandon in a week. You can always do more — the goal first is
+          every day beats a big one you abandon in a week. You can always do more: the goal first is
           to make showing up automatic.
         </P>
 
@@ -64,18 +122,18 @@ export const POSTS: Post[] = [
           <li>After I sit down at my desk, I will drink a glass of water.</li>
         </UL>
 
-        <H2>3. Make it visible — track the streak</H2>
+        <H2>3. Make it visible: track the streak</H2>
         <P>
           What gets measured gets done. Seeing an unbroken chain of completed days creates real
           momentum: you don&apos;t want to break it. This is exactly why a habit tracker with streaks
-          and a visual calendar works so well — each check-in is a small win you can literally see
+          and a visual calendar works so well: each check-in is a small win you can literally see
           building up. In <Strong>Phantom Tracker</Strong>, every day you show up fills a square and
           grows your streak, level, and XP.
         </P>
 
         <H2>4. Plan for the missed day</H2>
         <P>
-          You <em>will</em> miss a day — that&apos;s normal, and it&apos;s not failure. The rule that
+          You <em>will</em> miss a day: that&apos;s normal, and it&apos;s not failure. The rule that
           matters: <Strong>never miss twice.</Strong> One missed day is a slip; two becomes the new
           pattern. Decide in advance how you&apos;ll bounce back, and treat getting back on track as
           part of the habit itself.
@@ -85,7 +143,7 @@ export const POSTS: Post[] = [
         <P>
           Celebrate consistency over intensity. A 70% completion rate sustained for months beats a
           perfect week followed by burnout. Watch your weekly completion and longest streak trend up
-          over time — that slow, compounding progress is the whole game.
+          over time: that slow, compounding progress is the whole game.
         </P>
 
         <H2>Put it together</H2>
@@ -101,7 +159,7 @@ export const POSTS: Post[] = [
     slug: "best-free-habit-tracker",
     title: "The Best Free Habit Tracker in 2026 (and What to Look For)",
     description:
-      "What actually makes a great free habit tracker — streaks, reminders, stats, privacy — and why Phantom Tracker is a strong free pick.",
+      "What actually makes a great free habit tracker (streaks, reminders, stats, privacy) and why Phantom Tracker is a strong free pick.",
     date: "2026-06-10",
     readingMins: 5,
     keywords: ["best free habit tracker", "free habit tracker", "habit tracker app", "habit app"],
@@ -111,28 +169,28 @@ export const POSTS: Post[] = [
         <P>
           There are dozens of habit trackers, and most of the &ldquo;free&rdquo; ones either bury the
           good parts behind a paywall or drown you in ads. Here&apos;s what genuinely matters in a
-          free habit tracker — and how to choose one you&apos;ll actually keep using.
+          free habit tracker: and how to choose one you&apos;ll actually keep using.
         </P>
 
         <H2>What to look for</H2>
         <UL>
-          <li><Strong>A real free tier.</Strong> You should be able to track meaningful habits without paying — not a 7-day trial in disguise.</li>
+          <li><Strong>A real free tier.</Strong> You should be able to track meaningful habits without paying: not a 7-day trial in disguise.</li>
           <li><Strong>Streaks &amp; a visual calendar.</Strong> Seeing your consistency build is the single biggest motivator.</li>
           <li><Strong>Reminders.</Strong> A nudge at the right time is the difference between doing it and forgetting.</li>
-          <li><Strong>Stats that mean something.</Strong> Completion rate, best streak, and trends — not just vanity numbers.</li>
+          <li><Strong>Stats that mean something.</Strong> Completion rate, best streak, and trends: not just vanity numbers.</li>
           <li><Strong>Privacy.</Strong> Your habits are personal. Avoid apps that sell data or demand pointless permissions.</li>
-          <li><Strong>Works everywhere.</Strong> Phone, tablet, desktop — ideally installable as an app without an app store.</li>
+          <li><Strong>Works everywhere.</Strong> Phone, tablet, desktop: ideally installable as an app without an app store.</li>
         </UL>
 
         <H2>Why Phantom Tracker is a strong free choice</H2>
         <P>
           <Strong>Phantom Tracker</Strong> was built around a genuinely usable free plan: track up to
           four habits, build streaks, earn XP and levels, and watch a living world grow with your
-          consistency — all free, on every device, with no ads and no selling your data.
+          consistency: all free, on every device, with no ads and no selling your data.
         </P>
         <P>
           When you want more, Pro unlocks unlimited habits, timed push reminders, advanced stats, and
-          exclusive tiers — but the free plan is fully functional on its own. It installs straight to
+          exclusive tiers: but the free plan is fully functional on its own. It installs straight to
           your home screen (no app store needed), and it&apos;s available in English, Magyar and
           Română.
         </P>
@@ -141,7 +199,7 @@ export const POSTS: Post[] = [
         <P>
           The best free habit tracker is the one you&apos;ll open every day. Look for real streaks,
           helpful reminders, honest privacy, and a free tier that isn&apos;t crippled. If that sounds
-          like what you want, <Strong>give Phantom Tracker a try</Strong> — it&apos;s free to start
+          like what you want, <Strong>give Phantom Tracker a try</Strong>: it&apos;s free to start
           and takes about a minute to set up.
         </P>
       </>
@@ -151,7 +209,7 @@ export const POSTS: Post[] = [
     slug: "why-streaks-work",
     title: "Why Streaks Work: The Psychology of Habit Streaks",
     description:
-      "Streaks are one of the most powerful tools for consistency. Here's the psychology behind why they work — and how to use them without burning out.",
+      "Streaks are one of the most powerful tools for consistency. Here's the psychology behind why they work: and how to use them without burning out.",
     date: "2026-06-10",
     readingMins: 5,
     keywords: ["habit streaks", "why streaks work", "streak motivation", "habit tracker streaks"],
@@ -159,7 +217,7 @@ export const POSTS: Post[] = [
     content: (
       <>
         <P>
-          A &ldquo;streak&rdquo; — the number of days in a row you&apos;ve done something — is one of
+          A &ldquo;streak&rdquo;: the number of days in a row you&apos;ve done something: is one of
           the most effective motivators in any habit tracker. It seems almost too simple to work, yet
           people will go to surprising lengths to protect one. Here&apos;s why.
         </P>
@@ -167,7 +225,7 @@ export const POSTS: Post[] = [
         <H2>1. Loss aversion</H2>
         <P>
           We feel the pain of losing something about twice as strongly as the pleasure of gaining it.
-          Once you&apos;ve built a 20-day streak, breaking it <em>feels</em> like a loss — so you show
+          Once you&apos;ve built a 20-day streak, breaking it <em>feels</em> like a loss: so you show
           up to protect what you&apos;ve built. The streak turns an abstract goal into something
           concrete you don&apos;t want to give up.
         </P>
@@ -175,14 +233,14 @@ export const POSTS: Post[] = [
         <H2>2. The progress principle</H2>
         <P>
           Visible progress is intrinsically motivating. A growing chain of completed days gives your
-          brain a small hit of accomplishment every time you check in — momentum you can actually see.
+          brain a small hit of accomplishment every time you check in: momentum you can actually see.
           That&apos;s why a streak counter paired with a contribution calendar is so sticky.
         </P>
 
         <H2>3. Identity reinforcement</H2>
         <P>
           Every day you keep a streak alive, you cast a vote for the kind of person you&apos;re
-          becoming. A 60-day meditation streak isn&apos;t just data — it&apos;s evidence that
+          becoming. A 60-day meditation streak isn&apos;t just data: it&apos;s evidence that
           &ldquo;I&apos;m someone who meditates.&rdquo; Habits stick when they become part of your
           identity.
         </P>
@@ -201,7 +259,7 @@ export const POSTS: Post[] = [
         <H2>Make streaks work for you</H2>
         <P>
           Used well, streaks turn consistency into a game you want to win. <Strong>Phantom Tracker</Strong>
-          builds the whole experience around them — streak counters, bonus XP at 7, 14 and 30 days,
+          builds the whole experience around them: streak counters, bonus XP at 7, 14 and 30 days,
           milestone celebrations, and gentle nudges so you don&apos;t break a streak worth keeping.
         </P>
       </>

@@ -51,7 +51,7 @@ function XPBar({ logs, habitColor }: { logs: { completed: boolean }[]; habitColo
 
   return (
     <div className="mt-3">
-      {/* Current level — prominent */}
+      {/* Current level - prominent */}
       <div className="flex items-center justify-between mb-1">
         <span className="flex items-center gap-1.5 text-[11px]">
           <span>{info.emoji}</span>
@@ -71,7 +71,7 @@ function XPBar({ logs, habitColor }: { logs: { completed: boolean }[]; habitColo
         />
       </div>
 
-      {/* Next level — and the next tier it unlocks, if any */}
+      {/* Next level - and the next tier it unlocks, if any */}
       <div className="flex items-center justify-between mt-1 text-[9px] text-muted">
         <span>
           {t("form.next")}: {t("nav.level")} {info.level + 1}
@@ -427,7 +427,7 @@ export function HabitCard({ habit, range = "month", onToggleDay, onEdit, onDelet
   const today = format(new Date(), "yyyy-MM-dd");
   const doneToday = completedSet.has(today);
 
-  // "Forgot yesterday?" nudge — show only when yesterday was a scheduled day,
+  // "Forgot yesterday?" nudge - show only when yesterday was a scheduled day,
   // isn't logged yet, and falls on/after the habit's creation date.
   const yDate = subDays(new Date(), 1);
   const yesterday = format(yDate, "yyyy-MM-dd");

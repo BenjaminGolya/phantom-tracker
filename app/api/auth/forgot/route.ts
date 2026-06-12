@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const { email } = await req.json().catch(() => ({ email: "" }));
   const addr = String(email ?? "").trim().toLowerCase();
 
-  // Always return ok — never reveal whether an email is registered.
+  // Always return ok - never reveal whether an email is registered.
   if (!EMAIL_RE.test(addr)) return NextResponse.json({ ok: true });
 
   try {

@@ -24,7 +24,46 @@ function Frame({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Build a habit — a contribution grid filling up into a check.
+// Diamond announcement - an icy gem with aurora arcs and sparkles.
+export function DiamondHero() {
+  const CYAN = "#67e8f9";
+  return (
+    <Frame>
+      <defs>
+        <linearGradient id="dhGem" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a5f3fc" />
+          <stop offset="55%" stopColor="#38bdf8" />
+          <stop offset="100%" stopColor="#0e7490" />
+        </linearGradient>
+        <linearGradient id="dhAurora" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="rgba(103,232,249,0)" />
+          <stop offset="35%" stopColor="#67e8f9" />
+          <stop offset="60%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="rgba(94,234,212,0)" />
+        </linearGradient>
+      </defs>
+      {/* aurora bands */}
+      <path d="M 120 120 Q 400 30 690 110" fill="none" stroke="url(#dhAurora)" strokeWidth={7} strokeLinecap="round" opacity={0.55} />
+      <path d="M 90 160 Q 400 70 710 150" fill="none" stroke="url(#dhAurora)" strokeWidth={4} strokeLinecap="round" opacity={0.35} />
+      {/* gem */}
+      <g transform="translate(400 195)">
+        <polygon points="-78,-28 -40,-66 40,-66 78,-28 0,68" fill="url(#dhGem)" opacity={0.95} />
+        <polygon points="-78,-28 -40,-66 -14,-28" fill="#cffafe" opacity={0.5} />
+        <polygon points="14,-28 40,-66 78,-28" fill="#0ea5e9" opacity={0.45} />
+        <polygon points="-14,-28 0,68 14,-28" fill="#e0f2fe" opacity={0.35} />
+        <polyline points="-78,-28 78,-28" stroke="#e0f2fe" strokeWidth={2} opacity={0.6} />
+      </g>
+      {/* sparkles */}
+      {[[180, 230, 5], [250, 90, 4], [560, 250, 6], [640, 80, 4], [310, 280, 3]].map(([x, y, r], i) => (
+        <g key={i} transform={`translate(${x} ${y})`} opacity={0.8}>
+          <path d={`M0 ${-r} L${(r as number) * 0.3} ${-(r as number) * 0.3} L${r} 0 L${(r as number) * 0.3} ${(r as number) * 0.3} L0 ${r} L${-(r as number) * 0.3} ${(r as number) * 0.3} L${-r} 0 L${-(r as number) * 0.3} ${-(r as number) * 0.3} Z`} fill={CYAN} />
+        </g>
+      ))}
+    </Frame>
+  );
+}
+
+// Build a habit - a contribution grid filling up into a check.
 export function HabitGridHero() {
   const cols = 16, rows = 7, cell = 26, gap = 8;
   const ox = 80, oy = 70;
@@ -55,7 +94,7 @@ export function HabitGridHero() {
   );
 }
 
-// Best free tracker — a stylized app card with checked rows.
+// Best free tracker - a stylized app card with checked rows.
 export function TrackerCardHero() {
   const rows = [0, 1, 2, 3];
   return (
@@ -86,7 +125,7 @@ export function TrackerCardHero() {
   );
 }
 
-// Why streaks work — a flame over rising bars.
+// Why streaks work - a flame over rising bars.
 export function StreakHero() {
   const bars = [60, 95, 130, 175, 215];
   return (

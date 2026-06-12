@@ -68,7 +68,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
     setBusyId(id);
     setError(null);
     try {
-      // API expects { action, data? } — map our Action's `kind` to `action`.
+      // API expects { action, data? } - map our Action's `kind` to `action`.
       const payload = "data" in action
         ? { action: action.kind, data: action.data }
         : { action: action.kind };
@@ -173,7 +173,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                     <ChevronDown size={14} className={`text-muted shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
+                        <p className="text-sm font-medium text-white truncate">{u.name || "-"}</p>
                         {isSelf && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/40">YOU</span>}
                         {!u.verified && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-2 text-muted border border-border">unverified</span>}
                       </div>
@@ -267,7 +267,7 @@ export function AdminClient({ users, selfId }: { users: AdminUserRow[]; selfId: 
                     <MiniStat
                       icon={<Clock size={13} className="text-sky-400" />}
                       label="Last active"
-                      value={u.lastActive ? format(new Date(u.lastActive), "MMM d") : "—"}
+                      value={u.lastActive ? format(new Date(u.lastActive), "MMM d") : "-"}
                     />
                   </div>
                 )}
@@ -419,7 +419,7 @@ function GrantModal({ user, busy, onCancel, onGrant }: {
           </button>
         </div>
         {user.pro && !user.lifetime && user.proUntil && (
-          <p className="text-[11px] text-muted mt-3 text-center">Currently Pro until {format(new Date(user.proUntil), "MMM d, yyyy")} — months add to this.</p>
+          <p className="text-[11px] text-muted mt-3 text-center">Currently Pro until {format(new Date(user.proUntil), "MMM d, yyyy")}. Months add to this.</p>
         )}
       </div>
     </div>

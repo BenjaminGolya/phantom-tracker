@@ -6,14 +6,14 @@ import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
-  Smartphone, ChevronRight, CalendarDays, Sparkles,
+  Smartphone, ChevronRight, CalendarDays, Sparkles, Gem,
   Settings, LogOut, X, Apple, Play, Globe,
 } from "lucide-react";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { WorldExamples } from "@/components/profile/world-examples";
 import { useT } from "@/lib/i18n/context";
-import { PRICE_LABEL } from "@/lib/plan";
+import { PRICE_LABEL, PRICE_LABEL_LIFETIME, PRICE_LABEL_LIFETIME_LAUNCH } from "@/lib/plan";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -224,7 +224,7 @@ export function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero — rendered without an entrance animation so it paints instantly
+      {/* Hero - rendered without an entrance animation so it paints instantly
           (no blank/black first paint while JS hydrates). */}
       <section className="relative max-w-5xl mx-auto px-5 pt-16 pb-12 text-center">
         <div>
@@ -295,7 +295,7 @@ export function LandingPage() {
         <WorldExamples />
       </section>
 
-      {/* Plans — Free vs Pro */}
+      {/* Plans - Free vs Pro */}
       <section id="plans" className="max-w-5xl mx-auto px-5 py-16">
         <motion.div {...fadeUp} className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("landing.plansTitle")}</h2>
@@ -304,12 +304,12 @@ export function LandingPage() {
           </p>
         </motion.div>
 
-        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto items-stretch">
           {/* Free */}
-          <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col">
             <p className="text-xs uppercase tracking-widest text-muted font-medium mb-1">{t("landing.free")}</p>
             <p className="text-3xl font-bold mb-5">€0<span className="text-sm text-muted font-normal">{t("landing.perForever")}</span></p>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2.5 flex-1">
               {[
                 { label: t("lp.freeHabits"), ok: true },
                 { label: t("lp.dailyTracking"), ok: true },
@@ -335,7 +335,7 @@ export function LandingPage() {
           </div>
 
           {/* Pro */}
-          <div className="relative bg-surface border-2 border-primary/50 rounded-2xl p-6 shadow-[0_0_40px_#7f49c320]">
+          <div className="relative bg-surface border-2 border-primary/50 rounded-2xl p-6 shadow-[0_0_40px_#7f49c320] flex flex-col">
             <span className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md bg-primary text-white">
               {t("landing.mostPopular")}
             </span>
@@ -344,7 +344,7 @@ export function LandingPage() {
             </p>
             <p className="text-3xl font-bold">{PRICE_LABEL}</p>
             <p className="text-[11px] text-primary mb-5">{t("lp.proPriceSub")}</p>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2.5 flex-1">
               {[
                 t("lp.unlimited"),
                 t("lp.pushReminders"),
@@ -366,6 +366,48 @@ export function LandingPage() {
               <Sparkles size={14} /> {authed ? t("lp.goPro") : t("common.startFree")}
             </Link>
           </div>
+
+          {/* Diamond - coming soon */}
+          <div
+            className="relative rounded-2xl p-6 border-2"
+            style={{ borderColor: "#67e8f966", background: "linear-gradient(165deg,#67e8f90f,#818cf80a,#111)" }}
+          >
+            <span
+              className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md border"
+              style={{ background: "#67e8f91a", borderColor: "#67e8f966", color: "#67e8f9" }}
+            >
+              {t("lp.diamondSoon")}
+            </span>
+            <p className="text-xs uppercase tracking-widest font-medium mb-1 flex items-center gap-1" style={{ color: "#67e8f9" }}>
+              <Gem size={12} /> Diamond
+            </p>
+            <p className="text-3xl font-bold flex items-end gap-2">
+              {PRICE_LABEL_LIFETIME_LAUNCH}
+              <span className="text-base text-muted font-normal line-through mb-0.5">{PRICE_LABEL_LIFETIME}</span>
+            </p>
+            <p className="text-[11px] mb-5" style={{ color: "#67e8f9" }}>{t("lp.diamondPriceSub")}</p>
+            <ul className="space-y-2.5 flex-1">
+              {[
+                t("lp.diamondForever"),
+                t("lp.diamondXp"),
+                t("lp.diamondTheme"),
+                t("lp.diamondAurora"),
+                t("lp.diamondSummit"),
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm">
+                  <Gem size={13} className="shrink-0" style={{ color: "#67e8f9" }} />
+                  <span className="text-white">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/blog/diamond-is-coming"
+              className="mt-6 flex items-center justify-center gap-1.5 text-sm font-semibold py-2.5 rounded-xl border transition-colors"
+              style={{ borderColor: "#67e8f955", color: "#67e8f9" }}
+            >
+              {t("lp.diamondLearn")} <ChevronRight size={14} />
+            </Link>
+          </div>
         </motion.div>
       </section>
 
@@ -376,9 +418,58 @@ export function LandingPage() {
           <p className="text-muted mt-3 max-w-lg mx-auto">
             {t("lp.installSubtitle")}
           </p>
+        </motion.div>
 
-          {/* Native apps — coming soon (disabled store buttons) */}
-          <p className="text-sm text-muted mt-6 max-w-lg mx-auto">{t("lp.storesComingSoon")}</p>
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Step 1 - iPhone */}
+          <motion.div {...fadeUp} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
+              <Smartphone size={16} className="text-primary" />
+              <h3 className="text-sm font-semibold">{t("lp.step1Title")}</h3>
+            </div>
+            <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
+              <li>{t("lp.step1a")}</li>
+              <li>{t("lp.step1b")}</li>
+              <li>{t("lp.step1c")}</li>
+              <li>{t("lp.step1d")}</li>
+            </ol>
+          </motion.div>
+
+          {/* Step 2 - Android */}
+          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
+              <Plus size={16} className="text-primary" />
+              <h3 className="text-sm font-semibold">{t("lp.step2Title")}</h3>
+            </div>
+            <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
+              <li>{t("lp.step2a")}</li>
+              <li>{t("lp.step2b")}</li>
+              <li>{t("lp.step2c")}</li>
+              <li>{t("lp.step2d")}</li>
+            </ol>
+          </motion.div>
+
+          {/* Step 3 - Notifications */}
+          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
+              <Bell size={16} className="text-primary" />
+              <h3 className="text-sm font-semibold">{t("lp.step3Title")}</h3>
+            </div>
+            <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
+              <li>{t("lp.step3a")}</li>
+              <li>{t("lp.step3b")}</li>
+              <li>{t("lp.step3c")}</li>
+              <li>{t("lp.step3d")}</li>
+            </ol>
+          </motion.div>
+        </div>
+
+        {/* Native apps - coming soon (disabled store buttons) */}
+        <motion.div {...fadeUp} className="text-center mt-10">
+          <p className="text-sm text-muted">{t("lp.storesComingSoon")}</p>
           <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
             {[
               { icon: <Apple size={20} className="shrink-0" />, label: t("lp.appStore") },
@@ -399,54 +490,7 @@ export function LandingPage() {
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          {/* Step 1 — iPhone */}
-          <motion.div {...fadeUp} className="bg-surface border border-border rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
-              <Smartphone size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">{t("lp.step1Title")}</h3>
-            </div>
-            <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
-              <li>{t("lp.step1a")}</li>
-              <li>{t("lp.step1b")}</li>
-              <li>{t("lp.step1c")}</li>
-              <li>{t("lp.step1d")}</li>
-            </ol>
-          </motion.div>
-
-          {/* Step 2 — Android */}
-          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }} className="bg-surface border border-border rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
-              <Plus size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">{t("lp.step2Title")}</h3>
-            </div>
-            <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
-              <li>{t("lp.step2a")}</li>
-              <li>{t("lp.step2b")}</li>
-              <li>{t("lp.step2c")}</li>
-              <li>{t("lp.step2d")}</li>
-            </ol>
-          </motion.div>
-
-          {/* Step 3 — Notifications */}
-          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="bg-surface border border-border rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
-              <Bell size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">{t("lp.step3Title")}</h3>
-            </div>
-            <ol className="text-sm text-muted space-y-2 list-decimal pl-4 leading-relaxed">
-              <li>{t("lp.step3a")}</li>
-              <li>{t("lp.step3b")}</li>
-              <li>{t("lp.step3c")}</li>
-              <li>{t("lp.step3d")}</li>
-            </ol>
-          </motion.div>
-        </div>
-
-        <motion.p {...fadeUp} className="text-xs text-muted text-center mt-5">
+        <motion.p {...fadeUp} className="text-xs text-muted text-center mt-6">
           {t("lp.installNote")}
         </motion.p>
       </section>
