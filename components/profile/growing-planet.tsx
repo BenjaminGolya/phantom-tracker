@@ -116,13 +116,25 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         {p.diamond && (
           <>
             <linearGradient id={id("aurora")} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#22d3ee00" />
-              <stop offset="35%" stopColor="#22d3ee" />
-              <stop offset="55%" stopColor="#a78bfa" />
-              <stop offset="75%" stopColor="#5eead4" />
-              <stop offset="100%" stopColor="#5eead400" />
+              <stop offset="0%" stopColor="#67e8f900" />
+              <stop offset="22%" stopColor="#67e8f9" />
+              <stop offset="45%" stopColor="#a78bfa" />
+              <stop offset="68%" stopColor="#5eead4" />
+              <stop offset="86%" stopColor="#f0abfc" />
+              <stop offset="100%" stopColor="#67e8f900" />
             </linearGradient>
-            <filter id={id("auroraBlur")}><feGaussianBlur stdDeviation="3.2" /></filter>
+            <radialGradient id={id("auroraBloom")} cx="50%" cy="100%" r="75%">
+              <stop offset="0%" stopColor="#67e8f9" stopOpacity="0.5" />
+              <stop offset="42%" stopColor="#a78bfa" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#67e8f9" stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id={id("auroraCurtain")} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#a78bfa" stopOpacity="0" />
+              <stop offset="32%" stopColor="#67e8f9" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#5eead4" stopOpacity="0" />
+            </linearGradient>
+            <filter id={id("auroraBlur")} x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.4" /></filter>
+            <filter id={id("auroraSoft")} x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.5" /></filter>
           </>
         )}
       </defs>
@@ -185,28 +197,66 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
 
       <circle cx={120} cy={108} r={p.radius} fill={`url(#${id("shade")})`} />
 
-      {/* Diamond-exclusive aurora - shimmering bands arcing over the world */}
-      {p.diamond && (
-        <g filter={`url(#${id("auroraBlur")})`}>
-          {[0, 1, 2].map((k) => {
-            const lift = p.radius + 16 + k * 10;
-            const span = p.radius + 16 + k * 7;
-            return (
-              <motion.path
-                key={`au${k}`}
-                d={`M ${120 - span} ${108 - p.radius * 0.18} Q 120 ${108 - lift} ${120 + span} ${108 - p.radius * 0.18}`}
-                fill="none"
-                stroke={`url(#${id("aurora")})`}
-                strokeWidth={3 - k * 0.6}
-                strokeLinecap="round"
-                initial={{ opacity: 0.15 }}
-                animate={{ opacity: [0.15, 0.6, 0.25, 0.55, 0.15] }}
-                transition={{ duration: 5 + k * 1.5, repeat: Infinity, ease: "easeInOut", delay: k * 0.6 }}
-              />
-            );
-          })}
-        </g>
-      )}
+      {/* Diamond-exclusive aurora - a glowing crown of light over the world */}
+      {p.diamond && (() => {
+        const cx = 120, cy = 108, R = p.radius;
+        const baseY = cy - R * 0.05;           // where bands meet the horizon
+        const arcTop = (f: number) => cy - (R + 6) - Math.sin(f * Math.PI) * 22; // bowed-up top edge
+        return (
+          <g>
+            {/* Soft bloom halo crowning the planet */}
+            <motion.ellipse
+              cx={cx} cy={cy - R * 0.35} rx={R * 1.55} ry={R * 0.95}
+              fill={`url(#${id("auroraBloom")})`} filter={`url(#${id("auroraBlur")})`}
+              initial={{ opacity: 0.35 }}
+              animate={{ opacity: [0.35, 0.7, 0.45, 0.65, 0.35] }}
+              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Curtain rays hanging from the crown */}
+            <g filter={`url(#${id("auroraSoft")})`}>
+              {Array.from({ length: 13 }).map((_, i) => {
+                const f = i / 12;
+                const x = cx - (R + 4) + f * (R + 4) * 2;
+                const top = arcTop(f);
+                const len = 16 + Math.sin(f * Math.PI) * 26;
+                return (
+                  <motion.rect
+                    key={`cr${i}`}
+                    x={x - 1} y={top} width={2} height={len} rx={1}
+                    fill={`url(#${id("auroraCurtain")})`}
+                    initial={{ opacity: 0.2 }}
+                    animate={{ opacity: [0.15, 0.85, 0.3, 0.7, 0.15], scaleY: [0.85, 1.12, 0.92, 1.05, 0.85] }}
+                    transition={{ duration: 3.4 + (i % 5) * 0.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.16 }}
+                    style={{ transformOrigin: `${x}px ${top}px` }}
+                  />
+                );
+              })}
+            </g>
+
+            {/* Bright arcing bands */}
+            <g filter={`url(#${id("auroraBlur")})`}>
+              {[0, 1, 2, 3, 4].map((k) => {
+                const lift = R + 12 + k * 9;
+                const span = R + 12 + k * 6;
+                return (
+                  <motion.path
+                    key={`au${k}`}
+                    d={`M ${cx - span} ${baseY} Q ${cx} ${cy - lift} ${cx + span} ${baseY}`}
+                    fill="none"
+                    stroke={`url(#${id("aurora")})`}
+                    strokeWidth={3.6 - k * 0.5}
+                    strokeLinecap="round"
+                    initial={{ opacity: 0.2 }}
+                    animate={{ opacity: [0.2, 0.75, 0.35, 0.6, 0.2] }}
+                    transition={{ duration: 4.2 + k * 1.1, repeat: Infinity, ease: "easeInOut", delay: k * 0.45 }}
+                  />
+                );
+              })}
+            </g>
+          </g>
+        );
+      })()}
 
       {p.messy > 0.05 && (
         <g clipPath={`url(#${id("clip")})`}>
