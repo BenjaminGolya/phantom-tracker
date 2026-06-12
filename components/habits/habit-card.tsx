@@ -6,7 +6,7 @@ import {
   eachDayOfInterval, startOfYear, isSameMonth, isToday, isFuture,
   startOfISOWeek, endOfISOWeek, startOfDay, subDays,
 } from "date-fns";
-import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, ArrowUp, ArrowDown, Snowflake } from "lucide-react";
+import { Flame, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, ArrowUp, ArrowDown, Snowflake, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HabitWithLogs } from "@/types";
 import { calcStreak, getHabitLevel, isScheduledOn } from "@/lib/utils";
@@ -130,7 +130,7 @@ function GoalCounter({
         <span className="text-[10px] font-mono">
           <span style={{ color: habit.color }}>{val}</span>
           <span className="text-muted">/{goal}</span>
-          {done && <span style={{ color: habit.color }} className="ml-1">✓</span>}
+          {done && <Check size={12} className="inline ml-1 align-text-bottom" style={{ color: habit.color }} />}
         </span>
       </div>
 

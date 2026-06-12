@@ -98,7 +98,7 @@ function ChecklistMock() {
               {it.done ? <Check size={13} /> : it.icon}
             </div>
             <span className={`text-xs ${it.done ? "line-through text-muted" : "text-white"}`}>{it.name}</span>
-            {it.done && <span className="ml-auto text-[11px] text-primary font-medium">✓</span>}
+            {it.done && <Check size={13} className="ml-auto text-primary shrink-0" />}
           </div>
         ))}
       </div>

@@ -136,7 +136,11 @@ function GoalRow({ habit, today, onToggle, onFreeze }: {
             className="px-2.5 h-7 rounded-lg border text-[10px] font-medium whitespace-nowrap hover:opacity-80 transition-all"
           >{t("dash.all")}</button>
         )}
-        {done && <span style={{ color: habit.color }} className="text-xs font-medium pl-1">{t("dash.doneMark")}</span>}
+        {done && (
+          <span className="inline-flex items-center gap-1 pl-1 text-xs font-medium capitalize" style={{ color: habit.color }}>
+            {t("dash.done")} <Check size={14} />
+          </span>
+        )}
         {frozenToday && <span className="text-[11px] text-sky-400 font-medium pl-1">{t("dash.restDay")}</span>}
       </div>
 
