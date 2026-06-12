@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useMemo, useId } from "react";
-import { ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useId, useState } from "react";
+import { ChevronDown, X } from "lucide-react";
 import { useLang } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import { planetState, type PlanetState, type PlanetStatus, type TraitHabit } from "@/lib/profile-traits";
@@ -21,6 +21,21 @@ const STATUS_COLOR: Record<PlanetStatus, string> = {
   fading: "#a8a29e",
   dormant: "#9ca3af",
 };
+
+// Best to worst, with the vitality threshold (%) each one needs. Mirrors the
+// bands in planetState().
+const STATUS_LADDER: { key: PlanetStatus; min: number }[] = [
+  { key: "radiant", min: 92 },
+  { key: "thriving", min: 84 },
+  { key: "flourishing", min: 76 },
+  { key: "healthy", min: 68 },
+  { key: "steady", min: 60 },
+  { key: "stable", min: 52 },
+  { key: "wilting", min: 42 },
+  { key: "struggling", min: 32 },
+  { key: "fading", min: 22 },
+  { key: "dormant", min: 0 },
+];
 
 type Blob = { x: number; y: number; r: number };
 
@@ -369,23 +384,73 @@ export function GrowingPlanet({ habits, pro, diamond = false, seed = 1 }: { habi
   const { t } = useLang();
   const p = useMemo(() => planetState(habits, { isPro: pro, isDiamond: diamond, seed }), [habits, pro, diamond, seed]);
   const statusColor = STATUS_COLOR[p.status];
+  const [showStatuses, setShowStatuses] = useState(false);
+  const vitalityPct = Math.round(p.vitality * 100);
 
   return (
     <div className="bg-surface border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-sm font-medium">{t("prof.planetTitle")}</h2>
         <div className="flex items-center gap-1.5">
-          <span
-            className="text-[10px] font-semibold px-2 py-0.5 rounded-md border"
+          <button
+            type="button"
+            onClick={() => setShowStatuses(true)}
+            title={t("prof.statusAll")}
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-md border transition-transform hover:scale-105 active:scale-95"
             style={{ color: statusColor, borderColor: `${statusColor}55`, background: `${statusColor}18` }}
           >
             {t(`prof.status.${p.status}` as DictKey)}
-          </span>
+          </button>
           <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
             {t("prof.lvl")}{p.level}
           </span>
         </div>
       </div>
+
+      {/* All possible planet statuses */}
+      <AnimatePresence>
+        {showStatuses && (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={() => setShowStatuses(false)}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
+              className="relative w-full max-w-sm bg-surface border border-border rounded-2xl shadow-2xl z-10 max-h-[85dvh] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between px-5 pt-5 pb-3 border-b border-border">
+                <div>
+                  <h3 className="text-sm font-semibold">{t("prof.statusTitle")}</h3>
+                  <p className="text-xs text-muted mt-0.5">
+                    {t("prof.statusNow")} <span className="font-medium" style={{ color: statusColor }}>{t(`prof.status.${p.status}` as DictKey)}</span> · {vitalityPct}%
+                  </p>
+                </div>
+                <button onClick={() => setShowStatuses(false)} className="text-muted hover:text-white transition-colors"><X size={16} /></button>
+              </div>
+              <div className="overflow-y-auto px-3 py-2">
+                {STATUS_LADDER.map((s, i) => {
+                  const color = STATUS_COLOR[s.key];
+                  const current = s.key === p.status;
+                  const max = i === 0 ? 100 : STATUS_LADDER[i - 1].min;
+                  return (
+                    <div
+                      key={s.key}
+                      className="flex items-center gap-3 px-2.5 py-2 rounded-lg"
+                      style={current ? { background: `${color}18`, border: `1px solid ${color}55` } : undefined}
+                    >
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color, boxShadow: current ? `0 0 8px ${color}` : undefined }} />
+                      <span className="flex-1 text-sm font-medium" style={{ color: current ? color : "#fff" }}>
+                        {t(`prof.status.${s.key}` as DictKey)}
+                      </span>
+                      <span className="text-[11px] font-mono text-muted">{s.min}{max < 100 ? `–${max}` : "+"}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted px-5 py-3 border-t border-border leading-relaxed">{t("prof.statusFoot")}</p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="flex items-center justify-center py-2" style={{ perspective: 700 }}>
         <PlanetVisual state={p} />
