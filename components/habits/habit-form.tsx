@@ -28,6 +28,15 @@ const DEFAULT_CATEGORIES = [
   { label: "Productivity", emoji: "★" },
 ];
 
+// Pickable icons when creating a custom category (a real selector beats a
+// free-text emoji input).
+const CATEGORY_EMOJIS = [
+  "🎯", "💪", "🧘", "📚", "💼", "🎨", "👥", "💰",
+  "😴", "🥗", "✨", "🔥", "🏃", "💧", "🧠", "❤️",
+  "🎵", "✍️", "🌱", "☀️", "🌙", "⏰", "🍎", "🚭",
+  "💊", "🧹", "🐶", "🎮", "📷", "✈️", "⚽", "🎸",
+];
+
 const STORAGE_KEY = "phantom-tracker-categories";
 
 function loadCategories(): typeof DEFAULT_CATEGORIES {
@@ -61,7 +70,7 @@ function CategoryPicker({
   const [categories, setCategories] = useState(loadCategories);
   const [adding, setAdding] = useState(false);
   const [newLabel, setNewLabel] = useState("");
-  const [newEmoji, setNewEmoji] = useState("◆");
+  const [newEmoji, setNewEmoji] = useState(CATEGORY_EMOJIS[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -93,7 +102,7 @@ function CategoryPicker({
     saveCategories(updated);
     onChange(cat.label);
     setNewLabel("");
-    setNewEmoji("🏷️");
+    setNewEmoji(CATEGORY_EMOJIS[0]);
     setAdding(false);
     setOpen(false);
   }
@@ -187,15 +196,9 @@ function CategoryPicker({
             {/* Add new */}
             <div className="border-t border-border">
               {adding ? (
-                <div className="p-2 flex items-center gap-2">
+                <div className="p-2.5 space-y-2.5">
                   <input
                     ref={inputRef}
-                    value={newEmoji}
-                    onChange={(e) => setNewEmoji(e.target.value)}
-                    className="w-10 h-8 text-center bg-surface border border-border rounded-md text-sm focus:outline-none focus:border-primary"
-                    maxLength={2}
-                  />
-                  <input
                     value={newLabel}
                     onChange={(e) => setNewLabel(e.target.value)}
                     onKeyDown={(e) => {
@@ -203,16 +206,40 @@ function CategoryPicker({
                       if (e.key === "Escape") { setAdding(false); setNewLabel(""); }
                     }}
                     placeholder={t("form.categoryName")}
-                    className="flex-1 h-8 px-2 bg-surface border border-border rounded-md text-sm text-white placeholder-muted focus:outline-none focus:border-primary"
+                    className="w-full h-8 px-2 bg-surface border border-border rounded-md text-sm text-white placeholder-muted focus:outline-none focus:border-primary"
                   />
-                  <button
-                    type="button"
-                    onClick={addCategory}
-                    disabled={!newLabel.trim()}
-                    className="h-8 px-2.5 bg-primary hover:bg-primary-dim text-white text-xs rounded-md disabled:opacity-40 transition-colors"
-                  >
-                    {t("form.add")}
-                  </button>
+                  {/* Icon picker */}
+                  <div className="grid grid-cols-8 gap-1">
+                    {CATEGORY_EMOJIS.map((em) => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => setNewEmoji(em)}
+                        className={`h-7 rounded-md text-base flex items-center justify-center border transition-colors ${
+                          newEmoji === em ? "border-primary bg-primary/15" : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setAdding(false); setNewLabel(""); }}
+                      className="flex-1 h-8 text-xs text-muted hover:text-white rounded-md border border-border transition-colors"
+                    >
+                      {t("common.cancel")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={addCategory}
+                      disabled={!newLabel.trim()}
+                      className="flex-1 h-8 px-2.5 bg-primary hover:bg-primary-dim text-white text-xs font-medium rounded-md disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <span>{newEmoji}</span> {t("form.add")}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button

@@ -76,7 +76,7 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
   });
   const next = visibleLevels.find((l) => l.level === info.level + 1);
 
-  // Categories counted toward diversity (capped at 5). Derived from XP (10 each).
+  // Unique categories used (each adds +10 XP, uncapped).
   const cats = Math.round(info.breakdown.diversity / 10);
 
   const xpSources = [
@@ -85,8 +85,7 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
     { label: t("stats.srcPerfect"),      value: info.breakdown.perfectDays,  icon: <Star size={12} />,   color: "#eab308", hint: t("stats.srcPerfectHint") },
     {
       label: t("stats.srcDiversity"), value: info.breakdown.diversity, icon: <Shield size={12} />, color: "#22c55e",
-      hint: cats >= 5 ? t("stats.diversityMaxed") : `${cats}/5 ${t("stats.catsWord")} · ${t("stats.addWord")} ${5 - cats} ${t("stats.moreForWord")} +${(5 - cats) * 10} XP`,
-      cap: 5, used: cats,
+      hint: `${cats} ${t("stats.catsWord")} · ${t("stats.catEachXp")}`,
     },
     { label: t("stats.srcMastery"),     value: info.breakdown.masteryBonus, icon: <Trophy size={12} />, color: "#a855f7", hint: t("stats.srcMasteryHint") },
   ];
@@ -211,7 +210,6 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
         </summary>
         <div className="space-y-3 mt-3">
           {xpSources.map((src) => {
-            const capped = "cap" in src;
             return (
               <div key={src.label}>
                 <div className="flex items-center justify-between">
@@ -226,19 +224,8 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
                     +{src.value} XP
                   </span>
                 </div>
-                <div className="flex items-end justify-between gap-3 mt-1 ml-[22px]">
+                <div className="mt-1 ml-[22px]">
                   <p className="text-[10px] text-muted leading-snug">{src.hint}</p>
-                  {capped && (
-                    <div className="flex gap-1 shrink-0 mb-0.5">
-                      {Array.from({ length: (src as { cap: number }).cap }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-3.5 h-1.5 rounded-full transition-all"
-                          style={{ background: i < (src as { used: number }).used ? src.color : "#2a2a2a" }}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             );
@@ -552,7 +539,7 @@ export function StatsClient({ habits, pro = false, diamond = false, seed = 1 }: 
               { label: t("stats.perfectDays"), value: perfectDays, icon: <Star size={16} className="text-yellow-400" />, hint: t("stats.perfectDaysHint") },
               { label: t("stats.consistency7"), value: `${consistency7}%`, icon: <TrendingUp size={16} className="text-green-400" />, hint: t("stats.consistency7Hint") },
               { label: t("stats.activeStreaks"), value: `${activeStreakSum}d`, icon: <Flame size={16} className="text-orange-400" />, hint: t("stats.activeStreaksHint") },
-              { label: t("stats.categoriesUsed"), value: `${categoriesUsed}/5`, icon: <Shield size={16} className="text-primary" />, hint: t("stats.categoriesUsedHint") },
+              { label: t("stats.categoriesUsed"), value: `${categoriesUsed}`, icon: <Shield size={16} className="text-primary" />, hint: t("stats.categoriesUsedHint") },
               { label: t("stats.trend30"), value: `${trendPct >= 0 ? "+" : ""}${trendPct}%`, icon: <TrendingUp size={16} className={trendPct >= 0 ? "text-green-400" : "text-red-400"} />, hint: t("stats.trend30Hint") },
               { label: t("stats.dailyAvg"), value: avgPerDay, icon: <BarChart2 size={16} className="text-primary" />, hint: t("stats.dailyAvgHint") },
               { label: t("stats.busiestDay"), value: busiestDay, icon: <CalendarDays size={16} className="text-sky-400" />, hint: t("stats.busiestDayHint") },

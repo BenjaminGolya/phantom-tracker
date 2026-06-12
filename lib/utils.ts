@@ -276,8 +276,10 @@ export function calcProfileXP(
   const perfectDayXP = perfectDays * 5;
 
   // Diversity: 10 XP per unique category (max 5)
+  // Diversity: +10 XP per unique category, uncapped - the more varied your
+  // habits, the bigger the bonus.
   const uniqueCategories = new Set(habits.map((h) => h.category).filter(Boolean));
-  const diversity = Math.min(uniqueCategories.size, 5) * 10;
+  const diversity = uniqueCategories.size * 10;
 
   // Mastery bonus: 20 XP each time a habit crosses a tier threshold
   let masteryBonus = 0;
