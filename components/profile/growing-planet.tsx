@@ -94,11 +94,10 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
   const hue = 28 + 92 * p.vitality;
   const land = `hsl(${hue}, ${24 + p.vitality * 46}%, ${28 + p.vitality * 12}%)`;
 
-  // Rings grow with level: more rings the higher you climb. Non-Diamond rings
-  // are concentric (Saturn-style, one tilt); Diamond crosses several rings at
-  // different angles so the world reads like an atom. Each ring is drawn in two
-  // halves - the far arc behind the globe, the near arc in front - so it wraps.
-  const ringCount = p.level >= 13 ? 3 : p.level >= 9 ? 2 : p.level >= 6 ? 1 : 0;
+  // A normal ringed world gets a single Saturn-style ring. Only the ultimate
+  // (Diamond) crosses several rings at different angles, so it reads like an
+  // atom while still looking like a planet. Each ring is drawn in two halves -
+  // the far arc behind the globe, the near arc in front - so it wraps.
   const ringDefs = p.diamond
     ? [
         { off: 30, w: 6, color: "#67e8f9", op: 0.7, tilt: -20 },
@@ -106,13 +105,9 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         { off: 38, w: 5, color: "#5eead4", op: 0.55, tilt: 78 },
         { off: 50, w: 4.4, color: "#f0abfc", op: 0.5, tilt: 124 },
       ]
-    : Array.from({ length: ringCount }).map((_, i) => ({
-        off: 32 + i * 12,
-        w: 5 - i * 0.8,
-        color: ACCENT,
-        op: 0.55 - i * 0.12,
-        tilt: -18,
-      }));
+    : p.level >= 6
+    ? [{ off: 34, w: 4.5, color: ACCENT, op: 0.6, tilt: -18 }]
+    : [];
   const RING_RY = 0.3;
   const ringArc = (rx: number, near: boolean) =>
     `M ${-rx} 0 A ${rx} ${rx * RING_RY} 0 0 ${near ? 0 : 1} ${rx} 0`;
