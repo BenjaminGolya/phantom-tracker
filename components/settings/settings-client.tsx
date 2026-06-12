@@ -448,7 +448,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
       {lifetime && (
         <div className="bg-surface border border-border rounded-xl p-5">
           <h2 className="text-sm font-medium mb-1 flex items-center gap-2">
-            <Gem size={15} style={{ color: "#67e8f9" }} /> {t("set.accentTheme")}
+            <Gem size={15} className="text-primary" /> {t("set.accentTheme")}
           </h2>
           <p className="text-xs text-muted mb-3">{t("set.accentThemeDesc")}</p>
           <div className="grid grid-cols-2 gap-2">
