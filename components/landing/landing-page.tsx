@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Ghost, Target, Flame, BarChart2, Bell, Trophy, Check, Plus,
   Smartphone, ChevronRight, CalendarDays, Sparkles, Gem,
@@ -185,6 +185,36 @@ function NavAccount() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── A single expandable FAQ row ──────────────────────────────────────────────
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-4 text-left px-5 py-4"
+      >
+        <span className="text-sm font-medium text-white">{q}</span>
+        <ChevronRight size={16} className={`text-muted shrink-0 transition-transform ${open ? "rotate-90 text-primary" : ""}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <p className="px-5 pb-4 text-sm text-muted leading-relaxed">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -495,6 +525,19 @@ export function LandingPage() {
         </motion.p>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="max-w-3xl mx-auto px-5 py-16">
+        <motion.div {...fadeUp} className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("faq.title")}</h2>
+          <p className="text-muted mt-3">{t("faq.subtitle")}</p>
+        </motion.div>
+        <motion.div {...fadeUp} className="space-y-2.5">
+          {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+            <FaqItem key={n} q={t(`faq.q${n}` as const)} a={t(`faq.a${n}` as const)} />
+          ))}
+        </motion.div>
+      </section>
+
       {/* Final CTA */}
       <section className="max-w-5xl mx-auto px-5 py-16">
         <motion.div
@@ -532,6 +575,7 @@ export function LandingPage() {
                 <Link href="/signup" className="hover:text-white transition-colors">{t("common.getStarted")}</Link>
               </>
             )}
+            <Link href="/#faq" className="hover:text-white transition-colors">{t("common.faq")}</Link>
             <Link href="/blog" className="hover:text-white transition-colors">{t("common.blog")}</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">{t("common.privacy")}</Link>
             <Link href="/tos" className="hover:text-white transition-colors">{t("common.terms")}</Link>
