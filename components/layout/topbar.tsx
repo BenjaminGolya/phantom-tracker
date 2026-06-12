@@ -36,9 +36,9 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
 
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-surface shrink-0">
-      <div className="lg:hidden flex items-center gap-2 min-w-0">
-        <GhostLogo size={28} className="phantom-glow shrink-0" />
-        <span className="font-semibold text-sm whitespace-nowrap">Phantom Tracker</span>
+      <div className="lg:hidden flex items-center gap-2 min-w-0 mr-2">
+        <GhostLogo size={26} className="phantom-glow shrink-0" />
+        <span className="font-semibold text-sm truncate min-w-0 hidden min-[400px]:inline">Phantom Tracker</span>
         {pro && (
           lifetime ? (
             <span
