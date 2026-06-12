@@ -28,13 +28,14 @@ const DEFAULT_CATEGORIES = [
   { label: "Productivity", emoji: "★" },
 ];
 
-// Pickable icons when creating a custom category (a real selector beats a
-// free-text emoji input).
+// Pickable icons when creating a custom category. Minimalist monochrome
+// glyphs that match the built-in category symbols (they take the accent
+// colour), not colourful emoji.
 const CATEGORY_EMOJIS = [
-  "🎯", "💪", "🧘", "📚", "💼", "🎨", "👥", "💰",
-  "😴", "🥗", "✨", "🔥", "🏃", "💧", "🧠", "❤️",
-  "🎵", "✍️", "🌱", "☀️", "🌙", "⏰", "🍎", "🚭",
-  "💊", "🧹", "🐶", "🎮", "📷", "✈️", "⚽", "🎸",
+  "✚", "◆", "◇", "◈", "○", "◌", "◎", "◉",
+  "□", "▪", "▫", "▣", "≡", "✎", "✦", "✧",
+  "✶", "✷", "★", "☆", "✿", "❀", "❁", "∞",
+  "▲", "△", "♦", "◐", "◑", "⬡", "➤", "❖",
 ];
 
 const STORAGE_KEY = "phantom-tracker-categories";
@@ -215,8 +216,9 @@ function CategoryPicker({
                         key={em}
                         type="button"
                         onClick={() => setNewEmoji(em)}
-                        className={`h-7 rounded-md text-base flex items-center justify-center border transition-colors ${
-                          newEmoji === em ? "border-primary bg-primary/15" : "border-border hover:border-primary/50"
+                        style={{ color: newEmoji === em ? "#7f49c3" : "#a1a1aa" }}
+                        className={`h-7 rounded-md text-sm flex items-center justify-center border transition-colors ${
+                          newEmoji === em ? "border-primary bg-primary/15" : "border-border hover:border-primary/50 hover:text-white"
                         }`}
                       >
                         {em}
