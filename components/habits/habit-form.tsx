@@ -194,67 +194,81 @@ function CategoryPicker({
               })}
             </div>
 
-            {/* Add new */}
+            {/* Add new - opens a dedicated modal */}
             <div className="border-t border-border">
-              {adding ? (
-                <div className="p-2.5 space-y-2.5">
-                  <input
-                    ref={inputRef}
-                    value={newLabel}
-                    onChange={(e) => setNewLabel(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") addCategory();
-                      if (e.key === "Escape") { setAdding(false); setNewLabel(""); }
-                    }}
-                    placeholder={t("form.categoryName")}
-                    className="w-full h-8 px-2 bg-surface border border-border rounded-md text-sm text-white placeholder-muted focus:outline-none focus:border-primary"
-                  />
-                  {/* Icon picker */}
-                  <div className="grid grid-cols-8 gap-1">
-                    {CATEGORY_EMOJIS.map((em) => (
-                      <button
-                        key={em}
-                        type="button"
-                        onClick={() => setNewEmoji(em)}
-                        style={{ color: newEmoji === em ? "#7f49c3" : "#a1a1aa" }}
-                        className={`h-7 rounded-md text-sm flex items-center justify-center border transition-colors ${
-                          newEmoji === em ? "border-primary bg-primary/15" : "border-border hover:border-primary/50 hover:text-white"
-                        }`}
-                      >
-                        {em}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => { setAdding(false); setNewLabel(""); }}
-                      className="flex-1 h-8 text-xs text-muted hover:text-white rounded-md border border-border transition-colors"
-                    >
-                      {t("common.cancel")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={addCategory}
-                      disabled={!newLabel.trim()}
-                      className="flex-1 h-8 px-2.5 bg-primary hover:bg-primary-dim text-white text-xs font-medium rounded-md disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <span>{newEmoji}</span> {t("form.add")}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setAdding(true)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-muted hover:text-primary hover:bg-surface transition-colors"
-                >
-                  <Plus size={13} />
-                  {t("form.newCategory")}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setAdding(true)}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-muted hover:text-primary hover:bg-surface transition-colors"
+              >
+                <Plus size={13} />
+                {t("form.newCategory")}
+              </button>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* New-category modal (centered, so the icon grid is never clipped) */}
+      <AnimatePresence>
+        {adding && (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" onClick={() => { setAdding(false); setNewLabel(""); }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-md" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
+              className="relative w-full max-w-sm bg-surface border border-border rounded-2xl shadow-2xl z-10 p-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold">{t("form.newCategory")}</h3>
+                <button type="button" onClick={() => { setAdding(false); setNewLabel(""); }} className="text-muted hover:text-white transition-colors"><X size={16} /></button>
+              </div>
+              <input
+                ref={inputRef}
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addCategory();
+                  if (e.key === "Escape") { setAdding(false); setNewLabel(""); }
+                }}
+                placeholder={t("form.categoryName")}
+                className="w-full h-9 px-3 bg-surface-2 border border-border rounded-lg text-sm text-white placeholder-muted focus:outline-none focus:border-primary"
+              />
+              <p className="text-[11px] text-muted mt-3 mb-1.5">{t("form.pickIcon")}</p>
+              <div className="grid grid-cols-8 gap-1.5">
+                {CATEGORY_EMOJIS.map((em) => (
+                  <button
+                    key={em}
+                    type="button"
+                    onClick={() => setNewEmoji(em)}
+                    style={{ color: newEmoji === em ? "#7f49c3" : "#a1a1aa" }}
+                    className={`aspect-square rounded-md text-base flex items-center justify-center border transition-colors ${
+                      newEmoji === em ? "border-primary bg-primary/15" : "border-border hover:border-primary/50 hover:text-white"
+                    }`}
+                  >
+                    {em}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 mt-5">
+                <button
+                  type="button"
+                  onClick={() => { setAdding(false); setNewLabel(""); }}
+                  className="flex-1 h-9 text-sm text-muted hover:text-white rounded-lg border border-border transition-colors"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={addCategory}
+                  disabled={!newLabel.trim()}
+                  className="flex-1 h-9 bg-primary hover:bg-primary-dim text-white text-sm font-medium rounded-lg disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <span style={{ color: "#fff" }}>{newEmoji}</span> {t("form.add")}
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
