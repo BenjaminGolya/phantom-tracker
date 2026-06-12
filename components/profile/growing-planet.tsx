@@ -150,6 +150,26 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
               <stop offset="42%" stopColor="#a78bfa" stopOpacity="0.22" />
               <stop offset="100%" stopColor="#67e8f9" stopOpacity="0" />
             </radialGradient>
+            {/* Aurora curtain: green at the base fading up, like real auroras. */}
+            <linearGradient id={id("curtain")} gradientUnits="userSpaceOnUse"
+              x1="0" y1={108 - p.radius * 0.72} x2="0" y2={108 - p.radius * 1.7}>
+              <stop offset="0%" stopColor="#22c55e" stopOpacity="0.95" />
+              <stop offset="34%" stopColor="#34d399" stopOpacity="0.8" />
+              <stop offset="66%" stopColor="#7df2c8" stopOpacity="0.32" />
+              <stop offset="100%" stopColor="#a7f3d0" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id={id("auroraLine")} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#22c55e" stopOpacity="0" />
+              <stop offset="26%" stopColor="#34d399" stopOpacity="0.85" />
+              <stop offset="58%" stopColor="#d1fae5" stopOpacity="1" />
+              <stop offset="82%" stopColor="#5eead4" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#5eead4" stopOpacity="0" />
+            </linearGradient>
+            <radialGradient id={id("auroraHot")} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#d1fae5" stopOpacity="0.75" />
+              <stop offset="40%" stopColor="#34d399" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+            </radialGradient>
             <filter id={id("auroraBlur")} x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.4" /></filter>
             <filter id={id("auroraSoft")} x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.5" /></filter>
           </>
@@ -237,50 +257,68 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         </g>
       )}
 
-      {/* Diamond aurora - a glowing auroral oval painted around the upper pole,
-          earned alongside the rings. Sits on the planet, not around the whole
-          globe. */}
+      {/* Diamond aurora - a flowing green curtain sweeping over the upper limb,
+          with rays rising to a bright hotspot. Earned alongside the rings. */}
       {p.diamond && p.level >= 5 && (() => {
         const cx = 120, cy = 108, R = p.radius;
-        const ox = cx, oy = cy - R * 0.38;            // oval centre on the upper hemisphere
-        const orx = R * 0.58, ory = R * 0.2;
-        const tilt = -12;
-        const grad = `url(#${id("aurora")})`;
+        const A0 = 206, A1 = 334;                 // sweep across the top
+        const baseR = R * 0.92;                   // curtain foot, just inside the limb
+        const PEAK = 0.6;                         // hotspot position along the sweep
+        const N = 46;
+        const ang = (f: number) => ((A0 + (A1 - A0) * f) * Math.PI) / 180;
+        const foot = (f: number, rr = baseR) => {
+          const a = ang(f);
+          return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr] as const;
+        };
+        const env = (f: number) =>
+          0.4 * Math.sin(f * Math.PI) + 0.75 * Math.exp(-Math.pow((f - PEAK) / 0.17, 2));
+        // bright base band path along the arc
+        const [bl, blY] = foot(0), [br, brY] = foot(1);
+        const band = `M ${bl} ${blY} A ${baseR} ${baseR} 0 0 1 ${br} ${brY}`;
+        const [hx, hy] = foot(PEAK, baseR + R * 0.18);
         return (
           <g style={{ mixBlendMode: "screen" }}>
-            {/* Bloom over the pole */}
+            {/* hotspot bloom */}
             <motion.ellipse
-              cx={cx} cy={cy - R * 0.5} rx={R * 0.9} ry={R * 0.58}
-              fill={`url(#${id("auroraBloom")})`} filter={`url(#${id("auroraBlur")})`}
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: [0.3, 0.6, 0.4, 0.55, 0.3] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              cx={hx} cy={hy} rx={R * 0.62} ry={R * 0.5}
+              fill={`url(#${id("auroraHot")})`} filter={`url(#${id("auroraBlur")})`}
+              initial={{ opacity: 0.4 }}
+              animate={{ opacity: [0.4, 0.75, 0.5, 0.68, 0.4] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
-            {/* Outer glow oval */}
-            <g transform={`rotate(${tilt} ${ox} ${oy})`}>
-              <motion.ellipse
-                cx={ox} cy={oy} rx={orx} ry={ory} fill="none"
-                stroke={grad} strokeWidth={10} filter={`url(#${id("auroraBlur")})`}
-                initial={{ opacity: 0.2 }}
-                animate={{ opacity: [0.2, 0.45, 0.28, 0.4, 0.2] }}
-                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-              />
+
+            {/* curtain rays rising from the limb */}
+            <g filter={`url(#${id("auroraBlur")})`}>
+              {Array.from({ length: N }).map((_, i) => {
+                const f = i / (N - 1);
+                const a = ang(f);
+                const [bx, by] = foot(f);
+                const h = (10 + 34 * env(f)) * (0.85 + 0.3 * ((i * 37) % 7) / 7);
+                const tx = cx + Math.cos(a) * (baseR + h);
+                const ty = cy + Math.sin(a) * (baseR + h);
+                const cax = cx + Math.cos(a + 0.05) * (baseR + h * 0.55);
+                const cay = cy + Math.sin(a + 0.05) * (baseR + h * 0.55);
+                return (
+                  <motion.path
+                    key={`ray${i}`}
+                    d={`M ${bx} ${by} Q ${cax} ${cay} ${tx} ${ty}`}
+                    fill="none" stroke={`url(#${id("curtain")})`} strokeWidth={2.6} strokeLinecap="round"
+                    initial={{ opacity: 0.4 }}
+                    animate={{ opacity: [0.25, 0.85, 0.5, 0.75, 0.25] }}
+                    transition={{ duration: 3 + ((i * 13) % 5) * 0.5, repeat: Infinity, ease: "easeInOut", delay: (i % 9) * 0.18 }}
+                  />
+                );
+              })}
             </g>
-            {/* Bright auroral rings on the surface */}
-            <g transform={`rotate(${tilt} ${ox} ${oy})`} filter={`url(#${id("auroraSoft")})`}>
-              <motion.ellipse
-                cx={ox} cy={oy} rx={orx} ry={ory} fill="none" stroke={grad} strokeWidth={3.2}
-                initial={{ opacity: 0.55 }}
-                animate={{ opacity: [0.55, 0.95, 0.7, 0.9, 0.55] }}
-                transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <motion.ellipse
-                cx={ox} cy={oy} rx={orx * 0.6} ry={ory * 0.62} fill="none" stroke={grad} strokeWidth={2}
-                initial={{ opacity: 0.3 }}
-                animate={{ opacity: [0.3, 0.6, 0.4, 0.55, 0.3] }}
-                transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-              />
-            </g>
+
+            {/* bright defined base band */}
+            <motion.path
+              d={band} fill="none" stroke={`url(#${id("auroraLine")})`} strokeWidth={3.2}
+              strokeLinecap="round" filter={`url(#${id("auroraSoft")})`}
+              initial={{ opacity: 0.6 }}
+              animate={{ opacity: [0.6, 1, 0.75, 0.95, 0.6] }}
+              transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }}
+            />
           </g>
         );
       })()}
