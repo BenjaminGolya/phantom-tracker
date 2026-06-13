@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock, Lock } from "lucide-react";
+import { X, Loader2, ChevronDown, Plus, Tag, Check, Clock, Lock, BellRing, AlertTriangle } from "lucide-react";
 import { HABIT_ICONS } from "@/lib/habit-icons";
 import { HabitFormData, HabitWithLogs } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { useT, useLang } from "@/lib/i18n/context";
 import { categoryLabel } from "@/lib/i18n/category";
+import { usePush } from "@/lib/use-push";
 
 const COLORS = ["#7f49c3","#3b82f6","#10b981","#f59e0b","#ef4444","#ec4899","#8b5cf6","#06b6d4","#84cc16","#f97316"];
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -433,6 +434,14 @@ export function HabitForm({ initial, pro = false, categoryOptions = [], onSubmit
   const [reminderTime, setReminderTime] = useState(initial?.reminderTime ?? "");
   const [loading, setLoading] = useState(false);
 
+  // Reminders are useless without push notifications enabled on this device.
+  // When a user saves a habit with a reminder but hasn't subscribed yet, we
+  // intercept the save and prompt them to turn notifications on first.
+  const { supported, permission, subscribed, busy: pushBusy, iosNeedsInstall, subscribe } = usePush();
+  const [notifGate, setNotifGate] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
+  const pendingData = useRef<HabitFormData | null>(null);
+
   function toggleDay(d: string) {
     setSelectedDays((prev) =>
       prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]
@@ -444,10 +453,7 @@ export function HabitForm({ initial, pro = false, categoryOptions = [], onSubmit
     );
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setLoading(true);
+  function buildData(): HabitFormData {
     let freq = "daily";
     if (freqType === "weekly") {
       freq = (selectedDays.length ? selectedDays : [todayCode]).join(",");
@@ -455,7 +461,7 @@ export function HabitForm({ initial, pro = false, categoryOptions = [], onSubmit
       const days = (monthDays.length ? monthDays : [new Date().getDate()]).slice().sort((a, b) => a - b);
       freq = "monthly:" + days.join(",");
     }
-    await onSubmit({
+    return {
       name: name.trim(),
       description: description.trim() || null,
       icon,
@@ -464,8 +470,46 @@ export function HabitForm({ initial, pro = false, categoryOptions = [], onSubmit
       goal: goal ? parseInt(goal) : undefined,
       category: category || undefined,
       reminderTime: reminderTime || null,
-    });
+    };
+  }
+
+  async function persist(data: HabitFormData) {
+    setLoading(true);
+    await onSubmit(data);
     setLoading(false);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    const data = buildData();
+    // A reminder was set but notifications aren't enabled on this device →
+    // intercept and ask the user to turn them on so the reminder can fire.
+    if (data.reminderTime && !subscribed && (supported || iosNeedsInstall)) {
+      pendingData.current = data;
+      setNotifError(null);
+      setNotifGate(true);
+      return;
+    }
+    await persist(data);
+  }
+
+  // From the gate: enable notifications, then save so the reminder is active.
+  async function enableAndSave() {
+    setNotifError(null);
+    const res = await subscribe();
+    if (!res.ok) {
+      setNotifError(res.error ?? "unknown");
+      return;
+    }
+    setNotifGate(false);
+    if (pendingData.current) await persist(pendingData.current);
+  }
+
+  // Escape hatch: save now, enable notifications later (reminder won't fire yet).
+  async function saveAnyway() {
+    setNotifGate(false);
+    if (pendingData.current) await persist(pendingData.current);
   }
 
   return (
@@ -709,6 +753,57 @@ export function HabitForm({ initial, pro = false, categoryOptions = [], onSubmit
           </form>
         </motion.div>
       </div>
+
+      {/* Notifications-required gate: a reminder is set but push isn't enabled. */}
+      {notifGate && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md" onClick={() => setNotifGate(false)} />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            className="relative w-full max-w-sm bg-surface border border-border rounded-2xl p-5 z-10"
+          >
+            <div className="flex items-center gap-2.5 mb-2">
+              <span className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                <BellRing size={16} className="text-primary" />
+              </span>
+              <h3 className="text-sm font-semibold">{t("form.notifGateTitle")}</h3>
+            </div>
+            <p className="text-xs text-muted leading-relaxed mb-3">
+              {iosNeedsInstall
+                ? t("form.notifGateIos")
+                : permission === "denied"
+                ? t("form.notifGateDenied")
+                : t("form.notifGateBody")}
+            </p>
+            {notifError && (
+              <p className="flex items-start gap-1.5 text-xs text-red-400 mb-3">
+                <AlertTriangle size={13} className="shrink-0 mt-0.5" /> {t("form.notifGateError")}
+              </p>
+            )}
+            <div className="flex flex-col gap-2">
+              {!iosNeedsInstall && permission !== "denied" && (
+                <button
+                  onClick={enableAndSave}
+                  disabled={pushBusy || loading}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-primary hover:bg-primary-dim text-white text-sm font-semibold rounded-lg transition-all disabled:opacity-60"
+                >
+                  {pushBusy || loading ? <Loader2 size={14} className="animate-spin" /> : <BellRing size={14} />}
+                  {t("form.notifGateEnable")}
+                </button>
+              )}
+              <button
+                onClick={saveAnyway}
+                disabled={pushBusy || loading}
+                className="w-full py-2 text-xs font-medium text-muted hover:text-white transition-colors disabled:opacity-60"
+              >
+                {t("form.notifGateSaveAnyway")}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }
