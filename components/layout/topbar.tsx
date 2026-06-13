@@ -8,6 +8,7 @@ import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { useT } from "@/lib/i18n/context";
+import { clearAccentTheme } from "@/lib/theme";
 
 interface TopBarProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
@@ -19,6 +20,13 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  // The Diamond accent theme is for lifetime users only. If a non-Diamond user
+  // is signed in (e.g. after switching accounts on the same browser), make sure
+  // the theme isn't lingering from a previous Diamond session.
+  useEffect(() => {
+    if (!lifetime) clearAccentTheme();
+  }, [lifetime]);
 
   // Close the dropdown when clicking/tapping outside of it
   useEffect(() => {
@@ -125,7 +133,7 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
               {t("common.aboutInstall")}
             </Link>
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={() => { clearAccentTheme(); signOut({ callbackUrl: "/login" }); }}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-surface transition-colors"
             >
               <LogOut size={14} />

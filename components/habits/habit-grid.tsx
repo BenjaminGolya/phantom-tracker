@@ -16,22 +16,19 @@ interface HabitGridProps {
 const CELL = 11; // square size in px
 const ROW_OFFSET = 16; // height of the month-label row + its margin
 
-// Opacity ramp for completion intensity (level 1..4). Level 4 = goal fully met.
-const OPACITY = [0, 0.3, 0.52, 0.74, 1];
-
 export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
   const { lang } = useLang();
   const currentYear = year ?? new Date().getFullYear();
   const days = useMemo(() => getYearDays(currentYear), [currentYear]);
 
-  // date → log, so we can shade by how much of the goal was met that day.
-  const logByDate = useMemo(() => {
-    const m = new Map<string, { completed: boolean; frozen: boolean; value: number | null }>();
-    for (const l of habit.logs) {
-      m.set(l.date, { completed: l.completed, frozen: !!l.frozen, value: l.value ?? null });
-    }
-    return m;
-  }, [habit.logs]);
+  const completedSet = useMemo(
+    () => new Set(habit.logs.filter((l) => l.completed).map((l) => l.date)),
+    [habit.logs]
+  );
+  const frozenSet = useMemo(
+    () => new Set(habit.logs.filter((l) => l.frozen && !l.completed).map((l) => l.date)),
+    [habit.logs]
+  );
 
   const today = startOfDay(new Date());
   const todayKey = format(today, "yyyy-MM-dd");
@@ -63,29 +60,7 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
 
   function handleClick(day: string) {
     if (!day || !onToggle || !isEditable(day)) return;
-    onToggle(habit.id, day, !logByDate.get(day)?.completed);
-  }
-
-  // Completion intensity for a day: 0 = none, 4 = goal fully met (or done when
-  // the habit has no numeric goal).
-  function levelFor(day: string): number {
-    const log = logByDate.get(day);
-    if (!log || !log.completed) return 0;
-    if (habit.goal && log.value != null && log.value > 0) {
-      const r = Math.max(0, Math.min(1, log.value / habit.goal));
-      return r >= 1 ? 4 : r >= 0.66 ? 3 : r >= 0.34 ? 2 : 1;
-    }
-    return 4;
-  }
-
-  // Shade for a completed cell at the given level (used by cells + legend).
-  function shade(level: number): React.CSSProperties {
-    if (level <= 0) return { backgroundColor: "#1f1f1f", opacity: 0.5 };
-    return {
-      backgroundColor: habit.color,
-      opacity: OPACITY[level],
-      boxShadow: level === 4 ? `0 0 5px ${habit.color}80` : undefined,
-    };
+    onToggle(habit.id, day, !completedSet.has(day));
   }
 
   const MONTHS = Array.from({ length: 12 }, (_, m) =>
@@ -131,28 +106,29 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
             })}
           </div>
 
-          {/* Grid */}
+          {/* Grid - completion is binary: done, rest day, or missed. */}
           <div className="flex gap-px">
             {weeks.map((wk, wi) => (
               <div key={wi} className="flex flex-col gap-px">
                 {wk.map((day, di) => {
                   if (!day) return <div key={di} style={{ width: CELL, height: CELL }} />;
-                  const log = logByDate.get(day);
-                  const frozen = !!log?.frozen && !log?.completed;
-                  const level = levelFor(day);
+                  const done = completedSet.has(day);
+                  const frozen = frozenSet.has(day);
                   const isFuture = isAfter(startOfDay(parseISO(day)), today);
                   const isToday = day === todayKey;
 
-                  const base: React.CSSProperties = isFuture
+                  const base: React.CSSProperties = done
+                    ? { backgroundColor: habit.color, opacity: 1, boxShadow: `0 0 5px ${habit.color}80` }
+                    : isFuture
                     ? { backgroundColor: "#161616", opacity: 0.4 }
                     : frozen
-                    ? { backgroundColor: habit.color, opacity: 0.16 }
-                    : shade(level);
+                    ? { backgroundColor: habit.color, opacity: 0.2 }
+                    : { backgroundColor: "#1f1f1f", opacity: 0.5 };
 
                   return (
                     <div
                       key={di}
-                      title={`${day}${level ? " ✓" : frozen ? " · rest" : ""}`}
+                      title={`${day}${done ? " ✓" : frozen ? " · rest" : ""}`}
                       onClick={() => handleClick(day)}
                       style={{
                         width: CELL,
@@ -171,15 +147,6 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex items-center gap-1 justify-end mt-2.5 pr-1">
-        <span className="text-[8px] text-muted">{lang === "hu" ? "Kevesebb" : lang === "ro" ? "Mai puțin" : "Less"}</span>
-        {[0, 1, 2, 3, 4].map((l) => (
-          <div key={l} className="rounded-[2px]" style={{ width: 9, height: 9, ...shade(l) }} />
-        ))}
-        <span className="text-[8px] text-muted">{lang === "hu" ? "Több" : lang === "ro" ? "Mai mult" : "More"}</span>
       </div>
     </div>
   );

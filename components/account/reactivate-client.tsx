@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Loader2, LogOut, AlertTriangle, PauseCircle } from "lucide-react";
 import { GhostLogo } from "@/components/brand/ghost-mark";
+import { clearAccentTheme } from "@/lib/theme";
 
 export function ReactivateClient({
   name,
@@ -89,7 +90,7 @@ export function ReactivateClient({
           Reactivate my account
         </button>
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => { clearAccentTheme(); signOut({ callbackUrl: "/" }); }}
           className="w-full py-2.5 text-sm text-muted hover:text-white transition-colors flex items-center justify-center gap-2"
         >
           <LogOut size={14} /> Sign out

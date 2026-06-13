@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Loader2, Download, Upload, LogOut, Camera, Trash2, Bell, BellRing, Smartphone, Sparkles, Lock, Crown, Gem, PauseCircle, LifeBuoy, Send, ImagePlus, ShieldCheck, Globe } from "lucide-react";
 import { usePush } from "@/lib/use-push";
+import { clearAccentTheme } from "@/lib/theme";
 import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { APP_VERSION, LATEST, CHANGELOG } from "@/lib/version";
 import { useLang } from "@/lib/i18n/context";
@@ -229,6 +230,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
       const res = await fetch(`/api/account/${confirm}`, { method: "POST" });
       if (res.ok) {
         // Both actions log the user out; reactivation happens on next sign-in.
+        clearAccentTheme();
         await signOut({ callbackUrl: "/login" });
         return;
       }
@@ -912,7 +914,7 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
         <h2 className="text-sm font-medium text-red-400 mb-4">{t("settings.account")}</h2>
         <div className="space-y-3">
           <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => { clearAccentTheme(); signOut({ callbackUrl: "/login" }); }}
             className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-900/30 transition-colors"
           >
             <LogOut size={13} />

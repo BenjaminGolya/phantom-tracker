@@ -13,6 +13,7 @@ import { GhostLogo, GhostAvatar } from "@/components/brand/ghost-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { WorldExamples } from "@/components/profile/world-examples";
 import { useT } from "@/lib/i18n/context";
+import { clearAccentTheme } from "@/lib/theme";
 import { PRICE_LABEL, PRICE_LABEL_LIFETIME, PRICE_LABEL_LIFETIME_LAUNCH } from "@/lib/plan";
 
 const fadeUp = {
@@ -176,7 +177,7 @@ function NavAccount() {
               {t("common.settings")}
             </Link>
             <button
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={() => { clearAccentTheme(); signOut({ callbackUrl: "/" }); }}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-surface transition-colors"
             >
               <LogOut size={14} />

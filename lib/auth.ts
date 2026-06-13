@@ -121,15 +121,23 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
-        // The JWT only carries id/name/email, so an uploaded avatar (and any
-        // later name change) never reaches the client session. Pull them fresh
-        // from the DB so the account avatar shows everywhere, including the
-        // landing nav which relies on useSession().
-        const dbUser = await prisma.user.findUnique({
+        // Resolve the user fresh from the DB. This (a) pulls the avatar + any
+        // name change into the session (the JWT only carries id/name/email),
+        // and (b) self-heals a stale token id: if the id no longer maps to a
+        // row, fall back to the email so the session points at a real user
+        // instead of a dangling id (which would 500 on writes).
+        let dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { image: true, name: true },
+          select: { id: true, image: true, name: true },
         });
+        if (!dbUser && typeof token.email === "string") {
+          dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { id: true, image: true, name: true },
+          });
+        }
         if (dbUser) {
+          session.user.id = dbUser.id;
           session.user.image = dbUser.image ?? null;
           if (dbUser.name) session.user.name = dbUser.name;
         }
