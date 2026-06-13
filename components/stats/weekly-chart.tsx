@@ -22,6 +22,7 @@ export default function WeeklyChart({ data, total }: WeeklyChartProps) {
   const accentSoft = `rgb(${accent} / 0.10)`;
 
   return (
+    <div className="select-none [&_text]:cursor-default">
     <ResponsiveContainer width="100%" height={160}>
       <BarChart data={data} barSize={26} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
         <XAxis dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 11 }} axisLine={false} tickLine={false} dy={4} />
@@ -69,5 +70,6 @@ export default function WeeklyChart({ data, total }: WeeklyChartProps) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+    </div>
   );
 }
