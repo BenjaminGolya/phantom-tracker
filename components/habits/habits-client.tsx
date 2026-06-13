@@ -32,6 +32,8 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
   const [catFilter, setCatFilter] = useState<string | null>(null);
   const [view, setView] = useState<"cards" | "grid">("cards");
   const [range, setRange] = useState<ProgressRange>("month");
+  // The grid view keeps its own window, defaulting to the full year.
+  const [gridRange, setGridRange] = useState<"week" | "month" | "year">("year");
 
   // Keep local state in sync with fresh server data after navigation/refresh
   useEffect(() => {
@@ -204,7 +206,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h1 className="text-lg font-semibold">{t("nav.habits")}</h1>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          {/* Range toggle - only shown in cards view */}
+          {/* Range toggle - cards view (week/month/year/all) */}
           {view === "cards" && (
             <div className="flex items-center bg-surface border border-border rounded-lg p-0.5">
               {(["week", "month", "year", "all"] as const).map((r) => (
@@ -216,6 +218,22 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                   }`}
                 >
                   {r === "week" ? "7d" : r === "month" ? "30d" : r === "year" ? "1y" : t("dash.all")}
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Range toggle - grid view (defaults to the full year) */}
+          {view === "grid" && (
+            <div className="flex items-center bg-surface border border-border rounded-lg p-0.5">
+              {(["week", "month", "year"] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setGridRange(r)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize transition-all ${
+                    gridRange === r ? "bg-primary/20 text-primary" : "text-muted hover:text-white"
+                  }`}
+                >
+                  {r === "week" ? "7d" : r === "month" ? "30d" : "1y"}
                 </button>
               ))}
             </div>
@@ -304,7 +322,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
           </AnimatePresence>
         </div>
       ) : (
-        // Year grid view
+        // Grid (contribution) view - year by default, switchable to month/week
         <div className="space-y-6">
           {filtered.map((habit) => {
             const HabitIcon = getHabitIcon(habit.icon);
@@ -314,7 +332,7 @@ export function HabitsClient({ habits: initialHabits, pro = false }: HabitsClien
                 <span style={{ color: habit.color }}><HabitIcon size={16} /></span>
                 <span className="text-sm font-medium">{habit.name}</span>
               </div>
-              <HabitGrid habit={habit} onToggle={handleToggle} />
+              <HabitGrid habit={habit} range={gridRange} onToggle={handleToggle} />
             </div>
             );
           })}

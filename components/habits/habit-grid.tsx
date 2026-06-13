@@ -1,22 +1,34 @@
 "use client";
 
 import { useMemo } from "react";
-import { format, parseISO, isAfter, startOfDay } from "date-fns";
+import { format, parseISO, isAfter, startOfDay, subDays, eachDayOfInterval } from "date-fns";
 import { getYearDays } from "@/lib/utils";
 import { HabitWithLogs } from "@/types";
 import { useLang } from "@/lib/i18n/context";
 import { dfLocale } from "@/lib/i18n/date";
 
+type GridRange = "week" | "month" | "year";
+
 interface HabitGridProps {
   habit: HabitWithLogs;
   year?: number;
+  range?: GridRange;
   onToggle?: (habitId: string, date: string, completed: boolean) => void;
 }
 
-export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
+// Square size scales with the window so short ranges stay legible.
+const CELL: Record<GridRange, number> = { week: 26, month: 15, year: 10 };
+
+export function HabitGrid({ habit, year, range = "year", onToggle }: HabitGridProps) {
   const { lang } = useLang();
   const currentYear = year ?? new Date().getFullYear();
-  const days = useMemo(() => getYearDays(currentYear), [currentYear]);
+  const cell = CELL[range];
+  const days = useMemo(() => {
+    if (range === "year") return getYearDays(currentYear);
+    const end = startOfDay(new Date());
+    const start = subDays(end, range === "week" ? 6 : 29);
+    return eachDayOfInterval({ start, end }).map((d) => format(d, "yyyy-MM-dd"));
+  }, [range, currentYear]);
 
   const completedSet = useMemo(
     () => new Set(habit.logs.filter((l) => l.completed).map((l) => l.date)),
@@ -71,11 +83,11 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
       <div className="flex gap-px mb-1 pl-0" style={{ paddingLeft: 0 }}>
         {weeks.map((week, wi) => {
           const firstReal = week.find((d) => d !== "");
-          if (!firstReal) return <div key={wi} style={{ width: 11 }} />;
+          if (!firstReal) return <div key={wi} style={{ width: cell + 1 }} />;
           const d = parseISO(firstReal);
           const showMonth = d.getDate() <= 7;
           return (
-            <div key={wi} style={{ width: 11, minWidth: 11 }} className="text-center">
+            <div key={wi} style={{ width: cell + 1, minWidth: cell + 1 }} className="text-center">
               {showMonth && (
                 <span className="text-[8px] text-muted leading-none">
                   {MONTHS[d.getMonth()]}
@@ -92,7 +104,7 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
           <div key={wi} className="flex flex-col gap-px">
             {week.map((day, di) => {
               if (!day) {
-                return <div key={di} style={{ width: 10, height: 10 }} />;
+                return <div key={di} style={{ width: cell, height: cell }} />;
               }
               const completed = completedSet.has(day);
               const isFuture = isAfter(startOfDay(parseISO(day)), today);
@@ -104,8 +116,8 @@ export function HabitGrid({ habit, year, onToggle }: HabitGridProps) {
                   title={`${day}${completed ? " ✓" : ""}`}
                   onClick={() => handleClick(day)}
                   style={{
-                    width: 10,
-                    height: 10,
+                    width: cell,
+                    height: cell,
                     backgroundColor: completed
                       ? habit.color
                       : isFuture

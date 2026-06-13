@@ -37,8 +37,10 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-surface shrink-0">
       <div className="lg:hidden flex items-center gap-2 min-w-0 mr-2">
-        <GhostLogo size={26} className="phantom-glow shrink-0" />
-        <span className="font-semibold text-sm truncate min-w-0 hidden min-[400px]:inline">Phantom Tracker</span>
+        <Link href="/" className="flex items-center gap-2 min-w-0" aria-label={t("common.home")}>
+          <GhostLogo size={26} className="phantom-glow shrink-0" />
+          <span className="font-semibold text-sm truncate min-w-0 hidden min-[400px]:inline">Phantom Tracker</span>
+        </Link>
         {pro && (
           lifetime ? (
             <span
@@ -56,14 +58,9 @@ export function TopBar({ user, pro, lifetime }: TopBarProps) {
         )}
       </div>
 
-      {/* Back to the public landing page */}
-      <Link
-        href="/"
-        className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-muted hover:text-white hover:bg-surface-2 transition-colors"
-      >
-        <Home size={15} />
-        {t("common.home")}
-      </Link>
+      {/* Spacer keeps the account controls right-aligned on desktop (the logo
+          in the sidebar is the way back to the homepage). */}
+      <div className="hidden lg:block" />
 
       <div className="flex items-center gap-1 shrink-0">
         <NotificationBell />

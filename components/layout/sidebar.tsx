@@ -31,10 +31,12 @@ export function Sidebar({ user, pro, lifetime, isAdmin, profileLevel }: SidebarP
 
   return (
     <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-surface shrink-0">
-      {/* Logo */}
+      {/* Logo - links back to the public homepage */}
       <div className="flex items-center gap-2 px-3 h-14 border-b border-border">
-        <GhostLogo size={26} className="phantom-glow shrink-0" />
-        <span className="font-semibold text-[13px] tracking-tight whitespace-nowrap">Phantom Tracker</span>
+        <Link href="/" className="flex items-center gap-2 min-w-0" aria-label={t("common.home")}>
+          <GhostLogo size={26} className="phantom-glow shrink-0" />
+          <span className="font-semibold text-[13px] tracking-tight whitespace-nowrap">Phantom Tracker</span>
+        </Link>
         {pro && (
           lifetime ? (
             <span
