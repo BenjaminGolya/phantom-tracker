@@ -165,6 +165,20 @@ function ProfileLevelCard({ habits, pro, diamond }: { habits: HabitWithLogs[]; p
         </Link>
       )}
 
+      {/* Max-level banner: the player has reached the very top of their ladder. */}
+      {info.isMax && (
+        <div
+          className="flex items-center gap-2.5 mb-4 px-3 py-2.5 rounded-lg border"
+          style={{ borderColor: `${info.color}55`, background: `${info.color}14` }}
+        >
+          <Trophy size={16} className="shrink-0" style={{ color: info.color }} />
+          <span className="text-[11px] leading-snug" style={{ color: info.color }}>
+            <span className="font-semibold">{t("stats.maxLevelTitle")}</span>{" "}
+            <span className="text-muted">{t("stats.maxLevelBody")}</span>
+          </span>
+        </div>
+      )}
+
       {/* XP bar to next level */}
       <div className="mb-4">
         <div className="flex justify-between text-xs text-muted mb-1.5">

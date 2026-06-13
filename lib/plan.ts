@@ -49,7 +49,7 @@ export const PLAN_LIMITS = {
   /** Pro users earn this multiplier on all profile XP. */
   proXpMultiplier: 1.5,
   /** Diamond (lifetime) users earn an even bigger XP multiplier. */
-  diamondXpMultiplier: 2,
+  diamondXpMultiplier: 3,
   /**
    * Free profile level is capped at this level. Higher tiers (incl. the
    * Pro-exclusive tiers) require Pro. Pro = uncapped.
