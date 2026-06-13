@@ -403,8 +403,8 @@ export function LandingPage() {
             style={{ borderColor: "#67e8f966", background: "linear-gradient(165deg,#67e8f90f,#818cf80a,#111)" }}
           >
             <span
-              className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md border"
-              style={{ background: "#67e8f91a", borderColor: "#67e8f966", color: "#67e8f9" }}
+              className="absolute -top-2.5 right-5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md"
+              style={{ background: "#67e8f9", color: "#06242b" }}
             >
               {t("lp.diamondSoon")}
             </span>
