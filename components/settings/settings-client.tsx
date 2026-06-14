@@ -59,7 +59,7 @@ function fileToAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsClient({ user, pro = false, lifetime = false, proUntil = null, proSince = null, trialEndsAt = null, hasBilling = false, pendingEmail = null, twoFactorEnabled = false, newsletterOptIn = false }: SettingsClientProps) {
+export function SettingsClient({ user, pro = false, lifetime = false, proUntil = null, proSince = null, trialEndsAt = null, pendingEmail = null, twoFactorEnabled = false, newsletterOptIn = false }: SettingsClientProps) {
   const trialDaysLeft = trialEndsAt && new Date(trialEndsAt).getTime() > Date.now() ? daysUntil(trialEndsAt) : null;
 
   // Newsletter opt-in - saved to the user profile.
@@ -411,19 +411,16 @@ export function SettingsClient({ user, pro = false, lifetime = false, proUntil =
                 </p>
               </div>
             </div>
-            {hasBilling ? (
+            {/* Diamond is lifetime - nothing to manage. Everyone else gets a
+                Manage link to buy the app (Diamond) or change plan. */}
+            {!lifetime && (
               <Link
                 href="/pricing"
                 className="px-3 py-2 bg-surface-2 hover:bg-border text-sm text-white rounded-lg border border-border transition-colors shrink-0"
               >
                 {t("set.manage")}
               </Link>
-            ) : !lifetime ? (
-              // Comp Pro note - Diamond needs no billing explanation at all.
-              <span className="text-[11px] text-muted text-right shrink-0 max-w-[9rem]">
-                {t("set.complimentary")}
-              </span>
-            ) : null}
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-between gap-3 mt-3">
