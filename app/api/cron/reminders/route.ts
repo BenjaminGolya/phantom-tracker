@@ -89,10 +89,10 @@ async function runStreakNudges(): Promise<number> {
   const users = await prisma.user.findMany({
     where: { disabledAt: null, deletionRequestedAt: null, pushSubscriptions: { some: {} } },
     select: {
-      id: true, timezone: true,
+      id: true, timezone: true, plan: true,
       habits: {
         where: { archived: false, locked: false },
-        select: { id: true, name: true, frequency: true, logs: { select: { date: true, completed: true } } },
+        select: { id: true, name: true, frequency: true, reminderTime: true, logs: { select: { date: true, completed: true } } },
       },
     },
   });
@@ -109,6 +109,9 @@ async function runStreakNudges(): Promise<number> {
     let best: { name: string; streak: number } | null = null;
     const dayOfMonth = parseInt(local.date.slice(8, 10), 10);
     for (const h of u.habits) {
+      // Skip habits that already get their own timed reminder (Pro) - otherwise
+      // the user would receive the reminder AND this nudge for the same habit.
+      if (u.plan === "pro" && h.reminderTime) continue;
       if (!isScheduledOnParts(h.frequency, local.weekday, dayOfMonth)) continue;
       if (h.logs.some((l) => l.date === local.date && l.completed)) continue; // already done
       const streak = calcStreak(h.logs).current;
