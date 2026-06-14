@@ -39,8 +39,8 @@ type Tile = {
 const TILES: Tile[] = [
   { key: "free", name: "Free", price: "€0", per: "forever", blurb: "The essentials, free on every device." },
   { key: "monthly", name: "Pro Monthly", price: "€2", per: "/ mo", blurb: "All Pro features, billed monthly." },
-  { key: "yearly", name: "Pro Yearly", price: "€15", per: "/ yr", tag: { text: `SAVE ${YEARLY_SAVINGS_PCT}%`, cls: "bg-primary/20 text-primary" }, blurb: "All Pro features: best value." },
-  { key: "lifetime", name: "Diamond", price: "€29", per: "once", tag: { text: "SOON", cls: "bg-cyan-400/20 text-cyan-300" }, blurb: "Limited launch price (then €39). Pay once, Pro forever.", diamond: true },
+  { key: "yearly", name: "Pro Yearly", price: "€15", per: "/ yr", tag: { text: `SAVE ${YEARLY_SAVINGS_PCT}%`, cls: "bg-primary text-white" }, blurb: "All Pro features: best value." },
+  { key: "lifetime", name: "Diamond", price: "€29", per: "once", tag: { text: "SOON", cls: "bg-[#67e8f9] text-[#06242b]" }, blurb: "Limited launch price (then €39). Pay once, Diamond forever.", diamond: true },
 ];
 
 export function PricingClient({

@@ -51,7 +51,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           await prisma.user.update({ where: { id }, data: { plan: "pro", lifetime: true, proUntil: null, proSince: now } });
           await createNotification(id, {
             title: "💎 Welcome to Diamond",
-            body: "You now have Diamond: Pro forever, a 2× XP boost, the cyan theme, and your aurora.",
+            body: "You now have Diamond: all Pro features forever, a 3× XP boost, the cyan theme, and your aurora.",
             url: "/settings",
             icon: "billing",
           });
