@@ -194,6 +194,9 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
   // monthly habits that aren't due today move to a muted "Coming up" list so
   // it's clear when they next need doing - without cluttering today.
   const shown = filtered.filter((h) => isScheduledOn(h.frequency, now));
+  // How many of today's scheduled habits are already done.
+  const doneToday = shown.filter((h) => h.logs.some((l) => l.date === today && l.completed)).length;
+  const allDone = shown.length > 0 && doneToday === shown.length;
   const upcoming = filtered
     .filter((h) => !isScheduledOn(h.frequency, now))
     .map((h) => ({ habit: h, dues: nextDueDates(h.frequency, now, 3) }))
@@ -203,7 +206,20 @@ export function TodayChecklist({ habits, onToggle, onFreeze }: TodayChecklistPro
   return (
     <div>
       <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-        <h2 className="text-sm font-medium text-muted">{t("dash.todaysHabits")}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-medium text-muted">{t("dash.todaysHabits")}</h2>
+          {shown.length > 0 && (
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md border ${
+                allDone
+                  ? "bg-green-500/15 text-green-400 border-green-500/30"
+                  : "bg-surface-2 text-muted border-border"
+              }`}
+            >
+              <Check size={11} /> {doneToday}/{shown.length}
+            </span>
+          )}
+        </div>
         <CategoryFilter categories={categories} value={catFilter} onChange={setCatFilter} />
       </div>
       {shown.length === 0 && (
