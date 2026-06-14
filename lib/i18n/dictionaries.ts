@@ -205,6 +205,7 @@ const en = {
   "lp.step3c": "Set a reminder time on any habit",
   "lp.step3d": "Get a push at that time, even with the app closed 🔔",
   "lp.installNote": "📱 On iPhone, notifications need the app on your Home Screen first (that's Apple's rule). The steps above set it up for you.",
+  "welcome.aboutBody": "Phantom Tracker is a dark, minimalist habit tracker. Check in daily, build streaks, earn XP toward your cosmic rank, and watch your own living planet grow with every habit you keep. It runs on every device and installs to your home screen like a native app.",
 
   // auth
   "auth.signInTitle": "Sign in to your account",
@@ -732,6 +733,7 @@ const hu: Partial<Record<DictKey, string>> = {
   "lp.step3c": "Állíts be emlékeztető időt bármely szokásnál",
   "lp.step3d": "Kapj push értesítést abban az időpontban, akár bezárt alkalmazással is 🔔",
   "lp.installNote": "📱 iPhone-on az értesítésekhez először add hozzá az alkalmazást a kezdőképernyődhöz (ez az Apple szabálya). A fenti lépések ezt beállítják helyetted.",
+  "welcome.aboutBody": "A Phantom Tracker egy letisztult, sötét szokáskövető. Jelölj be naponta, építs sorozatokat, gyűjts XP-t a kozmikus rangodhoz, és nézd, ahogy a saját élő bolygód növekszik minden megtartott szokással. Minden eszközön fut, és natív alkalmazásként a kezdőképernyőre telepíthető.",
 
   "auth.signInTitle": "Jelentkezz be a fiókodba",
   "auth.signUpTitle": "Hozd létre a fiókod",
@@ -1247,6 +1249,7 @@ const ro: Partial<Record<DictKey, string>> = {
   "lp.step3c": "Setează o oră de memento la orice obicei",
   "lp.step3d": "Primește o notificare la acea oră, chiar și cu aplicația închisă 🔔",
   "lp.installNote": "📱 Pe iPhone, notificările necesită mai întâi adăugarea aplicației pe ecranul principal (e regula Apple). Pașii de mai sus configurează asta pentru tine.",
+  "welcome.aboutBody": "Phantom Tracker este un tracker de obiceiuri minimalist, în temă întunecată. Bifează zilnic, construiește serii, câștigă XP pentru rangul tău cosmic și privește cum propria ta planetă vie crește cu fiecare obicei pe care îl menții. Rulează pe orice dispozitiv și se instalează pe ecranul principal ca o aplicație nativă.",
 
   "auth.signInTitle": "Conectează-te la contul tău",
   "auth.signUpTitle": "Creează-ți contul",

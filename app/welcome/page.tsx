@@ -1,6 +1,6 @@
-import { LandingPage } from "@/components/landing/landing-page";
+import { WelcomeClient } from "@/components/welcome/welcome-client";
 
-// Public route - anyone (logged in or out) can revisit the landing page here.
+// Public route - the "About & install" page (reached from the account menu).
 export default function WelcomePage() {
-  return <LandingPage />;
+  return <WelcomeClient />;
 }
