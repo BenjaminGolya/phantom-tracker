@@ -537,6 +537,12 @@ export function LandingPage() {
             <FaqItem key={n} q={t(`faq.q${n}` as const)} a={t(`faq.a${n}` as const)} />
           ))}
         </motion.div>
+        <motion.p {...fadeUp} className="text-center text-sm text-muted mt-8">
+          {t("faq.more")}{" "}
+          <a href="mailto:support@phantomtracker.io" className="text-primary hover:underline font-medium">
+            support@phantomtracker.io
+          </a>
+        </motion.p>
       </section>
 
       {/* Final CTA */}

@@ -120,6 +120,7 @@ const en = {
   "faq.a7": "Every account grows a unique living planet that reflects your consistency. As you complete habits and earn XP, your world levels up: oceans gain land, trees and life appear, rings form, and a healthy planet glows and spins. Keep your streaks alive and it stays radiant; neglect it and it slowly fades. Diamond members can grow it all the way to its ultimate, atom like form.",
   "faq.q8": "How do levels and XP work?",
   "faq.a8": "You earn XP for every completion, plus bonuses for streaks, perfect days where you finish everything, the variety of categories you track, and habits reaching new milestones. That XP raises your profile level through a series of cosmic tiers. Pro earns a 1.5x boost and Diamond a 3x boost, so your rank and your world climb faster.",
+  "faq.more": "Have another question? Reach us at",
 
   // landing: hero
   "lp.heroBadge": "A dark, minimalist habit tracker",
@@ -650,6 +651,7 @@ const hu: Partial<Record<DictKey, string>> = {
   "faq.a7": "Minden fiók egy egyedi élő bolygót növeszt, amely a kitartásodat tükrözi. Ahogy teljesíted a szokásaidat és XP-t gyűjtesz, a világod szintet lép: az óceánok szárazfölddel bővülnek, fák és élet jelenik meg, gyűrűk formálódnak, és az egészséges bolygó ragyog és forog. Tartsd életben a sorozataidat, és ragyogó marad; ha elhanyagolod, lassan elhalványul. A Diamond tagok egészen a végső, atomszerű formájáig fejleszthetik.",
   "faq.q8": "Hogyan működnek a szintek és az XP?",
   "faq.a8": "Minden teljesítésért XP-t kapsz, plusz bónuszt a sorozatokért, a tökéletes napokért, amikor mindent befejezel, a követett kategóriák változatosságáért és azért, ha egy szokás új mérföldkövet ér el. Ez az XP emeli a profilszintedet a kozmikus szintek során. A Pro 1,5x-ös, a Diamond 3x-os szorzót kap, így a rangod és a világod gyorsabban növekszik.",
+  "faq.more": "Van még kérdésed? Írj nekünk ide:",
 
   "lp.heroBadge": "Sötét, minimalista szokáskövető",
   "lp.heroTitle1": "Építs szokásokat, amik",
@@ -1164,6 +1166,7 @@ const ro: Partial<Record<DictKey, string>> = {
   "faq.a7": "Fiecare cont crește o planetă vie unică, ce reflectă consecvența ta. Pe măsură ce îți finalizezi obiceiurile și câștigi XP, lumea ta urcă în niveluri: oceanele capătă uscat, apar copaci și viață, se formează inele, iar o planetă sănătoasă strălucește și se rotește. Menține-ți seriile active și rămâne radiantă; dacă o neglijezi, se estompează încet. Membrii Diamond o pot crește până la forma sa supremă, ca un atom.",
   "faq.q8": "Cum funcționează nivelurile și XP-ul?",
   "faq.a8": "Câștigi XP pentru fiecare finalizare, plus bonusuri pentru serii, zile perfecte în care termini tot, varietatea categoriilor urmărite și obiceiuri care ating noi praguri. Acel XP îți ridică nivelul de profil printr-o serie de trepte cosmice. Pro primește un spor de 1,5x, iar Diamond de 3x, așa că rangul și lumea ta cresc mai repede.",
+  "faq.more": "Ai altă întrebare? Scrie-ne la",
 
   "lp.heroBadge": "Un tracker de obiceiuri minimalist, întunecat",
   "lp.heroTitle1": "Construiește obiceiuri care",
