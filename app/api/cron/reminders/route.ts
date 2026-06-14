@@ -11,6 +11,28 @@ const STREAK_NUDGE_MIN = 3; // first streak length that earns a daily nudge
 
 export const dynamic = "force-dynamic";
 
+// Idempotency guard: has this exact notification already been recorded for the
+// user recently? Reminders/nudges fire once per day at a fixed minute, so a
+// lookback window safely blocks duplicate sends from an over-eager cron (retries
+// or sub-minute schedules) without ever skipping a legitimate daily send.
+async function alreadyNotified(
+  userId: string,
+  icon: string,
+  title: string | undefined,
+  withinMs: number
+): Promise<boolean> {
+  const dup = await prisma.notification.findFirst({
+    where: {
+      userId,
+      icon,
+      ...(title ? { title } : {}),
+      createdAt: { gte: new Date(Date.now() - withinMs) },
+    },
+    select: { id: true },
+  });
+  return !!dup;
+}
+
 // Compute the user's local time pieces for a given instant.
 function inTz(now: Date, tz: string) {
   const hhmm = new Intl.DateTimeFormat("en-GB", {
@@ -94,6 +116,9 @@ async function runStreakNudges(): Promise<number> {
     }
     if (!best) continue;
 
+    // Only one streak nudge per user per day, even if the cron runs repeatedly.
+    if (await alreadyNotified(u.id, "streak", undefined, 6 * 60 * 60 * 1000)) continue;
+
     await notifyUser(u.id, {
       title: `🔥 ${best.streak}-day streak`,
       body: `Don't break it - complete "${best.name}" to keep your streak alive.`,
@@ -140,6 +165,10 @@ async function runReminders() {
     // Don't nag if it's already done today
     const doneToday = habit.logs.some((l) => l.date === local.date && l.completed);
     if (doneToday) continue;
+
+    // Only one reminder per habit per fire, even if the cron runs more than once
+    // in this minute (or retries). Matches on the habit-specific title.
+    if (await alreadyNotified(habit.user.id, "reminder", `⏰ ${habit.name}`, 60 * 60 * 1000)) continue;
 
     await notifyUser(habit.user.id, {
       title: `⏰ ${habit.name}`,
