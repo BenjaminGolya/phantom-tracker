@@ -295,26 +295,31 @@ export function DashboardClient({ habits: initialHabits, pro = false, diamond = 
         </motion.div>
       )}
 
-      {/* Undo toast */}
+      {/* Undo toast - the fixed wrapper handles centering so framer-motion's
+          transform (the y animation) can't clobber a translate-based centering. */}
       {undo && !milestone && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-2 border border-border shadow-2xl shadow-black/50"
+        <div
+          className="fixed inset-x-0 z-[60] flex justify-center px-4 pointer-events-none"
           style={{ bottom: "calc(max(1rem, env(safe-area-inset-bottom)) + 4.5rem)" }}
         >
-          <span className="text-sm text-muted">{t("dash.updated")}</span>
-          <button
-            onClick={() => {
-              if (undoTimer.current) clearTimeout(undoTimer.current);
-              handleToggle(undo.habitId, undo.date, undo.completed, undo.value ?? undefined, true);
-              setUndo(null);
-            }}
-            className="text-sm font-semibold text-primary hover:underline"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="pointer-events-auto flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-2 border border-border shadow-2xl shadow-black/50"
           >
-            {t("dash.undo")}
-          </button>
-        </motion.div>
+            <span className="text-sm text-muted">{t("dash.updated")}</span>
+            <button
+              onClick={() => {
+                if (undoTimer.current) clearTimeout(undoTimer.current);
+                handleToggle(undo.habitId, undo.date, undo.completed, undo.value ?? undefined, true);
+                setUndo(null);
+              }}
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              {t("dash.undo")}
+            </button>
+          </motion.div>
+        </div>
       )}
     </div>
   );
