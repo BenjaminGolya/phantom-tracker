@@ -533,7 +533,7 @@ export function LandingPage() {
           <p className="text-muted mt-3">{t("faq.subtitle")}</p>
         </motion.div>
         <motion.div {...fadeUp} className="space-y-2.5">
-          {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+          {([1, 2, 3, 4, 5, 6, 7, 8] as const).map((n) => (
             <FaqItem key={n} q={t(`faq.q${n}` as const)} a={t(`faq.a${n}` as const)} />
           ))}
         </motion.div>
