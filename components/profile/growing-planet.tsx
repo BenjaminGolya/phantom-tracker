@@ -54,6 +54,11 @@ function mulberry32(a: number) {
 // per user); `amount` (0..1, grows with level) reveals more of them and nudges
 // their size. Clustered + capped so there is ALWAYS open ocean.
 const LAND_POOL = 6;
+// Round coordinates fed into SVG path/transform strings. Trig (sin/cos/exp/pow)
+// can differ by 1 ULP between the server's Node and the browser's V8, which
+// makes server/client markup mismatch and triggers React hydration warnings.
+// Rounding to 2 decimals yields identical strings on both sides (and trims DOM).
+const r2 = (n: number) => Math.round(n * 100) / 100;
 // Continents live on a horizontal "strip" (longitude x in [0, 2R), latitude y
 // in roughly [-0.45R, 0.45R]). The strip scrolls under the clipped globe, so
 // land and ocean rotate past the limb. A stable per-user pool is revealed
@@ -97,8 +102,8 @@ function treePositions(count: number, radius: number, seed = 1, amount = 0.5) {
       const ang = placed * 2.399963; // golden angle
       const rr = b.r * 0.62 * Math.sqrt((j + 0.5) / Math.max(1, share));
       out.push({
-        x: b.x + Math.cos(ang) * rr,
-        y: b.y + Math.sin(ang) * rr,
+        x: r2(b.x + Math.cos(ang) * rr),
+        y: r2(b.y + Math.sin(ang) * rr),
         s: 0.7 + ((placed * 37) % 50) / 100,
       });
       placed++;
@@ -300,7 +305,7 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
         const ang = (f: number) => ((A0 + (A1 - A0) * f) * Math.PI) / 180;
         const foot = (f: number, rr = baseR) => {
           const a = ang(f);
-          return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr] as const;
+          return [r2(cx + Math.cos(a) * rr), r2(cy + Math.sin(a) * rr)] as const;
         };
         const env = (f: number) =>
           0.4 * Math.sin(f * Math.PI) + 0.75 * Math.exp(-Math.pow((f - PEAK) / 0.17, 2));
@@ -326,10 +331,10 @@ export function PlanetVisual({ state: p }: { state: PlanetState }) {
                 const a = ang(f);
                 const [bx, by] = foot(f);
                 const h = (10 + 34 * env(f)) * (0.85 + 0.3 * ((i * 37) % 7) / 7);
-                const tx = cx + Math.cos(a) * (baseR + h);
-                const ty = cy + Math.sin(a) * (baseR + h);
-                const cax = cx + Math.cos(a + 0.05) * (baseR + h * 0.55);
-                const cay = cy + Math.sin(a + 0.05) * (baseR + h * 0.55);
+                const tx = r2(cx + Math.cos(a) * (baseR + h));
+                const ty = r2(cy + Math.sin(a) * (baseR + h));
+                const cax = r2(cx + Math.cos(a + 0.05) * (baseR + h * 0.55));
+                const cay = r2(cy + Math.sin(a + 0.05) * (baseR + h * 0.55));
                 return (
                   <motion.path
                     key={`ray${i}`}
